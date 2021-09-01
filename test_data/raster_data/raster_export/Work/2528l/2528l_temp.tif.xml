@@ -1,0 +1,8 @@
+<metadata xml:lang="en">
+  <Esri>
+    <CreaDate>20210507</CreaDate>
+    <CreaTime>13452000</CreaTime>
+    <ArcGISFormat>1.0</ArcGISFormat>
+    <SyncOnce>TRUE</SyncOnce>
+  <ModDate>20210623</ModDate></Esri>
+<dataIdInfo><idCitation><resTitle>2528l.tif</resTitle><citRespParty xmlns=""><rpCntInfo xmlns=""><cntAddress addressType="" /><cntPhone /></rpCntInfo><role><RoleCd value="006" /></role></citRespParty><citRespParty xmlns=""><rpOrgName>aaa</rpOrgName><rpCntInfo xmlns=""><cntAddress addressType="" /><cntPhone /></rpCntInfo><role><RoleCd value="010" /></role></citRespParty></idCitation><dataLang><languageCode value="eng" /></dataLang><tpCat><TopicCatCd value="009" /></tpCat></dataIdInfo><distInfo xmlns=""><distributor xmlns=""><distorCont xmlns=""><rpOrgName>UC Berkeley Library</rpOrgName><rpCntInfo><cntPhone><voiceNum tddtty="">(510) 642-2997****</voiceNum></cntPhone><cntAddress addressType=""><delPoint>50 McCone Hall</delPoint><city>Berkeley</city><adminArea>CA</adminArea><postCode>94720</postCode><country>USA</country><eMailAdd>eart@library.berkeley.edu</eMailAdd></cntAddress></rpCntInfo><editorSave>True</editorSave><displayName>UC Berkeley Library</displayName><role><RoleCd value="005" /></role></distorCont></distributor></distInfo></metadata>

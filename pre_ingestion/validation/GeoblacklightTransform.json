@@ -1,0 +1,163 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"description": "Schema for GeoBlacklight. See https://github.com/geoblacklight/geoblacklight/wiki/Schema for more details.",
+	"id": "http://geoblacklight.org/v1.0/schema",
+	"title": "GeoBlacklight Schema",
+	"type": "object",
+	"properties": {
+		"dc_title_s": {
+			"type": "string",
+			"description": "Title for the layer.",
+			"example": "My Title",
+			"minLength": 1
+		},
+		"dc_description_s": {
+			"type": "string",
+			"description": "Description for the layer. *Optional* maxLength-defined by Solr",
+			"example": "My Description",
+			"minLength": 1,
+			"maxLength": 32765
+		},
+		"dc_rights_s": {
+			"type": "string",
+			"enum": ["Public",
+			"Restricted"],
+			"description": "Access rights for the layer."
+		},
+		"dct_provenance_s": {
+			"type": "string",
+			"minLength": 1,
+			"description": "Institution who holds the layer.",
+			"example": "Stanford"
+		},
+		"layer_modified_dt": {
+			"type": "string",
+			"minLength": 1,
+			"format": "date-time",
+			"description": "Last modification date for the metadata record, using XML Schema dateTime format (YYYY-MM-DDThh:mm:ssZ). *Optional*"
+		},
+		"layer_geom_type_s": {
+			"type": "string",
+			"enum": ["Point",
+			"Line",
+			"Polygon",
+			"Raster",
+			"Scanned Map",
+			"Image",
+			"Mixed"],
+			"minLength": 1,
+			"description": "Geometry type for layer data, using controlled vocabulary. *Optional*"
+		},
+		"solr_geom": {
+			"type": "string",
+			"pattern": "ENVELOPE(.*,.*,.*,.*)",
+			"description": "Bounding box of the layer as a ENVELOPE WKT (from the CQL standard) using coordinates in (West, East, North, South) order. Note that this field is indexed as a Solr spatial (RPT) field.",
+			"example": "ENVELOPE(76.76, 84.76, 19.91, 12.62)"
+		},
+		"solr_year_i": {
+			"type": "integer",
+			"description": "*DEPRECATED* (only used by the Blacklight range plugin, not core GeoBlacklight, and generally you want a multi-valued field here): *Derived from* `dct_temporal_sm`. Year for which layer is valid and only a single value. Note that this field is indexed as a Solr numeric field.",
+			"example": "1989"
+		},
+		"dc_creator_sm": {
+			"type": "array",
+			"items": {
+				"type": "string",
+				"minLength": 1
+			},
+			"minItems": 1,
+			"uniqueItems": true,
+			"description": "Author(s) of the layer. *Optional*",
+			"example": "George Washington, Thomas Jefferson"
+		},
+		"dc_format_s": {
+			"type": "string",
+			"minLength": 1,
+			"description": "File format for the layer, ideally using a controlled vocabulary. *Optional*",
+			"example": "Shapefile, GeoTIFF, ArcGRID"
+		},
+		"dc_language_s": {
+			"type": "string",
+			"minLength": 1,
+			"description": "Language for the layer. *Optional*. Note that future versions of the schema may make this a multi-valued field.",
+			"example": "English"
+		},
+		"dc_publisher_s": {
+			"type": "string",
+			"minLength": 1,
+			"description": "Publisher of the layer. *Optional*",
+			"example": "ML InfoMap"
+		},
+		"dc_subject_sm": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"description": "Subjects for the layer, preferrably in a controlled vocabulary. *Optional*",
+			"example": "Census, Human settlements"
+		},
+		"dc_type_s": {
+			"type": "string",
+			"enum": ["Dataset",
+			"Image",
+			"PhysicalObject"],
+			"description": "Resource type of the layer, using DCMI Type Vocabulary, usually a `Dataset`. *Optional*"
+		},
+		"dct_spatial_sm": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"description": "Spatial coverage and place names for the layer, preferrably in a controlled vocabulary. *Optional*",
+			"example": "Paris, San Francisco"
+		},
+		"dct_temporal_sm": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"description": "Temporal coverage for the layer, typically years or dates. Note that this field is not in a specific date format. *Optional*",
+			"example": "1989, circa 2010, 2007-2009"
+		},
+		"dct_issued_dt": {
+			"type": "string",
+			"minLength": 1,
+			"format": "date-time",
+			"description": "Issued date for the layer, using XML Schema dateTime format (YYYY-MM-DDThh:mm:ssZ). *Optional*"
+		},
+		"georss_point_s": {
+			"type": "string",
+			"minLength": 1,
+			"description": "*DEPRECATED* (use `georss_box_s`): Point representation for layer as y, x - i.e., centroid",
+			"example": "12.6 -119.4"
+		},
+		"dc_relation_sm": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"description": "*DEPRECATED* (use `dct_isPartOf_sm`). A reference to a related resource for this layer. *Optional*",
+			"example": "http://purl.stanford.edu/vr593vj7147"
+		},
+		"dc_source_sm": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"description": "The identity of a layer from which this layer's data was derived. *Optional*",
+			"example": "stanford-vr593vj7147"
+		},
+		"geoblacklight_version": {
+			"type": "string",
+			"description": "The version of the GeoBlacklight Schema to which this metadata record conforms.",
+			"enum": ["1.0"]
+		}
+	},
+	"required": ["dc_title_s",
+	"dc_identifier_s",
+	"dc_rights_s",
+	"dct_provenance_s",
+	"layer_slug_s",
+	"solr_geom",
+	"dc_creator_sm"]
+}
