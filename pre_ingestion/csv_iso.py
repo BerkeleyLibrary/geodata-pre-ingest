@@ -9,7 +9,7 @@ from geo_helper import GeoHelper
 if os.name == "nt":
     import arcpy
 
-# In work directory: this if for writing to a single geofile
+# In work directory: writing to a single geofile
 # 1. Copy eariiso xml file to a backup file
 # 2. Create an ESRI ISO with slim ESRI ISO and export metadata from GeoFile to this ESRI ISO file: mostly techincal, lineage matadata etc.  - It requires to export to the original ESRI ISO XML file (.tif.xml, .shp.xml)
 # 3. Copyt the ESRI ISO metadata file from 2. to  "_temp.tif.xml" or "_temp.shp.xml"

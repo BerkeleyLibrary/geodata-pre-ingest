@@ -12,6 +12,7 @@ CSV_HEADER_COMMON = ["format_s","arkid","filename"]
 CSV_HEADER_TRANSFORM = [
          "title_s",
          "alternativeTitle",
+         "summary",
          "description",
          "language",
          "subject",
@@ -140,6 +141,7 @@ UCB_RESPONSIBLE_PARTY = {
     "country":"UNITED STATES"
 }
 
+# header can be mapped to a metadata element in geoblacklight which may have multiple values
 G_SM = [
              "alternativeTitle" ,
              "description" ,
@@ -324,6 +326,10 @@ transform_elements = {
 
     "alternativeTitle": {
         "path": "dataIdInfo/idCitation/resAltTitle",
+        "type": "string"},
+
+    "summary": {
+        "path": "dataIdInfo/idPurp",
         "type": "string"},
 
     "description": {
