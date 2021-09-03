@@ -229,11 +229,11 @@ OLD_ARK_FILES_REMOVED = "*** Old Ark files are removed: "
 
 MISSING_CVS_VALUES = '*** Found some invalid metadata values in the CSV file'
 
-INCORRECT_ROLE_FOR_INDIVIDUAL = 'Line {2}: "{0}" - In ResponsibleParty CSV file, role "{1}" should not have individual. Only role 6 could have individual'
+INCORRECT_ROLE_FOR_INDIVIDUAL = 'Line {2}: {0} - In ResponsibleParty CSV file, role "{1}" should not have individual. Only role 6 could have individual'
 
-MISSING_ROLE =  '*** Line {2}: Responsible party, "{0}" - missing "{1}" role'
+MISSING_ROLE =  'Line {2}: Responsible party, {0} - missing "{1}" role'
 
-EMPTY_ROLE =  '*** Line {2}:  arkid - {0}: Requred role {1} has no value'
+EMPTY_ROLE =  'Line {2}:  arkid - {0}: Requred role {1} has no value'
 
 PASS_PROJECTION_VALIDATION = "*** All projections are valid ***"
 
