@@ -233,7 +233,7 @@ INCORRECT_ROLE_FOR_INDIVIDUAL = 'Line {2}: {0} - Role "{1}" should not have indi
 
 MISSING_ROLE =  'Line {2}: Responsible party, {0} - missing "{1}" role'
 
-EMPTY_ROLE =  'Line {2}: {0} - Requred role {1} has no value'
+EMPTY_ROLE =  'Line {2}: {0} - Requred role "{1}" has no value'
 
 PASS_PROJECTION_VALIDATION = "*** All projections are valid ***"
 
