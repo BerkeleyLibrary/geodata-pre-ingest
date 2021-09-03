@@ -227,9 +227,9 @@ SAVE_TO_CSV = "***  CSV files exported: {0}."
 
 OLD_ARK_FILES_REMOVED = "*** Old Ark files are removed: "
 
-MISSING_CVS_VALUES = '*** Found some invalid metadata values in the CSV file'
+MISSING_CVS_VALUES = '*** Found invalid metadata in this csv file: {0}'
 
-INCORRECT_ROLE_FOR_INDIVIDUAL = 'Line {2}: {0} - In ResponsibleParty CSV file, role "{1}" should not have individual. Only role 6 could have individual'
+INCORRECT_ROLE_FOR_INDIVIDUAL = 'Line {2}: {0} - Role "{1}" should not have individual. Only role 6 could have individual'
 
 MISSING_ROLE =  'Line {2}: Responsible party, {0} - missing "{1}" role'
 

@@ -21,6 +21,7 @@ class ValidateCSV(object):
 
     def prepare_main_csv_validation(self):
         with open(self.csv_files[0], 'r') as csvfile:
+            print self.csv_files[0]
             csv_reader = csv.DictReader(csvfile)
             line_num = 0
             for main_csv_raw in csv_reader:
@@ -194,13 +195,16 @@ class ValidateCSV(object):
 
 
     def updated_csv_files_valid(self):
-        msg_list = self.validate_main_csv_file()
-        msg_list_2 =  self.validate_resp_update_csv_file()
-        msg_list.extend(msg_list_2)
+        def output(ls,file):
+            if ls > 0: GeoHelper._print_files_txt(ls,par.MISSING_CVS_VALUES.format(file))
+
+        msg_list_main = self.validate_main_csv_file()
+        msg_list_resp =  self.validate_resp_update_csv_file()
+        msg_list = msg_list_main + msg_list_resp
 
         if len(msg_list) > 0:
-            GeoHelper.arcgis_message(self.csv_files[0])
-            GeoHelper._print_files_txt(msg_list,par.MISSING_CVS_VALUES)
+            output(msg_list_main,self.csv_files[0])
+            output(msg_list_resp,self.csv_files[1])
             return False
         else:
             GeoHelper.arcgis_message(par.PASS_CSV_VALIDATION)
