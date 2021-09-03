@@ -10,16 +10,16 @@ from geo_helper import GeoHelper
 if os.name == "nt":
 	import arcpy
 
-# 1. Most metadata values are extracted from ESRI ISO file - arcgis_isofile, arkid from  assigned ark to geofile
+# 1. Most metadata values are extracted from ESRI ISO file - arcgis_isofile, arkid from assigned ark to geofile
 # 2  All metadata elements return as string value
-# 2. Pass in ESIR ISO file: shp.xml, or tif.xml
+# 2. ESIR ISO file: shp.xml, or tif.xml
 # 3. This is single geofile matadata
 # 4. Save regular metadata from ESRI ISO as attributes, attribute names are derived from  keys (csv headers) in  par.transform_elements
-# 5. one ESRIISO file may have multiple Responsible parties. They are from two different ESRIISO sources: 1) ./dataIdInfo/idCitation/citRespParty; 2) ./dataIdInfo/idPoC
+# 5. One ESRI ISO file may have multiple Responsible Parties. They are from two different sources: 1) ./dataIdInfo/idCitation/citRespParty; 2) ./dataIdInfo/idPoC
 
-# read metadata from ESRIISO, save to an object
+# Read metadata from ESRIISO, save to an object
 class ArcGisIso(object):
-	def __init__(self,arcgis_isofile):  # full path geofile:  arcgis_isofile = "/geodata_pre_ingest/test_raster/raster_workspace/Angola_restricted/024/024.tif.xml"
+	def __init__(self,arcgis_isofile):  # geofile example:  arcgis_isofile = "/geodata_pre_ingest/test_raster/raster_workspace/Angola_restricted/024/024.tif.xml"
 		self.arcgis_isofile = arcgis_isofile
 		self.root = self._root()
 		self.ark = self._ark()
@@ -51,7 +51,7 @@ class ArcGisIso(object):
 
 	#### main csv data ######
 	def _collection_title(self):
-		# tag_info to be consistent with tag_info from par.transform_elements
+		# tag_info is consistent with tag_info from par.transform_elements
 		first_tag_info = {"path": "dataIdInfo/idCitation/collTitle"}
 		second_tag_info = {"path": "dataIdInfo/aggrInfo/aggrDSName/resTitle"}
 		second_code_tag_info = {"path": "dataIdInfo/aggrInfo/assocType/AscTypeCd",
@@ -70,7 +70,7 @@ class ArcGisIso(object):
 		if  len(txt) == 0: txt = collection_title_second()
 		return txt
 
-    # if there is more complicated elements, cosolidate this
+
 	def _temporalCoverage(self):
 		txt = ""
 		# sequence of these paths must be kept
@@ -87,7 +87,7 @@ class ArcGisIso(object):
 	def _modified_date_dt(self):
 		return  datetime.datetime.today().strftime('%Y%m%d')
 
-	def _element_value(self,tag_info,parent_node): # xml element defined in dictionary
+	def _element_value(self,tag_info,parent_node):
 
 		def has_attribute(name):
 			return tag_info.has_key(name) and tag_info[name]
@@ -129,7 +129,7 @@ class ArcGisIso(object):
 			element_value = self._element_value(tag_info,self.root)
 			obj.__dict__["_{0}_o".format(header)] = element_value
 
-		# update these elements with new values	
+		# Update these elements with new values
 		obj.__dict__["_{0}_o".format("collectionTitle")] = self._collection_title()
 		obj.__dict__["_{0}_o".format("temporalCoverage")] = self._temporalCoverage()
 		obj.__dict__["_{0}_o".format("modified_date_dt")] = self._modified_date_dt()
@@ -202,7 +202,7 @@ class ArcGisIso(object):
 		objs_idPoC =  self._responsible_parties_objs('./dataIdInfo/idPoC')
 		objs.extend(objs_idPoC)
 
-		objs_default = self._add_default_publisher_originator(objs) # if not "006", "010" from both places
+		objs_default = self._add_default_publisher_originator(objs) # if existed "006", "010" from both sources
 		objs.extend(objs_default)
 
 		return objs
