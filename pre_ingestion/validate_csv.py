@@ -5,44 +5,47 @@ import csv
 import json
 from geo_helper import GeoHelper
 import par
-
 if os.name == "nt":
     from jsonschema import validate
     import jsonschema
 
-# Not just validating CSV
+
 class ValidateCSV(object):
     def __init__(self,process_path):
         self.csv_files = GeoHelper.dest_csv_files_updated(process_path)
         self.process_path = process_path
-        self.arkids = self.arkids()
+        self.arkids = []
+        self.main_ark_line = {}
+        self.prepare_main_csv_validation()
 
-    def arkids(self):
-        arks = []
+
+    def prepare_main_csv_validation(self):
         with open(self.csv_files[0], 'r') as csvfile:
             csv_reader = csv.DictReader(csvfile)
+            line_num = 0
             for main_csv_raw in csv_reader:
                 arkid = main_csv_raw["arkid"].strip()
+                line_num =+ 1
                 if len(arkid) == 0:
-                    GeoHelper.arcgis_message(" A line in '{0}' has no arkid".format(self.csv_files[0]))
+                    GeoHelper.arcgis_message(" Line {1}:  in '{0}' has no arkid".format(self.csv_files[0]),str(line_num))
                 else:
-                    arks.append(arkid)
-        return arks
+                    self.arkids.append(arkid)
+                    self.main_ark_line[arkid] = str(line_num)
 
-    def check_default_codes(self,arkid,column_val,code_list,header):
+
+    def check_default_codes(self,arkid,column_val,code_list,header,line):
         messages = []
         if len(column_val) > 0:
             vals = [txt.strip() for txt in column_val.split("$")]
             for val in vals:
                 if not int(val) in code_list:
-                    warning_msg = "{0} - column '{1}' has incorrect code value -- '{2}' ".format(arkid,header,val)
+                    warning_msg = "Line {3}: {0} - column '{1}' has incorrect code value -- '{2}' ".format(arkid,header,val,line)
                     messages.append(warning_msg)
         return messages
 
 
     def validate_main_csv_file(self):
         messages = []
-
         # main csv - 1. make sure columns with header in par.CSV_REQUIRED_HEADERS have values, mandatory metadata elementes
         def check_required_elements(raw):
             required_headers = par.CSV_REQUIRED_HEADERS
@@ -50,7 +53,7 @@ class ValidateCSV(object):
                 val = GeoHelper.metadata_from_csv(header,raw)
                 if not GeoHelper.isNotNullorEmpty(val):
                     arkid = raw["arkid"].strip()
-                    warning_msg = "{0} - '{1}': missing required value ".format(arkid,header)
+                    warning_msg = "Line {2}:  {0} - '{1}': missing required value ".format(arkid,header,self.main_ark_line[arkid])
                     messages.append(warning_msg)
 
         # main csv - 2. To avoid typo in accessright element
@@ -59,7 +62,7 @@ class ValidateCSV(object):
             rights = ["public","private"]
             right = raw["accessRights_s"].strip().lower()
             if len(right) > 0 and (not right in rights):
-                warning_msg = "{0} - '{1}' value should not be '{2}'.".format(arkid,"accessRights_s",right)
+                warning_msg = "Line {3}:  {0} - '{1}' value should not be '{2}'.".format(arkid,"accessRights_s",right,self.main_ark_line[arkid])
                 messages.append(warning_msg)
 
         # main csv - 3. Make sure input correct topicis code
@@ -69,15 +72,16 @@ class ValidateCSV(object):
             column_val = raw["topicISO"].strip()
             column_val_o = raw["topicISO_o"].strip()
 
-            warning_msgs = self.check_default_codes(arkid,column_val,codes,"topicISO")
-            warning_msgs_o = self.check_default_codes(arkid,column_val_o,codes,"topicISO_o")
+            warning_msgs = self.check_default_codes(arkid,column_val,codes,"topicISO",self.main_ark_line[arkid])
+            warning_msgs_o = self.check_default_codes(arkid,column_val_o,codes,"topicISO_o",self.main_ark_line[arkid])
             warning_msgs.extend(warning_msgs_o)
             if len(warning_msgs)>0:
                 messages.extend(warning_msgs)
 
         # main csv - 4. Make sure Geofile work directory is the same as in main csv file. A user may move the updated CSV files around
         def check_geofile(raw):
-            geofile = raw["filename"]
+            geofile = raw["filename"].strip()
+            arkid = raw["arkid"].strip()
             geopath = GeoHelper.geo_path_from_CSV_geofile(geofile)
             workpath = GeoHelper.work_path(self.process_path)
 
@@ -86,15 +90,13 @@ class ValidateCSV(object):
                 if os.path.isfile(geofile):
                     correct_geofile = True
                 else:
-                    messages.append("**** Missing Geofile - {0}".format(geofile))
+                    messages.append("Line {1}: Missing Geofile - {0}".format(geofile,self.main_ark_line[arkid]))
             else:
-                messages.append("*** Work Directory is different! From CSV file - {0}; Actual work directory - {1}".format(geopath,workpath))
+                messages.append("Line {2}: Work Directory is different! From CSV file - {0}; Actual work directory - {1}".format(geopath,workpath,self.main_ark_line[arkid]))
             return correct_geofile
-
 
         # def check_sourcetype(raw):
         #     warning_msgs = self.check_default_codes(raw,par.resourceType,"resourceType")
-
 
         def validate_all():
             with open(self.csv_files[0],'r') as csv_file:
@@ -112,13 +114,11 @@ class ValidateCSV(object):
 
     def validate_resp_update_csv_file(self):
         resp_msg = []
-        arkids = []
         arkids_with_publisher = []
         arkids_with_originator = []
+        ark_line = {}
 
         def ark_category(arkid,role):
-            if arkid not in arkids:
-                arkids.append(arkid)
             if role == "010":
                 arkids_with_publisher.append(arkid)
             if role == "006":
@@ -127,22 +127,22 @@ class ValidateCSV(object):
         # resp_csv - 1. only role 006 can have "individual value"
         def only_role_006_has_individual(arkid,role,individual):
             if len(individual) > 0 and role <> "006":
-                msg = par.INCORRECT_ROLE_FOR_INDIVIDUAL.format(arkid,role)
+                msg = par.INCORRECT_ROLE_FOR_INDIVIDUAL.format(arkid,role,ark_line[arkid])
                 resp_msg.append(msg)
 
-        def ensure_006_010_have_value(arkid,role,individual,organization):
+        def ensure_006_010_have_values(arkid,role,individual,organization):
             invlid_originator_value = (role == "006") and len(individual) == 0  and len(organization) == 0
             invlid_publisher_value = (role == "010") and len(organization) == 0
             if invlid_originator_value or invlid_publisher_value:
-                msg = par.EMPTY_ROLE.format(arkid,role)
+                msg = par.EMPTY_ROLE.format(arkid,role,ark_line[arkid])
                 resp_msg.append(msg)
 
         def check_missing_roles(role_msg,role_arks):
             messeges = []
             if len(role_arks) > 0:
-                for arkid in arkids:
+                for arkid in self.arkids: # main csv file: one geofile - one arkid
                     if not arkid in role_arks:
-                        msg = par.MISSING_ROLE.format(arkid,role_msg)
+                        msg = par.MISSING_ROLE.format(arkid,role_msg,ark_line[arkid])
                         messeges.append(msg)
             return messeges
 
@@ -157,11 +157,25 @@ class ValidateCSV(object):
         # resp_csv - 4. Make sure input correct role code
         def ensure_correct_role_code(arkid,role_val):
             codes = range(1,12)
-            msg = self.check_default_codes(arkid,role_val,codes,"role")
+            msg = self.check_default_codes(arkid,role_val,codes,"role",ark_line[arkid])
             if len(msg)>0:
                 resp_msg.extend(msg)
 
+        def prepare_validation():
+            responsible_part_csvfile = self.csv_files[1]
+            with open(responsible_part_csvfile, 'r') as csvfile:
+                csv_reader = csv.DictReader(csvfile)
+                line_num = 0
+                for raw in csv_reader:
+                    arkid = raw["arkid"].strip()
+                    role = raw["role"].strip().zfill(3)
+                    line_num += 1
+                    ark_line[arkid] = str(line_num)
+                    ark_category(arkid,role)
+
         def validate_all():
+            prepare_validation()
+            ensure_required_roles_existed()
             responsible_part_csvfile = self.csv_files[1]
             with open(responsible_part_csvfile, 'r') as csvfile:
                 csv_reader = csv.DictReader(csvfile)
@@ -171,12 +185,9 @@ class ValidateCSV(object):
                     individual = raw["individual"].strip()
                     organization = raw["organization"].strip()
 
-                    ark_category(arkid,role)
                     ensure_correct_role_code(arkid,role)
                     only_role_006_has_individual(arkid,role,individual)
-                    ensure_006_010_have_value(arkid,role,individual,organization)
-            ensure_required_roles_existed()
-
+                    ensure_006_010_have_values(arkid,role,individual,organization)
             return resp_msg
 
         return validate_all()
@@ -220,15 +231,18 @@ class ValidateCSV(object):
 
         return len(missing_files) == 0
 
+
     # 1. Check ISO19139 files
     def iso19139_files_existed(self):
         dir = GeoHelper.iso19139_path(self.process_path)
         return self.files_existed(dir,"iso19139.xml")
 
+
     # 2. Check geoblacklight files
     def geoblacklight_files_existed(self):
         dir = GeoHelper.geoblacklight_path(self.process_path)
         return self.files_existed(dir,"geoblacklight.json")
+
 
     def files_existed_to_zip(self,is_source_file):
         def new_file(old_file):
@@ -249,13 +263,16 @@ class ValidateCSV(object):
 
         return len(missing_files) == 0
 
+
     # 3. check work files ready for map.zp
     def work_files_existed(self):
         return self.files_existed_to_zip(False)
 
+
     # 4. check source files ready for download  data.zip
     def source_files_existed(self):
         return self.files_existed_to_zip(True)
+
 
     # 5. check download zip files existing for merrritt
     def data_zip_files_existed(self):
