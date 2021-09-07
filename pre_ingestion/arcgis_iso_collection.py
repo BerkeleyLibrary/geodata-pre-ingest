@@ -10,13 +10,11 @@ import par
 if os.name == "nt":
     import arcpy
 
-# Note:
-# Final workflow:
-# 1) Will allow user to use ArcCatalog to input,update and modify metadata. Since those descriptive metadata are only stored in the original ESRI ISO metadata. We will use the original ESRI ISO metadata file
-# 2) Use original original ESRI ISO - ".tif.xml" or ".shp.xml" in work directory,
-# 3) If no orignal ESRI ISO existing, create one by copy the slim ESRI ISO  to the original ESRI ISO file
-# 4) Add it back later, if the original metadata is FGDC
 
+# 1) Workflow allows user to use ArcCatalog to input/add/update metadata. - Descriptive metadata from ArcCatalog are saved in the original ESRIISO metadata.
+# 2) Use original original ESRI ISO - ".tif.xml" or ".shp.xml" from work directory,
+# 3) If no orignal ESRI ISO existing, create one by copying the slim ESRIISO xml to work directory
+# 4) TODO: if needed, add FGDC metadata case
 
 class ArcGisIsoCollection(object):
     def __init__(self,workspace_batch_path,geo_ext):
