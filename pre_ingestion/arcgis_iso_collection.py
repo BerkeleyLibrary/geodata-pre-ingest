@@ -23,7 +23,7 @@ class ArcGisIsoCollection(object):
 
 
     def all_arcgisiso(self):
-        esriiso_slim = os.path.join(os.path.dirname(__file__),"metadata_template","ESRI_ISO_slim.xml")  # template xml file with minium metadata
+        esriiso_slim = os.path.join(os.path.dirname(__file__),"metadata_template","ESRI_ISO_slim.xml")  
 
         def _esriiso_file(file):
             return "{0}.xml".format(file)

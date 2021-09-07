@@ -10,16 +10,16 @@ from geo_helper import GeoHelper
 if os.name == "nt":
 	import arcpy
 
-# 1. Most metadata values are extracted from ESRI ISO file - arcgis_isofile, arkid from assigned ark to geofile
-# 2  All metadata elements return as string value
-# 2. ESIR ISO file: shp.xml, or tif.xml
-# 3. This is single geofile matadata
-# 4. Save regular metadata from ESRI ISO as attributes, attribute names are derived from  keys (csv headers) in  par.transform_elements
-# 5. One ESRI ISO file may have multiple Responsible Parties. They are from two different sources: 1) ./dataIdInfo/idCitation/citRespParty; 2) ./dataIdInfo/idPoC
 
-# Read metadata from ESRIISO, save to an object
+# 1  Metadata element value is in string format
+# 2. Most metadata values are extracted from ESRI ISO file - shp.xml, or tif.xml
+# 3. A single geofile matadata - Read metadata from ESRI ISO file, save to an object
+# 4. Object attribute names are derived from keys(csv headers) in par.transform_elements
+# 5. arkid from assigned ark to geofile
+# 6. One ESRI ISO file may have multiple Responsible Parties. They are from two different sources: 1) ./dataIdInfo/idCitation/citRespParty; 2) ./dataIdInfo/idPoC
+
 class ArcGisIso(object):
-	def __init__(self,arcgis_isofile):  # geofile example:  arcgis_isofile = "/geodata_pre_ingest/test_raster/raster_workspace/Angola_restricted/024/024.tif.xml"
+	def __init__(self,arcgis_isofile):
 		self.arcgis_isofile = arcgis_isofile
 		self.root = self._root()
 		self.ark = self._ark()
@@ -31,17 +31,21 @@ class ArcGisIso(object):
 		tree = ET.parse(self.arcgis_isofile)
 		return tree.getroot()
 
+
 	def _fun_txt(self):
 		return lambda element: element.text.strip()
+
 
 	def _fun_val(self):
 		return lambda element: element.get('value').strip()
 
-	### values for csv file###
+
+	### Values for csv file###
 	def _ark(self):
 		esriiso_dir = os.path.dirname(self.arcgis_isofile)  # work directory
 		_ark = GeoHelper.ark_from_arkfile(esriiso_dir)
 		return _ark
+
 
 	# '/geodata_pre_ingest/test_raster/raster_workspace/Angola_restricted/024/024.tif.xml
 	# =>  /geodata_pre_ingest/test_raster/raster_workspace/Angola_restricted/024/024.tif
@@ -87,6 +91,7 @@ class ArcGisIso(object):
 	def _modified_date_dt(self):
 		return  datetime.datetime.today().strftime('%Y%m%d')
 
+
 	def _element_value(self,tag_info,parent_node):
 
 		def has_attribute(name):
@@ -129,7 +134,7 @@ class ArcGisIso(object):
 			element_value = self._element_value(tag_info,self.root)
 			obj.__dict__["_{0}_o".format(header)] = element_value
 
-		# Update these elements with new values
+		# Update these special elements with new values
 		obj.__dict__["_{0}_o".format("collectionTitle")] = self._collection_title()
 		obj.__dict__["_{0}_o".format("temporalCoverage")] = self._temporalCoverage()
 		obj.__dict__["_{0}_o".format("modified_date_dt")] = self._modified_date_dt()
@@ -137,7 +142,7 @@ class ArcGisIso(object):
 
 
 	#### responsible party csv data ######
-	# To make sure there is one "006" and one "010" role in repsponsible parties of a specific geofile
+	# To ensure a geofile has at least one "006" and one "010" roles in repsponsible parties
 	def _add_default_publisher_originator(self,objs_cititation_idPoC):
 		resp_objs = []
 
@@ -169,7 +174,7 @@ class ArcGisIso(object):
 
 
 	def _responsible_parties_objs(self,path):
-		def responsible_party_obj(node): # attr - MetadataContainer node
+		def responsible_party_obj(node):
 			obj = None
 			role = node.find('./role/RoleCd').get('value')
 			if role:
@@ -206,7 +211,6 @@ class ArcGisIso(object):
 		objs.extend(objs_default)
 
 		return objs
-
 
 
 class MetadataContainer(object):

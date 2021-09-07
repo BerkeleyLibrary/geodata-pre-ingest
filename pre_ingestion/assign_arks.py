@@ -6,11 +6,10 @@ from shutil import copyfile
 from geo_helper import GeoHelper
 
 
-
 # 1. Make sure no Ark file existing in both WORK and SOURCE directories before allocating ark ids
 # 2. Make sure the number of arkids in arks.txt are the same as the numbers of GeoFiles in both WORK and SOURCE directories
-# 3. Susan required: once ark assinged, cannot be assigned again from tool
-# 4. To re-assiging arks, a user will remove all ark files located under the subdirectory of GeoFiles in both WORK and SOURCE directories.  ark file ,such as "026/026_arkark_a7r971_arkark.txt"
+# 3. If a geofile has an arkfile, the tool will not assign arks anymore
+# 4. To re-assiging arks, a user will need to remove all ark files located under the subdirectory of GeoFiles in both WORK and SOURCE directories.  ark file ,such as "026/026_arkark_a7r971_arkark.txt"
 
 class AssignArks(object):
 

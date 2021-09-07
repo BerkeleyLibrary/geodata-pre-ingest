@@ -9,14 +9,14 @@ from geo_helper import GeoHelper
 if os.name == "nt":
     import arcpy
 
-# Geoblacklight metadata from three different sources:
+
+# Geoblacklight metadata from:
 # 1) CSV
 # 2) Default values
 # 3) Drived from arkid
 # 4) Extracted from iso19139
-# 5) From obj - got from reponsible party csv file
-# 6) For column with "_o", if not new value updated in CSV, pick up the value colum "_o"
-# 7) Todo: add multiple resource download after geoblacklight v4
+# 5) From obj - gotten from reponsible party csv file
+# 6) Todo: add multiple resource download after geoblacklight v4
 
 class CsvGeoblacklight(object):
     def __init__(self,raw_obj,process_path):
@@ -26,6 +26,7 @@ class CsvGeoblacklight(object):
         self.arkid = self.main_csv_raw["arkid"].strip()
         self.geofile = self.main_csv_raw["filename"].strip()
         self.process_path = process_path
+
 
     def create_geoblacklight_file(self):
         def geoblacklight_file():
@@ -188,7 +189,7 @@ class CsvGeoblacklight(object):
         self._geoblacklight_boundary(root,json_data)
 
 
-    # from ISO19139
+    # From ISO19139
     def _geoblacklight_boundary(self,root,json_data):
         parent_path = "./{0}identificationInfo/{0}MD_DataIdentification/{0}extent/{0}EX_Extent/{0}geographicElement/{0}EX_GeographicBoundingBox".format("{http://www.isotc211.org/2005/gmd}")
         east_path = "./{0}eastBoundLongitude/{1}Decimal".format("{http://www.isotc211.org/2005/gmd}","{http://www.isotc211.org/2005/gco}")
@@ -203,7 +204,7 @@ class CsvGeoblacklight(object):
             S = parent_node.find(south_path).text
             W = parent_node.find(west_path).text
 
-            env = "ENVELOPE({0},{1},{2},{3})".format(W,E,N,S)  # "ENVELOPE(-122.839783, -122.406402, 38.194766, 37.802318)"
+            env = "ENVELOPE({0},{1},{2},{3})".format(W,E,N,S)
             json_data["locn_geometry"] = env
         else:
             GeoHelper.arcgis_message("{0} - {1}: No boundary found .".format(self.geofile,self.arkid))

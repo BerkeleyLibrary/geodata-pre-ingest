@@ -45,7 +45,7 @@
                     <HasPyramids Sync="TRUE">TRUE</HasPyramids>
                     <SourceType Sync="TRUE">continuous</SourceType>
                     <PixelType Sync="TRUE">unsigned integer</PixelType>
-                    <NoDataValue Sync="TRUE" />
+                    <NoDataValue Sync="TRUE"/>
                 </General>
             </RasterProperties>
         </DataProperties>
@@ -112,28 +112,79 @@
     <dataIdInfo>
         <envirDesc Sync="TRUE"> Version 6.2 (Build 9200) ; Esri ArcGIS 10.6.1.9270</envirDesc>
         <dataLang>
-            <languageCode Sync="TRUE" value="eng" />
-            <countryCode Sync="TRUE" value="USA" />
+            <languageCode Sync="TRUE" value="eng"/>
+            <countryCode value="USA" Sync="TRUE"/>
         </dataLang>
-        <idCitation>
+        <idCitation
+            xmlns="">
             <resTitle Sync="FALSE">Map of the University of California, Berkeley, 1911</resTitle>
-            <presForm>
-                <PresFormCd Sync="TRUE" value="005" />
+            <presForm
+                xmlns="">
+                <PresFormCd Sync="TRUE" value="005"/>
             </presForm>
             <resRefDate>
                 <refDate>1911</refDate>
                 <refDateType>
-                    <DateTypCd value="001" />
+                    <DateTypCd value="001"/>
                 </refDateType>
             </resRefDate>
             <date>
                 <createDate>1911-01-01T00:00:00</createDate>
                 <pubDate>2021-03-17T00:00:00</pubDate>
             </date>
+            <citRespParty
+                xmlns="">
+                <rpIndName>John Ridener</rpIndName>
+                <rpOrgName>Earth Sciences and Map Library University of California, Berkeley</rpOrgName>
+                <rpPosName>GIS Specialist</rpPosName>
+                <rpCntInfo
+                    xmlns="">
+                    <cntAddress addressType="">
+                        <delPoint>50 McCone Hall, UC Berkeley</delPoint>
+                        <city>Berkeley</city>
+                        <adminArea>California</adminArea>
+                        <postCode>94720</postCode>
+                        <eMailAdd>jridener@library.berkeley.edu</eMailAdd>
+                        <country>us</country>
+                    </cntAddress>
+                    <cntPhone>
+                        <voiceNum tddtty="">510 643 9350</voiceNum>
+                    </cntPhone>
+                </rpCntInfo>
+                <role>
+                    <RoleCd value="006"/>
+                </role>
+                <displayName>John Ridener</displayName>
+            </citRespParty>
+            <citRespParty
+                xmlns="">
+                <editorSource>external</editorSource>
+                <editorDigest>b227a3aba7a27788ab3eec356a07be0a</editorDigest>
+                <rpOrgName>UC Berkeley Library</rpOrgName>
+                <rpCntInfo
+                    xmlns="">
+                    <cntPhone>
+                        <voiceNum tddtty="">(510) 642-2997</voiceNum>
+                    </cntPhone>
+                    <cntAddress addressType="">
+                        <delPoint>50 McCone Hall</delPoint>
+                        <city>Berkeley</city>
+                        <adminArea>CA</adminArea>
+                        <postCode>94720</postCode>
+                        <country>US</country>
+                        <eMailAdd>eart@library.berkeley.edu</eMailAdd>
+                    </cntAddress>
+                </rpCntInfo>
+                <editorSave>True</editorSave>
+                <displayName>UC Berkeley Library</displayName>
+                <role>
+                    <RoleCd value="010"/>
+                </role>
+            </citRespParty>
             <collTitle>Historical Maps of the Bay Area</collTitle>
-        <citRespParty xmlns=""><rpOrgName>Earth Sciences and Map Library University of California, Berkeley</rpOrgName><rpIndName>John Ridener</rpIndName><rpPosName>GIS Specialist</rpPosName><rpCntInfo xmlns=""><eMailAdd>jridener@library.berkeley.edu</eMailAdd><cntAddress addressType=""><delPoint>50 McCone Hall, UC Berkeley</delPoint><city>Berkeley</city><postCode>94720</postCode><country>us</country></cntAddress><cntPhone /></rpCntInfo><role><RoleCd value="006" /></role></citRespParty><citRespParty xmlns=""><rpOrgName>UC Berkeley Library</rpOrgName><rpCntInfo xmlns=""><eMailAdd>eart@library.berkeley.edu</eMailAdd><cntAddress addressType=""><delPoint>50 McCone Hall</delPoint><city>Berkeley</city><postCode>94720</postCode><country>US</country></cntAddress><cntPhone /></rpCntInfo><role><RoleCd value="010" /></role></citRespParty><citRespParty xmlns=""><rpOrgName>Earth Sciences and Map Library University of California, Berkeley</rpOrgName><rpIndName>John Ridener</rpIndName><rpPosName>GIS Specialist</rpPosName><rpCntInfo xmlns=""><eMailAdd>jridener@library.berkeley.edu</eMailAdd><cntAddress addressType=""><delPoint>50 McCone Hall, UC Berkeley</delPoint><city>Berkeley</city><postCode>94720</postCode><country>us</country></cntAddress><cntPhone /></rpCntInfo><role><RoleCd value="006" /></role></citRespParty></idCitation>
+        </idCitation>
         <spatRpType>
-            <SpatRepTypCd Sync="TRUE" value="002" />
+            <SpatRepTypCd Sync="TRUE" value="002"/>
         </spatRpType>
         <geoBox esriExtentType="decdegrees">
             <westBL Sync="TRUE">-122.270628</westBL>
@@ -142,9 +193,11 @@
             <southBL Sync="TRUE">37.86678</southBL>
             <exTypeCode Sync="TRUE">1</exTypeCode>
         </geoBox>
-        <idAbs>Scan of a map of the University of California, Berkeley published in January 1911. Shows campus buildings, roads, paths and creeks. Includes list of buildings and other facilities, with descriptions.</idAbs>
-        <dataExt>
-            <geoEle>
+        <idAbs>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;Scan of a map of the University of California, Berkeley published in January 1911. Shows campus buildings, roads, paths and creeks. Includes list of buildings and other facilities, with descriptions.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;</idAbs>
+        <dataExt
+            xmlns="">
+            <geoEle
+                xmlns="">
                 <GeoBndBox esriExtentType="search">
                     <exTypeCode Sync="TRUE">1</exTypeCode>
                     <westBL Sync="TRUE">-122.270628</westBL>
@@ -154,32 +207,87 @@
                 </GeoBndBox>
             </geoEle>
         </dataExt>
+        <placeKeys
+            xmlns="">
+            <keyword>University of California Berkeley campus</keyword>
+        </placeKeys>
+        <placeKeys
+            xmlns="">
+            <keyword>Berkeley (Calif.)</keyword>
+        </placeKeys>
+        <placeKeys
+            xmlns="">
+            <keyword>Alameda County (Calif.)</keyword>
+        </placeKeys>
+        <placeKeys
+            xmlns="">
+            <keyword>California</keyword>
+        </placeKeys>
+        <tempKeys
+            xmlns="">
+            <keyword>1911</keyword>
+        </tempKeys>
+        <themeKeys
+            xmlns="">
+            <keyword>university campuses</keyword>
+        </themeKeys>
         <dataChar>
-            <CharSetCd value="004" />
+            <CharSetCd value="004"/>
         </dataChar>
-        <resMaint>
+        <idPoC
+            xmlns="">
+            <rpIndName>John Ridener</rpIndName>
+            <rpOrgName>Earth Sciences and Map Library University of California, Berkeley</rpOrgName>
+            <rpPosName>GIS Specialist</rpPosName>
+            <rpCntInfo
+                xmlns="">
+                <cntAddress addressType="">
+                    <delPoint>50 McCone Hall, UC Berkeley</delPoint>
+                    <city>Berkeley</city>
+                    <adminArea>California</adminArea>
+                    <postCode>94720</postCode>
+                    <eMailAdd>jridener@library.berkeley.edu</eMailAdd>
+                    <country>us</country>
+                </cntAddress>
+                <cntPhone>
+                    <voiceNum tddtty="">510 643 9350</voiceNum>
+                </cntPhone>
+            </rpCntInfo>
+            <role>
+                <RoleCd value="006"/>
+            </role>
+            <displayName>John Ridener</displayName>
+            <displayName>John Ridener</displayName>
+        </idPoC>
+        <resMaint
+            xmlns="">
             <maintFreq>
-                <MaintFreqCd value="011" />
+                <MaintFreqCd value="011"/>
             </maintFreq>
         </resMaint>
-        <aggrInfo>
+        <aggrInfo
+            xmlns="">
             <assocType>
-                <AscTypeCd value="002" />
+                <AscTypeCd value="002"/>
             </assocType>
             <initType>
-                <InitTypCd value="002" />
+                <InitTypCd value="002"/>
             </initType>
-            <aggrDSName>
+            <aggrDSName
+                xmlns="">
                 <resTitle>Historical Maps of the Bay Area</resTitle>
-                <presForm>
+                <presForm
+                    xmlns="">
                     <fgdcGeoform>map</fgdcGeoform>
-                    <PresFormCd value="005" />
+                    <PresFormCd value="005"/>
                 </presForm>
-                <citRespParty>
+                <citRespParty
+                    xmlns="">
                     <editorSource>external</editorSource>
                     <editorDigest>b227a3aba7a27788ab3eec356a07be0a</editorDigest>
                     <rpOrgName>UC Berkeley Library</rpOrgName>
-                    <rpCntInfo>
+                    <rpCntInfo
+                        xmlns="">
                         <cntPhone>
                             <voiceNum tddtty="">(510) 642-2997</voiceNum>
                         </cntPhone>
@@ -195,12 +303,21 @@
                     <editorSave>True</editorSave>
                     <displayName>UC Berkeley Library</displayName>
                     <role>
-                        <RoleCd value="001" />
+                        <RoleCd value="001"/>
                     </role>
                 </citRespParty>
             </aggrDSName>
         </aggrInfo>
-        <themeKeys xmlns=""><keyword>university campuses</keyword></themeKeys><placeKeys xmlns=""><keyword>University of California Berkeley campus</keyword></placeKeys><placeKeys xmlns=""><keyword>Berkeley (Calif.)</keyword></placeKeys><placeKeys xmlns=""><keyword>Alameda County (Calif.)</keyword></placeKeys><placeKeys xmlns=""><keyword>California</keyword></placeKeys><tpCat><TopicCatCd value="017" /></tpCat><tpCat><TopicCatCd value="012" /></tpCat><tpCat><TopicCatCd value="018" /></tpCat><tempKeys xmlns=""><keyword>1911</keyword></tempKeys></dataIdInfo>
+        <tpCat>
+            <TopicCatCd value="017"/>
+        </tpCat>
+        <tpCat>
+            <TopicCatCd value="012"/>
+        </tpCat>
+        <tpCat>
+            <TopicCatCd value="018"/>
+        </tpCat>
+    </dataIdInfo>
     <metainfo>
         <langmeta Sync="TRUE">en</langmeta>
         <metstdn Sync="TRUE">FGDC Content Standards for Digital Geospatial Metadata</metstdn>
@@ -224,55 +341,63 @@
         <metd Sync="TRUE">20100510</metd>
     </metainfo>
     <mdLang>
-        <languageCode Sync="TRUE" value="eng" />
-        <countryCode Sync="TRUE" value="USA" />
+        <languageCode Sync="TRUE" value="eng"/>
+        <countryCode value="USA" Sync="TRUE"/>
     </mdLang>
     <mdChar>
-        <CharSetCd Sync="TRUE" value="005" />
+        <CharSetCd Sync="TRUE" value="005"/>
     </mdChar>
     <mdHrLv>
-        <ScopeCd Sync="TRUE" value="005" />
+        <ScopeCd Sync="TRUE" value="005"/>
     </mdHrLv>
     <mdHrLvName Sync="TRUE">dataset</mdHrLvName>
-    <distInfo>
-        <distributor>
-            <distorTran>
-                <onLineSrc>
+    <distInfo
+        xmlns="">
+        <distributor
+            xmlns="">
+            <distorTran
+                xmlns="">
+                <onLineSrc
+                    xmlns="">
                     <linkage Sync="TRUE">file://\\MCC-57-8\F$\UCB\G4364_B5_2U5_1911_U5_rectified.tif</linkage>
                     <protocol Sync="TRUE">Local Area Network</protocol>
                     <orDesc Sync="TRUE">002</orDesc>
                 </onLineSrc>
                 <transSize Sync="TRUE">0.000</transSize>
             </distorTran>
-            <distorFormat>
+            <distorFormat
+                xmlns="">
                 <formatName Sync="TRUE">Raster Dataset</formatName>
                 <formatVer>Adobe Photoshop CS3, Global Mapper</formatVer>
             </distorFormat>
-            <distorCont>
+            <distorCont
+                xmlns="">
                 <editorSource>external</editorSource>
                 <editorDigest>b227a3aba7a27788ab3eec356a07be0a</editorDigest>
-                <rpOrgName>UC Berkeley Library</rpOrgName>
-                <rpCntInfo>
+                <rpOrgName>UC Berkeley Library!!!!!!!!</rpOrgName>
+                <rpCntInfo
+                    xmlns="">
                     <cntPhone>
-                        <voiceNum tddtty="">(510) 642-2997****</voiceNum>
+                        <voiceNum tddtty="">(510) 642-2997</voiceNum>
                     </cntPhone>
                     <cntAddress addressType="">
                         <delPoint>50 McCone Hall</delPoint>
                         <city>Berkeley</city>
                         <adminArea>CA</adminArea>
                         <postCode>94720</postCode>
-                        <country>USA</country>
+                        <country>US</country>
                         <eMailAdd>eart@library.berkeley.edu</eMailAdd>
                     </cntAddress>
                 </rpCntInfo>
                 <editorSave>True</editorSave>
                 <displayName>UC Berkeley Library</displayName>
                 <role>
-                    <RoleCd value="005" />
+                    <RoleCd value="005"/>
                 </role>
             </distorCont>
         </distributor>
-        <distFormat>
+        <distFormat
+            xmlns="">
             <formatName Sync="FALSE">GeoTIFF</formatName>
             <formatVer>Adobe Photoshop CS3, Global Mapper</formatVer>
         </distFormat>
@@ -327,7 +452,8 @@
     </spref>
     <refSysInfo>
         <RefSystem dimension="">
-            <refSysID>
+            <refSysID
+                xmlns="">
                 <identCode Sync="TRUE" code="4326">GCS_WGS_1984</identCode>
                 <idCodeSpace Sync="TRUE">EPSG</idCodeSpace>
                 <idVersion Sync="TRUE">6.14(3.0.1)</idVersion>
@@ -335,21 +461,25 @@
         </RefSystem>
     </refSysInfo>
     <mdDateSt Sync="TRUE">20210427</mdDateSt>
-    <dqInfo>
+    <dqInfo
+        xmlns="">
         <dataLineage>
-            <dataSource type="">
+            <dataSource
+                xmlns="" type="">
                 <srcDesc>Scan of "Map of the University of California, Berkeley" published 1911 from the UC Berkeley Library Earth Sciences &amp; Map Library collection. Physical dimensions are 48 x 30 cm., on sheet 50 x 64 cm. Call number: G4364.B5:2U5 1911 .U5</srcDesc>
                 <srcMedName>
-                    <MedNameCd value="018" />
+                    <MedNameCd value="018"/>
                 </srcMedName>
             </dataSource>
         </dataLineage>
     </dqInfo>
-    <mdContact>
+    <mdContact
+        xmlns="">
         <editorSource>external</editorSource>
         <editorDigest>b227a3aba7a27788ab3eec356a07be0a</editorDigest>
         <rpOrgName>UC Berkeley Library</rpOrgName>
-        <rpCntInfo>
+        <rpCntInfo
+            xmlns="">
             <cntPhone>
                 <voiceNum tddtty="">(510) 642-2997</voiceNum>
             </cntPhone>
@@ -365,18 +495,19 @@
         <editorSave>True</editorSave>
         <displayName>UC Berkeley Library</displayName>
         <role>
-            <RoleCd value="005" />
+            <RoleCd value="005"/>
         </role>
     </mdContact>
-    <mdMaint>
+    <mdMaint
+        xmlns="">
         <maintFreq>
-            <MaintFreqCd value="009" />
+            <MaintFreqCd value="009"/>
         </maintFreq>
     </mdMaint>
     <spatRepInfo>
         <Georect>
             <cellGeo>
-                <CellGeoCd Sync="TRUE" value="002" />
+                <CellGeoCd Sync="TRUE" value="002"/>
             </cellGeo>
             <numDims Sync="TRUE">2</numDims>
             <tranParaAv Sync="TRUE">1</tranParaAv>
@@ -409,35 +540,35 @@
                 </dimResol>
             </axisDimension>
             <ptInPixel>
-                <PixOrientCd Sync="TRUE" value="001" />
+                <PixOrientCd Sync="TRUE" value="001"/>
             </ptInPixel>
         </Georect>
     </spatRepInfo>
     <contInfo>
         <ImgDesc>
             <contentTyp>
-                <ContentTypCd Sync="TRUE" value="001" />
+                <ContentTypCd Sync="TRUE" value="001"/>
             </contentTyp>
             <covDim>
                 <Band>
                     <dimDescrp Sync="TRUE">Band_1</dimDescrp>
                     <bitsPerVal Sync="TRUE">8</bitsPerVal>
                     <valUnit>
-                        <UOM type="length" />
+                        <UOM type="length"/>
                     </valUnit>
                 </Band>
                 <Band>
                     <dimDescrp Sync="TRUE">Band_2</dimDescrp>
                     <bitsPerVal Sync="TRUE">8</bitsPerVal>
                     <valUnit>
-                        <UOM type="length" />
+                        <UOM type="length"/>
                     </valUnit>
                 </Band>
                 <Band>
                     <dimDescrp Sync="TRUE">Band_3</dimDescrp>
                     <bitsPerVal Sync="TRUE">8</bitsPerVal>
                     <valUnit>
-                        <UOM type="length" />
+                        <UOM type="length"/>
                     </valUnit>
                 </Band>
             </covDim>

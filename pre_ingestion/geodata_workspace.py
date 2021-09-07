@@ -20,12 +20,12 @@ class GeodataWorkspace(object):
         self.geo_ext = geo_ext
 
 
-    # all files of a geofile has the same basename: eg. 20.tif, 20.aux,20.tif.xml etc.
+    # All files of a geofile have the same basename: eg. 20.tif, 20.aux,20.tif.xml etc.
     def files_in_geofile(self,geofile):
         ls = []
         geofile_base = os.path.splitext(geofile)[0] # "test_raster/raster_source/Angola_restricted/020.tif" => "test_raster/raster_source/Angola_restricted/020"
 
-        def file_base(file): # some file may have multip ".", such as "20.tif.xml", so cannot use os.path.splitext
+        def file_base(file): # some file may have multiple ".", such as "20.tif.xml", so cannot use os.path.splitext
             ls = file.split(".")
             return ls[0]
 
@@ -67,7 +67,7 @@ class GeodataWorkspace(object):
                         # print "dir +" + os.path.join(root, name)
                         os.rmdir(os.path.join(root, name))
 
-        # get geofile basename for creating a folder to move related files of a geofile to this folder:  eg. 20.tif => 20
+        # Get a geofile basename for creating a folder to move related files of this geofile to the folder:  eg. 20.tif => 20
         def sub_path(geofile,batch_path):
             geofile_basename = os.path.basename(geofile)
             geofile_batch_name = os.path.splitext(geofile_basename)[0]
@@ -88,7 +88,7 @@ class GeodataWorkspace(object):
                 dest_file_name = os.path.join(geofile_path,f_basename)
                 copyfile(f,dest_file_name)
 
-        # for vector data
+        # For vector data
         def proj_geofile_to_work(geofile):
             dest_geofile_path = sub_path(geofile,workspace_batch_path)
             f_basename = os.path.basename(geofile)

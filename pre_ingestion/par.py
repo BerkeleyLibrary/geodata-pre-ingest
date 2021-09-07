@@ -1,12 +1,10 @@
-
 from datetime import datetime
-
 
 
 CSV_HEADER_COMMON = ["format_s","arkid","filename"]
 
-# Not very column in CSV has a valuefron ESRI ISO metadata
-# Elements in below array are ordered as it is in the main csv file;
+# Som columns in CSV has no mapping to ESRI ISO metadata
+# Elements in below array are ordered the same as column order in the main csv file;
 # These columns are extracrted from ESRI ISO XML
 # "_s" - single value column
 CSV_HEADER_TRANSFORM = [
@@ -44,7 +42,7 @@ CSV_HEADER_EMPTY = [
          "suppressed_b",
          "georeferenced_b"]
 
-# mapping between csv header and geoblacklight elements
+# Mapping between csv header and geoblacklight elements
 CSV_HEADER_COLUMNS = {
             "format_s": "dct_format_s",
             "title_s" : "dct_title_s",
@@ -73,41 +71,8 @@ CSV_HEADER_COLUMNS = {
             "suppressed_b" : "gbl_suppressed_b",
             "georeferenced_b" : "gbl_georeferenced_b"
             }
-# all columns in main header
-# CSV_HEADER_COLUMNS = {
-#             "format_s": "dct_format_s",
-#             "title_s" : "dct_title_s",
-#             "alternativeTitle" : "dct_alternative_sm",
-#             "description" : "dct_description_sm",
-#             "language" : "dct_language_sm",
-#             # "originator" : "dct_creator_sm",  - from responsible parties
-#             # "publisher" : "dct_publisher_sm", - from responsible parties
-#             "subject" : "dct_subject_sm",
-#             "topicISO" : "dcat_theme_sm",
-#             "keyword" : "dcat_keyword_sm",
-#             "temporalCoverage" : "dct_temporal_sm",
-#             "date_s" : "dct_issued_s",
-#             "solrYear_s" : "gbl_indexYear_i",
-#             "dateRange_drsim" : "gbl_dateRange_drsim",
-#             "relation" : "dct_relation_sm",
-#             "spatialSubject" : "dct_spatial_sm",
-#             "collectionTitle" : "pcdm_memberOf_sm",
-#             "isPartOf" : "dct_isPartOf_sm",
-#             "source" : "dct_source_sm",
-#             "isVersionOf" : "dct_isVersionOf_sm",
-#             "replaces" : "dct_replaces_sm",
-#             "isReplacedBy" : "dct_isReplacedBy_sm",
-#             # "rights" : "dct_rights_sm",  - from CSV_HEADER_COLUMNS_RIGHTS
-#             # "rightsHolder" : "dct_rightsHolder_sm",  - from responsible parties
-#             "license" : "dct_license_sm",
-#             "accessRights_s" : "dct_accessRights_s",
-#             "modified_date_dt" : "gbl_mdModified_dt",
-#             "resourceClass" : "gbl_resourceClass_sm",
-#             "suppressed_b" : "gbl_suppressed_b",
-#             "georeferenced_b" : "gbl_georeferenced_b"
-#             }
 
-# Combine three below three columns to "dct_rights_sm" in Geoblacklight
+# Combine three rights to "dct_rights_sm" in Geoblacklight
 CSV_HEADER_COLUMNS_RIGHTS = [ "rights_general","rights_legal","rights_security",]
 
 
@@ -141,7 +106,7 @@ UCB_RESPONSIBLE_PARTY = {
     "country":"UNITED STATES"
 }
 
-# header can be mapped to a metadata element in geoblacklight which may have multiple values
+# A list of headers which can be mapped to metadata in geoblacklight which have multiple values
 G_SM = [
              "alternativeTitle" ,
              "description" ,
@@ -243,7 +208,7 @@ PASS_CSV_VALIDATION = "*** The updated CSV files are valid ***"
 
 FILES_NOT_MOVED = "*** Files not moved to work batch - name not good,please check, or move manually."
 
-# keys are CSV headers of responsible party csv file
+# Keys are used as CSV headers of responsible party csv file
 responsibleparty_elements = {
     "contact_name": {
         "path": "rpIndName",
@@ -313,11 +278,9 @@ responsibleparty_elements = {
 
 	}
 
-# ESRI ISO metadata element information:
-# 1) used as mapping for storing ESRI ISO metadata to object bfore exporting to CSV;
-# 2) used as mapping for storing csv columns to object before transforming to ESRI ISO
-# 3) key will be the same as CSV_HEADER_TRANSFORM. Since dictionary in python cannot keep the order, key sequence of CSV_HEADER_TRANSFORM will be the order of headers of the main CSV file
-# 4) only elements with "key_path":True will have multiple elements in ISO19139
+
+# 1) Keys are used as CSV headers of the main CSV file, header sequence is from CSV_HEADER_TRANSFORM
+# 2) Elements with "key_path":True are supposed to have multiple occurrences in ISO19139
 transform_elements = {
 
     "title_s": {
@@ -608,4 +571,6 @@ vector_exts = [".cpg",
 #
 #     }
 
-#  Look for value in "/dataIdInfo/tempKeys/keyword", if found take the value; if not found, then check value in "/dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Period" and "/dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Instant"
+#  Looking for value in "/dataIdInfo/tempKeys/keyword",
+#  if found, taking the value;
+#  if not found, then check value in "/dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Period" and "/dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Instant"

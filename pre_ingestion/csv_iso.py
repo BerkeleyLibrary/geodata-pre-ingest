@@ -9,18 +9,20 @@ from geo_helper import GeoHelper
 if os.name == "nt":
     import arcpy
 
+
 # In work directory: writing to a single geofile
 # 1. Copy eariiso xml file to a backup file
-# 2. Create an ESRI ISO with slim ESRI ISO and export metadata from GeoFile to this ESRI ISO file: mostly techincal, lineage matadata etc.  - It requires to export to the original ESRI ISO XML file (.tif.xml, .shp.xml)
-# 3. Copyt the ESRI ISO metadata file from 2. to  "_temp.tif.xml" or "_temp.shp.xml"
+# 2. Create an ESRI ISO with slim ESRI ISO and export metadata from GeoFile to this ESRI ISO file: mostly techincal, lineage matadata etc.  - Arcpy requires to export to the original ESRI ISO XML file (.tif.xml, .shp.xml)
+# 3. Copyt the ESRI ISO metadata file from #2 to  "_temp.tif.xml" or "_temp.shp.xml"
 # 4. Wrote both main csv and responsible csv information to the temp file in #3
 # 5. Tranform the temp file to iso19139 metadata through arcpy
 # 6. Save one iso19139 file to work - iso19139 directory with subdirectory (ark name)
-# 7. Save one iso19139 file to the ource geofile directory - required by Susan
+# 7. Save one iso19139 file to the ource geofile directory
 # 8. Copy the backed-up ESRI ISO xml from 1) to the original ESRI ISO file ".tif.xml" or ".shp.xml"
 # 9. Remove the temp ESRI ISO xml file: "_temp.tif.xml" or "_temp.shp.xml"
-# 10.New workflow to ESRI ISO: 1) save resposilbe party with role "006", "010" to './dataIdInfo/idCitation/citRespParty'
-                  #2) other roles related responsilbe parties to  './dataIdInfo/idPoC'
+# 10.Responsible parties:
+                        #1) Save resposilbe party with role "006", "010" to './dataIdInfo/idCitation/citRespParty'
+                        #2) Other roles related responsilbe parties are saved to  './dataIdInfo/idPoC'
 
 class CsvIso(object):
     def __init__(self,csv_obj,process_path):
@@ -48,8 +50,10 @@ class CsvIso(object):
                 copyfile(esriiso_file,esriiso_backup_file)
                 GeoHelper.rm_file(esriiso_file)
 
-        # create an ESRI ISO xml from slim ESRI ISO template
-        # A full ESIR ISO cannot be generated, a tick is to copy a slim ESRI ISO template, then export metadata of this geofile to to it's own metadata file.  https://desktop.arcgis.com/en/arcmap/10.3/tools/conversion-toolbox/import-metadata.htm
+        # Create an ESRI ISO xml from slim ESRI ISO template
+        # A full ESIR ISO cannot be generated, an alternative way is:
+         #1) Copy a slim ESRI ISO template,
+         #2) Export metadata of this geofile to it's own metadata file.  See: https://desktop.arcgis.com/en/arcmap/10.3/tools/conversion-toolbox/import-metadata.htm
         def create_esriiso_file():
             esriiso_slim = os.path.join(os.path.dirname(__file__),"metadata_template","ESRI_ISO_slim.xml")  # template xml file with minium metadata
             copyfile(esriiso_slim,esriiso_file)
@@ -61,7 +65,6 @@ class CsvIso(object):
             if os.path.isfile(esriiso_file):
                 copyfile(esriiso_file,esriiso_temp_file)
 
-        # copy to the temp file, prepare for transforming to ISO19139
         def prepare_esriiso_file_to_transform():
             if os.name == "nt":
                 backup_and_remove_original_esriiso_file()
@@ -82,16 +85,16 @@ class CsvIso(object):
             if os.path.isfile(esriiso_temp_file):
                 self._update_csvs_to_esriiso(esriiso_temp_file) # csv is read and written to the tempfile. it is written to geofile in work directory, geofile path is from csv file
                 if os.name == "nt":
-                    self._transfrom_esriiso_to_iso19139(esriiso_temp_file) # this has to be in arcgis machine
+                    self._transfrom_esriiso_to_iso19139(esriiso_temp_file)
                     recover_original_esriiso()
                     clean_up() # can be commented out for debug in VM
             else:
                 GeoHelper.arcgis_message("ESRIISO - '{0}' is missing: Please try: 1) run tool '1. 4 - Exporting Metedata from Woking Directory to The CSV files Directory'; 2) make sure geofile path is correct in updated CSV files.".format(esriiso_temp_file) )
 
-
         esriiso_to_iso19139()
 
-    # requirement from Susan: only 010 and 006 got to citation responsible party
+
+    # Only 010 and 006 goes to citation responsible party
     def _seperate_resp_parties(self,raws):
         for raw in raws:
             role = raw["role"].strip()
@@ -100,10 +103,11 @@ class CsvIso(object):
             else:
                 self.resp_parties_idoc_raws.append(raw)
 
+
     def _update_csvs_to_esriiso(self,tempfile):
         tree =  ET.parse(tempfile)
         root = tree.getroot()
-        self.root = root  # delayed loading
+        self.root = root
 
         self._populate_main_metadata()
         self._populate_responsible_parties()
@@ -145,14 +149,13 @@ class CsvIso(object):
 
         def transform_and_copy():
             the_iso19139_file = iso19139_file()
-            transform_ISO19139(the_iso19139_file)  #  this will be in work directory
+            transform_ISO19139(the_iso19139_file)  #  In work directory
             copy_ISO19139_to_source_dir(the_iso19139_file)
 
         transform_and_copy()
 
 
     ###################### populate main metadata from csv ###################
-
     def _populate_main_metadata(self):
         def special_type(dic,a):
             return dic.has_key(a) and dic[a]
@@ -175,7 +178,7 @@ class CsvIso(object):
                 grandchild_node = ET.SubElement(child_node,grandchild)
                 grandchild_node.text = val
 
-        # elements under tag "dataIdInfo"
+        # Elements under tag "dataIdInfo"
         def add_node_multiple_values(path,val): # example path: "dataIdInfo/tempKeys/keyword" => dataInfo/child/grandchild
             tags = path.split("/")
             child = tags[1]
@@ -200,9 +203,8 @@ class CsvIso(object):
                 val = val.replace("$",";") # Geoblacklight allow multiple values, ISO19139 will be a single value
                 add_node_value(path,val,add_to_attribute)
 
-        # all rights are written under "dataIdInfo/resConst" node
+        # All rights are written under "dataIdInfo/resConst" node
         def update_metadata_rights(rights):
-            # element_info_dic = par.transform_elements["rights_general"] # "dataIdInfo/resConst/Consts/useLimit",
             def right_tag(header):
                 element_info_dic = par.transform_elements[header]
                 path = element_info_dic["path"]
@@ -226,7 +228,7 @@ class CsvIso(object):
             return new_val if len(new_val) > 0 else old_val
 
         def update_csv_to_temp_ESRIISO():
-            rights = {} # three different rights
+            rights = {}
             for h in par.CSV_HEADER_TRANSFORM:
                 val = final_value(h) # new workflow: write all back to ESRI ISO
                 if len(val) > 0 :
@@ -256,7 +258,7 @@ class CsvIso(object):
         return child_element
 
 
-    def _ensure_path_nodes_exists(self,path): # all the path defined in header elements start from root, each element on the path is identical
+    def _ensure_path_nodes_exists(self,path): # all the path defined in header elements start from root, each element in a path is identical
         elements = path.split("/")
         parent = self.root
         for e in elements:
@@ -318,14 +320,12 @@ class CsvIso(object):
                 val = value(name)
                 if GeoHelper.isNotNullorEmpty(val):
                     child_node_name = par.responsibleparty_elements[name]["path"].split("/")[-1]
-                    # print "{0} :: {1}".format(child_node_name,val)
                     add_sub_node(parent_node,child_node_name,val)
 
         # parent_node = self.root.find('./dataIdInfo')
         respParty_parent_node = self.root.find(parent_path)
 
         if not respParty_parent_node is None:
-            #citRespParty = ET.SubElement(parent_node,"idPoC", attrib={"xmlns": ""})
             respParty_node = ET.SubElement(respParty_parent_node,tag, attrib={"xmlns": ""})
 
             organization = value("organization")

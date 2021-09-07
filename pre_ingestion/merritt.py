@@ -6,22 +6,24 @@ from geo_helper import GeoHelper
 import par
 import hashlib
 
+
 class Merrit(object):
     def __init__(self,process_path,final_result_dir):
         self.process_path = process_path
         self.final_result_dir = final_result_dir
 
-    # geoblacklight json files under result to get all arks
+
     def _content(self):
         content = ""
         geoblacklight_dir =  GeoHelper.geoblacklight_path(self.process_path)
 
         for root, dirs, files in os.walk(geoblacklight_dir):
-            for dir in dirs: # here dir is ark
+            for dir in dirs: # dir's name is ark
                 if GeoHelper.isNotNullorEmpty(dir):
                     ark_merrit = ArkMerritt(dir,self.process_path)
                     content  += ark_merrit.row()
         return content
+
 
     def save_merritt_to_file(self):
         merritt_file = os.path.join(self.final_result_dir,"merritt.txt")
@@ -30,6 +32,7 @@ class Merrit(object):
             f.write(header)
             content = self._content()
             f.write(content)
+
 
 
 class ArkMerritt(object):

@@ -8,7 +8,7 @@ import par
 if os.name == "nt":
     import arcpy
 
-# Preparing for ISO19139 and geoblacklight
+
 class CsvIsoCollection(object):
     def __init__(self,csv_files):
         self.csv_files = csv_files
@@ -76,7 +76,6 @@ class CsvIsoCollection(object):
         return populate_csv_obj()
 
 
-
     def _populate_responsibleparty_csv(self):
         def populate_role(raw): # prepare for writting to ESRI ISO
             val = raw["role"].strip()
@@ -87,7 +86,6 @@ class CsvIsoCollection(object):
             for raw in csv_reader:
                 populate_role(raw)
                 self.resp_parties_from_csv.append(raw)
-
 
 
 class CSVContainer(object):

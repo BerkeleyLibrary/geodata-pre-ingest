@@ -48,7 +48,7 @@ class GeoHelper:
     @staticmethod
     def geo_path_from_CSV_geofile(geofile):
         geofile_basepath = os.path.split(geofile)[0]
-        ls = GeoHelper.path_split(geofile_basepath)[:-1] # remove the directory name of geofile "/vector_data/vector_export/Work/1950prj_county" => ""/vector_data/vector_export/Work"
+        ls = GeoHelper.path_split(geofile_basepath)[:-1] # remove the directory name of a geofile "/vector_data/vector_export/Work/1950prj_county" => ""/vector_data/vector_export/Work"
         new_path = GeoHelper.path_join(ls)
         return new_path
 
@@ -100,7 +100,6 @@ class GeoHelper:
         batchname = GeoHelper.batchname(original_batch_path)
         return os.path.join(dest_path,batchname)
 
-    # path should be existed
     @staticmethod
     def mkdir(path,sub_path):
         pathName = os.path.join(path,sub_path)

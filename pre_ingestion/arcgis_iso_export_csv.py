@@ -8,9 +8,9 @@ import par
 if os.name == "nt":
     import arcpy
 
-# Note:
-# 1) Writing main metadata from arcgis_iso_collection to main csv file, saved in *_UPDATED,*_ORIGINAL csv files
-# 2) Writing responsible party metadata from arcgis_iso_collection to the responsible file, saved in *_UPDATED,*_ORIGINAL csv files
+
+# 1) Writing main metadata from arcgis_iso_collection to main csv files, saved as *_UPDATED,*_ORIGINAL csv files
+# 2) Writing responsible party metadata from arcgis_iso_collection to responsible party csv files, saved in *_UPDATED,*_ORIGINAL csv files
 
 class ExportCsv(object):
 
@@ -50,7 +50,7 @@ class ExportCsv(object):
         ls = []
 
         def add_transformed_metadata():
-            for name in self.main_csv_tranform_header_double:  # python dictionary cannot grarentee the order of items,we have to use the list for ordering items - make sure written in order
+            for name in self.main_csv_tranform_header_double:  # Use the list to ensure the order, python dictionary cannot grarentee the order of items
                 val = self._attr_value(metadata_obj,name)
                 ls.append(val)
 
@@ -59,17 +59,17 @@ class ExportCsv(object):
         GeoHelper._space(ls,15)
         return ls
 
-    # one arcgisiso obj has multiple responsible parties
-    def _res_raw(self,arcgisiso,resp_obj,update_individual):  #  responsible_party = None: when emapty ESRI ISO generated
+    # One arcgisiso obj has multiple responsible parties
+    def _res_raw(self,arcgisiso,resp_obj,update_individual):
         ls = []
 
         def add_from_column():
-            ls.append(resp_obj.__dict__["_from"]) # default value for ""update?
+            ls.append(resp_obj.__dict__["_from"])
             if update_individual:
                 ls.append(resp_obj.__dict__["_individual"])
 
         def add_transformed_metadata():
-            for name in par.CSV_HEADER_RESPONSIBLE_PARTY[2:]: #   # python dictionary cannot grarentee the order of items
+            for name in par.CSV_HEADER_RESPONSIBLE_PARTY[2:]: # Use the list to ensure the order, python dictionary cannot grarentee the order of items
                 # val = self._attr_value(resp_obj,"{0}_o".format(name))
                 val = self._attr_value(resp_obj,name)  # use the same name as defined in par.CSV_HEADER_RESPONSIBLE_PARTY: only role has two columns: role_o, role
                 ls.append(val)
