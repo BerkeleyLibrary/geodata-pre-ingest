@@ -18,7 +18,7 @@ class ExportCsv(object):
         self.geo_ext = geo_ext
         self.arcGisIso_list = arcGisIso_list
         self.dest_csv_files = dest_csv_files
-
+        self.main_csv_tranform_header_double = self._double_header(par.CSV_HEADER_TRANSFORM)  # add header_o column for main csv
 
     def _format(self):
         format = ""
@@ -26,42 +26,42 @@ class ExportCsv(object):
         elif self.geo_ext.lower() == ".shp": format = "Shape File"
         return format
 
+    def _double_header(self,ls):
+        out_ls = []
+        for l in ls:
+            out_ls.append("{0}_o".format(l))
+            out_ls.append(l)
+        return out_ls
+
+    def _attr_value(self,metadata_obj,key):
+        txt = ""
+        attr_key = "_{0}".format(key)
+        if attr_key in metadata_obj.__dict__:
+            txt = metadata_obj.__dict__[attr_key]
+        return txt
 
     def _add_common_metadata(self,ls,arcgisiso):
         ls.append(self._format())
         ls.append(arcgisiso.ark)
         ls.append(arcgisiso.filename)
 
-
     def _main_csv_raw(self,arcgisiso):
         metadata_obj = arcgisiso.main_csv_metadata
         ls = []
 
-        def column_val(name):
-            val = ""
-            if name.endswith("_o"):
-                val = metadata_obj.__dict__["_{0}".format(name)]
-            return val
-
         def add_transformed_metadata():
-            for name in par.CSV_ORDERED_HEADERS:
-                val = column_val(name)
+            for name in self.main_csv_tranform_header_double:  # Use the list to ensure the order, python dictionary cannot grarentee the order of items
+                val = self._attr_value(metadata_obj,name)
                 ls.append(val)
 
         self._add_common_metadata(ls,arcgisiso)
         add_transformed_metadata()
+        GeoHelper._space(ls,15)
         return ls
 
     # One arcgisiso obj has multiple responsible parties
     def _res_raw(self,arcgisiso,resp_obj,update_individual):
         ls = []
-
-        def column_val(key):
-            txt = ""
-            attr_key = "_{0}".format(key)
-            if attr_key in resp_obj.__dict__:
-                txt = resp_obj.__dict__[attr_key]
-            return txt
 
         def add_from_column():
             ls.append(resp_obj.__dict__["_from"])
@@ -69,8 +69,9 @@ class ExportCsv(object):
                 ls.append(resp_obj.__dict__["_individual"])
 
         def add_transformed_metadata():
-            for name in par.CSV_HEADER_RESPONSIBLE_PARTY[2:]: # Use the list to ensure the order, python dictionary cannot garentee the order of items
-                val = column_val(name)
+            for name in par.CSV_HEADER_RESPONSIBLE_PARTY[2:]: # Use the list to ensure the order, python dictionary cannot grarentee the order of items
+                # val = self._attr_value(resp_obj,"{0}_o".format(name))
+                val = self._attr_value(resp_obj,name)  # use the same name as defined in par.CSV_HEADER_RESPONSIBLE_PARTY: only role has two columns: role_o, role
                 ls.append(val)
 
         add_from_column()
@@ -98,7 +99,8 @@ class ExportCsv(object):
 
         def get_main_csv_header_with_o():
             header.extend(par.CSV_HEADER_COMMON)
-            header.extend(par.CSV_ORDERED_HEADERS)
+            header.extend(self.main_csv_tranform_header_double)
+            header.extend(par.CSV_HEADER_EMPTY)
 
         def get_raws():
             for arcGisIso in self.arcGisIso_list:
