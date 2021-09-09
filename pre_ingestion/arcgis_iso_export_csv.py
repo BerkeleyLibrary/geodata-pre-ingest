@@ -53,7 +53,7 @@ class ExportCsv(object):
         return ls
 
     # One arcgisiso obj has multiple responsible parties
-    def _res_raw(self,arcgisiso,resp_obj,update_individual):
+    def _responsible_party_update_raw(self,arcgisiso,resp_obj):
         ls = []
 
         def column_val(key):
@@ -65,8 +65,7 @@ class ExportCsv(object):
 
         def add_from_column():
             ls.append(resp_obj.__dict__["_from"])
-            if update_individual:
-                ls.append(resp_obj.__dict__["_individual"])
+            ls.append(resp_obj.__dict__["_individual"])
 
         def add_transformed_metadata():
             for name in par.CSV_HEADER_RESPONSIBLE_PARTY[2:]: # Use the list to ensure the order, python dictionary cannot garentee the order of items
@@ -78,11 +77,6 @@ class ExportCsv(object):
         add_transformed_metadata()
         return ls
 
-    def _responsible_party_update_raw(self,arcgisiso,resp_obj):
-        return self._res_raw(arcgisiso,resp_obj,True)
-
-    def _responsible_party_original_raw(self,arcgisiso,resp_obj):
-        return self._res_raw(arcgisiso,resp_obj,False)
 
     def _write_csv(self,file,header,raws):
         with open(file, 'wb') as csvfile:

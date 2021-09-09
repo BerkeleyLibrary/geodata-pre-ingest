@@ -52,8 +52,6 @@ class GeoHelper:
         new_path = GeoHelper.path_join(ls)
         return new_path
 
-    #######################################################################
-
     @staticmethod
     def batchname(path):   # eg. c://original/Angola_restricted
         return GeoHelper.path_split(path)[-1]
@@ -212,31 +210,6 @@ class GeoHelper:
         header.extend(par.CSV_HEADER_COMMON)
         header.extend(par.CSV_HEADER_RESPONSIBLE_PARTY[2:])
         return header
-
-    # @staticmethod
-    # def responsibleParty_csv_original_header():
-    #     header = []
-    #     header.extend(par.CSV_HEADER_RESPONSIBLE_PARTY[:1])
-    #     header.extend(par.CSV_HEADER_COMMON)
-    #     header.extend(par.CSV_HEADER_RESPONSIBLE_PARTY[2:])
-    #     return header
-
-    # @staticmethod
-    # def main_csv_header():
-    #
-    #     def double_header(ls):
-    #         out_ls = []
-    #         for l in ls:
-    #             out_ls.append("{0}_o".format(l))
-    #             out_ls.append(l)
-    #         return out_ls
-    #
-    #     header = []
-    #     header.extend(par.CSV_HEADER_COMMON)
-    #     transformed_metadata_header = double_header(par.CSV_HEADER_TRANSFORM)
-    #     header.extend(transformed_metadata_header)
-    #     header.extend(par.CSV_HEADER_EMPTY)
-    #     return header
 
     @staticmethod
     def dest_csv_files(process_path):
