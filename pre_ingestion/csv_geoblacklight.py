@@ -100,6 +100,7 @@ class CsvGeoblacklight(object):
             if len(val) > 0:
                 if header == "date_s": val = d_sub_str(val)
                 if header == "topicISO": val = isoTopics(val)
+                if header == "accessRights_s": val = val.lower().capitalize() 
             return val
 
         def val_from_csv(header): # string
