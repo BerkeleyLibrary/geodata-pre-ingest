@@ -60,7 +60,7 @@ class ValidateCSV(object):
         # main csv - 2. To avoid typo in accessright element
         def check_accessright(raw):
             arkid = raw["arkid"].strip()
-            rights = ["public","private"]
+            rights = ["public","restricted"]
             right = raw["accessRights_s"].strip().lower()
             if len(right) > 0 and (not right in rights):
                 warning_msg = "Line {3}:  {0} - '{1}' value should not be '{2}'.".format(arkid,"accessRights_s",right,self.main_ark_line[arkid])
