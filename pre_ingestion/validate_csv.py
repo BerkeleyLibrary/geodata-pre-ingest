@@ -20,19 +20,23 @@ class ValidateCSV(object):
 
 
     def prepare_main_csv_validation(self):
+        ark_line_dic = {}
+        arkids = []
         with open(self.csv_files[0], 'r') as csvfile:
             print self.csv_files[0]
             csv_reader = csv.DictReader(csvfile)
             line_num = 0
             for main_csv_raw in csv_reader:
                 arkid = main_csv_raw["arkid"].strip()
-                line_num =+ 1
+                line_num += 1
                 if len(arkid) == 0:
                     GeoHelper.arcgis_message(" Line {1}:  in '{0}' has no arkid".format(self.csv_files[0]),str(line_num))
                 else:
-                    self.arkids.append(arkid)
-                    self.main_ark_line[arkid] = str(line_num)
-
+                    arkids.append(arkid)
+                    ark_line_dic[arkid] = str(line_num)
+        self.main_ark_line = ark_line_dic
+        self.arkids = arkids
+    
 
     def check_default_codes(self,arkid,column_val,code_list,header,line):
         messages = []

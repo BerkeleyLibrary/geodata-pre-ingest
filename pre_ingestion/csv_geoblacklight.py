@@ -100,7 +100,7 @@ class CsvGeoblacklight(object):
             if len(val) > 0:
                 if header == "date_s": val = d_sub_str(val)
                 if header == "topicISO": val = isoTopics(val)
-                if header == "accessRights_s": val = val.lower().capitalize() 
+                if header == "accessRights_s": val = val.lower().capitalize()
             return val
 
         def val_from_csv(header): # string
@@ -174,7 +174,7 @@ class CsvGeoblacklight(object):
         arkid = self.arkid.strip()
         json_data['id'] = "{0}{1}".format(par.PREFIX,arkid)
         json_data['gbl_wxsIdentifier_s'] = arkid
-        json_data['dct_identifier_sm'] = "http://spatial.lib.berkeley.edu/viewpublic/{0}{1}".format(par.PREFIX,arkid)
+        json_data['dct_identifier_sm'] = ["http://spatial.lib.berkeley.edu/viewpublic/{0}{1}".format(par.PREFIX,arkid)]
         json_data['dct_references_s'] = dc_references(arkid)
 
 
