@@ -46,7 +46,7 @@ CSV_ORDERED_HEADERS = [
         "spatialSubject",
         "temporalCoverage_o",
         "temporalCoverage",
-        "solrYear_s",
+        "solrYear",
         "dateRange_drsim",
         "language_o",
         "language",
@@ -105,7 +105,7 @@ CSV_HEADER_COLUMNS = {
             "keyword" : "dcat_keyword_sm",
             "temporalCoverage" : "dct_temporal_sm",
             "date_s" : "dct_issued_s",
-            "solrYear_s" : "gbl_indexYear_i",
+            "solrYear" : "gbl_indexYear_im",
             "dateRange_drsim" : "gbl_dateRange_drsim",
             "relation" : "dct_relation_sm",
             "spatialSubject" : "dct_spatial_sm",
@@ -175,6 +175,7 @@ G_SM = [
              "replaces" ,
              "isReplacedBy" ,
              "license" ,
+             "solrYear",
              "resourceClass"
 ]
 
@@ -415,7 +416,7 @@ transform_elements = {
 
 
 # required elements - header names
-CSV_REQUIRED_HEADERS = ["title_s","solrYear_s","accessRights_s","modified_date_dt"]
+CSV_REQUIRED_HEADERS = ["title_s","accessRights_s","modified_date_dt"] # "solrYear" is validated separatedly 
 
 resourceType = [
         "LiDAR",

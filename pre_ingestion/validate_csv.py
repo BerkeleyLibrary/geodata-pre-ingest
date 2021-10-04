@@ -5,6 +5,7 @@ import csv
 import json
 from geo_helper import GeoHelper
 import par
+import re
 if os.name == "nt":
     from jsonschema import validate
     import jsonschema
@@ -36,7 +37,7 @@ class ValidateCSV(object):
                     ark_line_dic[arkid] = str(line_num)
         self.main_ark_line = ark_line_dic
         self.arkids = arkids
-    
+
 
     def check_default_codes(self,arkid,column_val,code_list,header,line):
         messages = []
@@ -102,6 +103,45 @@ class ValidateCSV(object):
 
         # def check_sourcetype(raw):
         #     warning_msgs = self.check_default_codes(raw,par.resourceType,"resourceType")
+        def check_solr_year(raw):
+            four_digit_reg = '^\d{4}$'
+            all_digit_reg = '^-?[1-9]\d*$'
+
+            column_val = raw["solrYear"]
+            arkid = raw["arkid"].strip()
+            line = self.main_ark_line[arkid]
+
+            def match(reg,str):
+                return len(re.findall(reg,str)) == 1
+
+            def all_match(arr,reg):
+                for str in arr:
+                    if not match(reg,str):
+                        return False
+                return True
+
+            def valid_all_years(years):
+                if all_match(years,all_digit_reg):
+                    return True
+                else:
+                    messages.append("Line {0}: solrYear has an invalid year.".format(line))
+                    return False
+
+            def valid_four_digit_years(years):
+                if  not all_match(years,four_digit_reg):
+                    messages.append("Line {0}: solrYear is not a 4 digital year.".format(line))
+
+
+            def check_all():
+                if column_val:
+                    years = [val.strip() for val in column_val.split("$")]
+                    if valid_all_years(years):
+                        valid_four_digit_years(years)
+                else:
+                    messages.append("Line {0}: solrYear has no value.".format(line))
+
+            check_all()
+
 
         def validate_all():
             with open(self.csv_files[0],'r') as csv_file:
@@ -111,6 +151,7 @@ class ValidateCSV(object):
                     check_required_elements(raw)
                     check_topiciso(raw)
                     check_accessright(raw)
+                    check_solr_year(raw)
                     # check_sourcetype(raw)
                 return messages
 

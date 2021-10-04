@@ -114,20 +114,16 @@ class CsvGeoblacklight(object):
         	words = [w.capitalize() if (w not in noCapWords) and (w[0].isalpha()) else w  for w in str.split()]
         	return " ".join(words)
 
-        def captilize_arr(arr):
-            new_arr = [captilize_str(w) for w in arr]
-            return new_arr
+        def captilize_arr(header,arr):
+            if need_captilize(header):
+                return[captilize_str(w) for w in arr]
+            return arr
 
         def format_metadata(header,column_val):
             val = column_val
             if is_multiple_values(header):
                 val = column_val.split("$")
-                need_captilized = need_captilize(header)
-                if need_captilized:
-                    val = captilize_arr(val)
-            # else: # no this case for now
-            #     if need_captilized:
-            #         val = captilize_str(val)
+                val = captilize_arr(header,val)
             return val
 
         def add_rights(): # conslidate multiple columns of rights to one
