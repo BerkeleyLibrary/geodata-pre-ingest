@@ -185,7 +185,7 @@ RESULT_DIRECTORY = ["GeoFiles for Downloading","GeoFiles for Geoserver(Projected
 
 PREFIX = "berkeley-"
 INSTITUTION = "Berkeley"
-GEOBLACKLGITH_VERSION = "v2"
+GEOBLACKLGITH_VERSION = "Aardvark"
 
 HOSTS = {
           "geoserver_host":"geoservices.lib.berkeley.edu",
@@ -416,7 +416,7 @@ transform_elements = {
 
 
 # required elements - header names
-CSV_REQUIRED_HEADERS = ["title_s","accessRights_s","modified_date_dt"] # "solrYear" is validated separatedly 
+CSV_REQUIRED_HEADERS = ["title_s","accessRights_s","modified_date_dt"] # "solrYear" is validated separatedly
 
 resourceType = [
         "LiDAR",
