@@ -129,6 +129,17 @@ class ArcGisIso(object):
 
 
 	def _main_csv_metadata(self):
+
+		geom = {"polyline":"Line data",
+				"polygon" : "Polygon data",
+				"point": "Point data"
+				}
+
+		def get_geom_type():
+			desc = arcpy.Describe(self.filename)
+			geoType = desc.shapeType.lower()
+			return geom[geoType]
+
 		obj = MetadataContainer() #xml element defined in dictionary
 		for header,tag_info in par.transform_elements.iteritems():
 			element_value = self._element_value(tag_info,self.root)
@@ -138,6 +149,8 @@ class ArcGisIso(object):
 		obj.__dict__["_{0}_o".format("collectionTitle")] = self._collection_title()
 		obj.__dict__["_{0}_o".format("temporalCoverage")] = self._temporalCoverage()
 		obj.__dict__["_{0}_o".format("modified_date_dt")] = self._modified_date_dt()
+		if os.name == "nt":
+			obj.__dict__["_{0}_o".format("resourceType")] = get_geom_type()
 		return obj
 
 
