@@ -92,6 +92,33 @@ class ArcGisIso(object):
 		return  datetime.datetime.today().strftime('%Y%m%d')
 
 
+	def _resource_type(self):
+		geom = {"polyline":"Line data",
+				"polygon" : "Polygon data",
+				"point": "Point data"
+				}
+
+		def geom_type():
+			geo_type = ""
+			desc = arcpy.Describe(self.filename)
+			data_type = desc.dataType
+			if data_type == "RasterDataset":
+				geo_type = "Raster data"
+			elif data_type == "ShapeFile":
+				shp_type = desc.shapeType.lower()
+				geo_type = geom[shp_type]
+			return geo_type
+
+		def get_resouce_type():
+			_geom_type = ""
+			if os.name == "nt":
+				_geom_type = geom_type()
+			return _geom_type
+
+		get_resouce_type()
+
+
+
 	def _element_value(self,tag_info,parent_node):
 
 		def has_attribute(name):
@@ -130,15 +157,8 @@ class ArcGisIso(object):
 
 	def _main_csv_metadata(self):
 
-		geom = {"polyline":"Line data",
-				"polygon" : "Polygon data",
-				"point": "Point data"
-				}
 
-		def get_geom_type():
-			desc = arcpy.Describe(self.filename)
-			geoType = desc.shapeType.lower()
-			return geom[geoType]
+
 
 		obj = MetadataContainer() #xml element defined in dictionary
 		for header,tag_info in par.transform_elements.iteritems():
@@ -149,8 +169,7 @@ class ArcGisIso(object):
 		obj.__dict__["_{0}_o".format("collectionTitle")] = self._collection_title()
 		obj.__dict__["_{0}_o".format("temporalCoverage")] = self._temporalCoverage()
 		obj.__dict__["_{0}_o".format("modified_date_dt")] = self._modified_date_dt()
-		if os.name == "nt":
-			obj.__dict__["_{0}_o".format("resourceType")] = get_geom_type()
+		obj.__dict__["_{0}_o".format("resourceType")] = self._resource_type()
 		return obj
 
 
@@ -227,5 +246,5 @@ class ArcGisIso(object):
 
 
 class MetadataContainer(object):
-    def __init__(self):
-        pass
+	def __init__(self):
+		pass

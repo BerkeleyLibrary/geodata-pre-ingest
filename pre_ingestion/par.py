@@ -3,7 +3,7 @@ from datetime import datetime
 
 CSV_HEADER_COMMON = ["format_s","arkid","filename"]
 
-# Som columns in CSV has no mapping to ESRI ISO metadata
+# Some columns in CSV has no mapping to ESRI ISO metadata
 # Elements in below array are ordered the same as column order in the main csv file;
 # These columns are extracrted from ESRI ISO XML
 # "_s" - single value column
@@ -51,6 +51,7 @@ CSV_ORDERED_HEADERS = [
         "language_o",
         "language",
         "resourceClass",
+        "resourceType_o",
         "resourceType",
         "collectionTitle_o",
         "collectionTitle",
