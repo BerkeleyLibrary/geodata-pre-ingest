@@ -26,7 +26,7 @@ class ValidateCSV(object):
         with open(self.csv_files[0], 'r') as csvfile:
             print self.csv_files[0]
             csv_reader = csv.DictReader(csvfile)
-            line_num = 0
+            line_num = 1
             for main_csv_raw in csv_reader:
                 arkid = main_csv_raw["arkid"].strip()
                 line_num += 1
