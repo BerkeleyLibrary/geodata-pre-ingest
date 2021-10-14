@@ -3,9 +3,9 @@ from datetime import datetime
 
 CSV_HEADER_COMMON = ["format_s","arkid","filename"]
 
-# Main CSV Files: columns with these headers are mapped to ESRI ISO;
+# The Main CSV File: columns with below headers are extracted,updated and written to ESRI ISO;
 # an extracted value from ESIR ISO is stored at a column with a header of "*_o".
-# with one field exception:  "resourceType" gotten from ArcPy, it is not written to ESRI ISO, but with column "*_o" in column
+# with one field exception:  "resourceType" is gotten from ArcPy, it is not written to ESRI ISO, but with column "*_o" in column
 
 CSV_HEADER_TRANSFORM = [
          "title_s",
@@ -25,6 +25,7 @@ CSV_HEADER_TRANSFORM = [
          "topicISO",
          "keyword",
          "temporalCoverage"]
+
 
 # Main CSV File headers: the order of this array define the order the CSV file
 CSV_ORDERED_HEADERS = [
@@ -81,7 +82,25 @@ CSV_ORDERED_HEADERS = [
 
 
 
-# Mapping between csv header and geoblacklight elements
+##Below fields do not need mapping because the are gotten from other places:
+# dct_creator_sm
+# dct_publisher_sm
+# schema_provider_s
+# locn_geometry
+# dct_rights_sm
+# dct_rightsHolder_sm
+# gbl_wxsIdentifier_s
+# dct_references_s
+# id
+# dct_identifier_sm
+# gbl_mdVersion_s
+
+## geoblacklight metadata not included by UCB:
+# dcat_centroid_ss
+# gbl_fileSize_s
+
+# Mapping between csv header and geoblacklight elements:
+# "dateRange_drsim" using string "[1980 TO 1995]"
 CSV_HEADER_GEOBLACKLIGHT_MAP = {
             "format_s": "dct_format_s",
             "title_s" : "dct_title_s",
@@ -145,29 +164,6 @@ UCB_RESPONSIBLE_PARTY = {
     "zip":"94720-6000",
     "country":"UNITED STATES"
 }
-
-# A list of headers mapped to geoblacklight metadata with multiple values
-G_SM = [
-             "alternativeTitle" ,
-             "description" ,
-             "language" ,
-             "resourceType",
-             "subject" ,
-             "topicISO" ,
-             "keyword" ,
-             "temporalCoverage" ,
-             "relation" ,
-             "spatialSubject",
-             "collectionTitle",
-             "isPartOf" ,
-             "source" ,
-             "isVersionOf" ,
-             "replaces" ,
-             "isReplacedBy" ,
-             "license" ,
-             "solrYear",
-             "resourceClass"
-]
 
 PROCESS_SUB_DIRECTORY = ["Results","Source","Work"]
 RESULT_DIRECTORY_PARENTS =  ["precessed_result","final_result"]

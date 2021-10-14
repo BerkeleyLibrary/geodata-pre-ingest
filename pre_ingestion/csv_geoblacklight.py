@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 import csv
 import par
 import json
+import re
 from datetime import datetime
 from geo_helper import GeoHelper
 if os.name == "nt":
@@ -67,7 +68,8 @@ class CsvGeoblacklight(object):
             return (header in par.CSV_HEADER_TRANSFORM)
 
         def is_multiple_values(header):
-            return header in par.G_SM
+            multiple = re.search("_sm|_im$",par.CSV_HEADER_GEOBLACKLIGHT_MAP[header].strip())
+            return True if multiple else False
 
         def need_captilize(header):  # only elements in from csv file needs capitlizsed
             HEADER_UPCASE = ["spatialSubject","subject"]

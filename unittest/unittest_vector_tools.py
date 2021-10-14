@@ -4,6 +4,9 @@ import sys
 import unittest
 import shutil
 
+# when changing csv header, headers of below testing csv files have to be updated accordingly.
+# 1)  ~/vector_export/Resultes/processed_result/updated CSV Files/template.csv
+
 # To test directory layout, go to run: test/v_test_0_1_create_resultspace.py
 
 # use date from vector_data/vector - import data
