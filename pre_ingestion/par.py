@@ -13,6 +13,7 @@ CSV_HEADER_TRANSFORM = [
          "summary",
          "description",
          "language",
+         "resourceType",
          "subject",
          "date_s",
          "spatialSubject",
@@ -77,30 +78,16 @@ CSV_ORDERED_HEADERS = [
         "modified_date_dt"
          ]
 
-# CSV_HEADER_EMPTY = [
-#          "resourceClass",
-#          "resourceType",
-#          "solrYear_s",
-#          "dateRange_drsim",
-#          "relation",
-#          "isPartOf",
-#          "source",
-#          "isVersionOf",
-#          "replaces",
-#          "isReplacedBy",
-#          "rightsHolder",
-#          "license",
-#          "accessRights_s",
-#          "suppressed_b",
-#          "georeferenced_b"]
+
 
 # Mapping between csv header and geoblacklight elements
-CSV_HEADER_COLUMNS = {
+CSV_HEADER_GEOBLACKLIGHT_MAP = {
             "format_s": "dct_format_s",
             "title_s" : "dct_title_s",
             "alternativeTitle" : "dct_alternative_sm",
             "description" : "dct_description_sm",
             "language" : "dct_language_sm",
+            "resourceType":"gbl_resourceType_sm",
             "subject" : "dct_subject_sm",
             "topicISO" : "dcat_theme_sm",
             "keyword" : "dcat_keyword_sm",

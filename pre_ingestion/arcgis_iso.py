@@ -109,13 +109,13 @@ class ArcGisIso(object):
 				geo_type = geom[shp_type]
 			return geo_type
 
-		def get_resouce_type():
+		def get_resource_type():
 			_geom_type = ""
 			if os.name == "nt":
 				_geom_type = geom_type()
 			return _geom_type
 
-		get_resouce_type()
+		return get_resource_type()
 
 
 

@@ -137,7 +137,7 @@ class CsvGeoblacklight(object):
                 json_data["dct_rights_sm"] = all_ls
 
         def add_metadata():
-            for header,element_name in par.CSV_HEADER_COLUMNS.iteritems():
+            for header,element_name in par.CSV_HEADER_GEOBLACKLIGHT_MAP.iteritems():
                 column_val = val_from_csv(header)
                 if len(column_val) > 0:
                     meta_value = format_metadata(header,column_val)
