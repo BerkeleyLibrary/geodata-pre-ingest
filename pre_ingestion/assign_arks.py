@@ -22,7 +22,10 @@ class AssignArks(object):
 
         self.geofiles_from_workpath = GeoHelper.geofiles(self.workpath,ext)
         self.geofiles_from_sourcepath = GeoHelper.geofiles(self.sourcepath,ext)
+        self.ark_geofile_mapping = self._ark_geofile_mapping(process_path)
 
+    def _ark_geofile_mapping(self,process_path):
+        return "{0}/ark_geofile_mapping.txt".format(process_path)
 
     def _arks(self,txtfile):
         def layerid(line): #ark:/28722/s7r971
@@ -78,12 +81,22 @@ class AssignArks(object):
         def assign():
             if equal_numbers():
                 i = 0
-                for ark in self._arks:
-                    work_geofile = self.geofiles_from_workpath[i]
-                    work_arkfile = GeoHelper.arkfilename(work_geofile,self.ext,ark)
-                    save_to_work(work_arkfile,ark,work_geofile) # save work directory geofile info in the ark file
-                    copy_to_source(work_arkfile)
-                    i += 1
+                open(self.ark_geofile_mapping, "w").close()
+                with open(self.ark_geofile_mapping ,'w') as f:
+
+                    header = "{0}\t{1}\n".format("ArK","GeoFile in Working Directory")
+                    f.write(header)
+
+                    for ark in self._arks:
+                        work_geofile = self.geofiles_from_workpath[i]
+                        work_arkfile = GeoHelper.arkfilename(work_geofile,self.ext,ark)
+                        save_to_work(work_arkfile,ark,work_geofile) # save work directory geofile info in the ark file
+                        copy_to_source(work_arkfile)
+                        i += 1
+
+                        ark_geofile = "ark:/28722/{0}\t{1}\n".format(ark,work_geofile)
+                        f.write(ark_geofile)
+
                 if i > 0: GeoHelper.arcgis_message(par.SUCCESSFUL_ASSINGED_ARKS.format(str(i)))
 
         assign()
