@@ -3,10 +3,10 @@ from datetime import datetime
 
 CSV_HEADER_COMMON = ["format_s","arkid","filename"]
 
-# Some columns in CSV has no mapping to ESRI ISO metadata
-# Elements in below array are ordered the same as column order in the main csv file;
-# These columns are extracrted from ESRI ISO XML
-# "_s" - single value column
+# Main CSV Files: columns with these headers are mapped to ESRI ISO;
+# an extracted value from ESIR ISO is stored at a column with a header of "*_o".
+# with one field exception:  "resourceType" gotten from ArcPy, it is not written to ESRI ISO, but with column "*_o" in column
+
 CSV_HEADER_TRANSFORM = [
          "title_s",
          "alternativeTitle",
@@ -26,6 +26,7 @@ CSV_HEADER_TRANSFORM = [
          "keyword",
          "temporalCoverage"]
 
+# Main CSV File headers: the order of this array define the order the CSV file
 CSV_ORDERED_HEADERS = [
         "title_s_o",
         "title_s",
@@ -145,11 +146,12 @@ UCB_RESPONSIBLE_PARTY = {
     "country":"UNITED STATES"
 }
 
-# A list of headers which can be mapped to metadata in geoblacklight which have multiple values
+# A list of headers mapped to geoblacklight metadata with multiple values
 G_SM = [
              "alternativeTitle" ,
              "description" ,
              "language" ,
+             "resourceType",
              "subject" ,
              "topicISO" ,
              "keyword" ,
@@ -518,6 +520,25 @@ vector_exts = [".cpg",
         ".shp",
         ".shp.xml",
         ".shx"]
+
+## geoblacklight metadata got from other places:
+# dct_creator_sm
+# dct_publisher_sm
+# schema_provider_s
+# locn_geometry
+# dct_rights_sm
+# dct_rightsHolder_sm
+# gbl_wxsIdentifier_s
+# dct_references_s
+# id
+# dct_identifier_sm
+# gbl_mdVersion_s
+
+## geoblacklight metadata not included by UCB:
+# dcat_centroid_ss
+# gbl_fileSize_s
+
+
 
 # not used in code, for future reference
 # geoblacklight_rolecodes = ["006","010"]

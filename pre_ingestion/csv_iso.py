@@ -227,15 +227,28 @@ class CsvIso(object):
             old_val = self.main_csv_raw[h_o].strip()
             return new_val if len(new_val) > 0 else old_val
 
+        # def update_csv_to_temp_ESRIISO():
+        #     rights = {}
+        #     for h in par.CSV_HEADER_TRANSFORM:
+        #         val = final_value(h) # new workflow: write all back to ESRI ISO
+        #         if len(val) > 0 :
+        #             if h in par.CSV_HEADER_COLUMNS_RIGHTS:
+        #                 rights[h] = val
+        #             else:
+        #                 update_metadata(h,val)
+        #     if bool(rights):
+        #         update_metadata_rights(rights)
         def update_csv_to_temp_ESRIISO():
             rights = {}
             for h in par.CSV_HEADER_TRANSFORM:
-                val = final_value(h) # new workflow: write all back to ESRI ISO
-                if len(val) > 0 :
-                    if h in par.CSV_HEADER_COLUMNS_RIGHTS:
-                        rights[h] = val
-                    else:
-                        update_metadata(h,val)
+                if  h <> "resourceType":  # do not write resourceType to ESRI ISO xml
+                    val = final_value(h) # new workflow: write all back to ESRI ISO
+                    if len(val) > 0 :
+                        if h in par.CSV_HEADER_COLUMNS_RIGHTS: # combine mulitple right elements into one
+                            rights[h] = val
+                        else:
+                            update_metadata(h,val)
+
             if bool(rights):
                 update_metadata_rights(rights)
 
