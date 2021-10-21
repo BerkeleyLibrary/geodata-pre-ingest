@@ -6,7 +6,7 @@
         <SyncOnce>FALSE</SyncOnce>
         <SyncDate>20210407</SyncDate>
         <SyncTime>12163800</SyncTime>
-        <ModDate>20210427</ModDate>
+        <ModDate>20211019</ModDate>
         <ModTime>14172100</ModTime>
         <DataProperties>
             <itemProps>
@@ -112,11 +112,11 @@
     <dataIdInfo>
         <envirDesc Sync="TRUE"> Version 6.2 (Build 9200) ; Esri ArcGIS 10.6.1.9270</envirDesc>
         <dataLang>
-            <languageCode Sync="TRUE" value="eng" />
+            <languageCode Sync="TRUE" value="ger" />
             <countryCode Sync="TRUE" value="USA" />
         </dataLang>
         <idCitation>
-            <resTitle Sync="FALSE">Map of the University of California, Berkeley, 1911</resTitle>
+            <resTitle Sync="FALSE">Schaffhausen (Sheet 205), Switzerland 1:50,000 topographic map, 1994</resTitle>
             <presForm>
                 <PresFormCd Sync="TRUE" value="005" />
             </presForm>
@@ -128,7 +128,7 @@
             </resRefDate>
             <date>
                 <createDate>1911-01-01T00:00:00</createDate>
-                <pubDate>2021-03-17T00:00:00</pubDate>
+                <pubDate>19940607</pubDate>
             </date>
             <collTitle>Historical Maps of the Bay Area</collTitle>
         <citRespParty xmlns=""><rpOrgName>Earth Sciences and Map Library University of California, Berkeley</rpOrgName><rpIndName>John Ridener</rpIndName><rpPosName>GIS Specialist</rpPosName><rpCntInfo xmlns=""><eMailAdd>jridener@library.berkeley.edu</eMailAdd><cntAddress addressType=""><delPoint>50 McCone Hall, UC Berkeley</delPoint><city>Berkeley</city><postCode>94720</postCode><country>us</country></cntAddress><cntPhone /></rpCntInfo><role><RoleCd value="006" /></role></citRespParty><citRespParty xmlns=""><rpOrgName>UC Berkeley Library</rpOrgName><rpCntInfo xmlns=""><eMailAdd>eart@library.berkeley.edu</eMailAdd><cntAddress addressType=""><delPoint>50 McCone Hall</delPoint><city>Berkeley</city><postCode>94720</postCode><country>US</country></cntAddress><cntPhone /></rpCntInfo><role><RoleCd value="010" /></role></citRespParty><citRespParty xmlns=""><rpOrgName>Earth Sciences and Map Library University of California, Berkeley</rpOrgName><rpIndName>John Ridener</rpIndName><rpPosName>GIS Specialist</rpPosName><rpCntInfo xmlns=""><eMailAdd>jridener@library.berkeley.edu</eMailAdd><cntAddress addressType=""><delPoint>50 McCone Hall, UC Berkeley</delPoint><city>Berkeley</city><postCode>94720</postCode><country>us</country></cntAddress><cntPhone /></rpCntInfo><role><RoleCd value="006" /></role></citRespParty></idCitation>
@@ -142,7 +142,7 @@
             <southBL Sync="TRUE">37.86678</southBL>
             <exTypeCode Sync="TRUE">1</exTypeCode>
         </geoBox>
-        <idAbs>Scan of a map of the University of California, Berkeley published in January 1911. Shows campus buildings, roads, paths and creeks. Includes list of buildings and other facilities, with descriptions.</idAbs>
+        <idAbs>(&#20320;&#22909;)This a sheet from a set of topographic maps published between 1983-2007 covering Switzerland at a scale of 1:50,000. Relief shown by contours, shading, hachures, and spot heights. Depths shown by contours and soundings. Shows roads, railways, drainage and built-up areas. The print maps were scanned at 400dpi, clipped to the map area, and georeferenced by LANDInfo Worldwide Mapping LLC, Inc. in approximately 2009.</idAbs>
         <dataExt>
             <geoEle>
                 <GeoBndBox esriExtentType="search">
@@ -200,7 +200,7 @@
                 </citRespParty>
             </aggrDSName>
         </aggrInfo>
-        <idPurp>test</idPurp><themeKeys xmlns=""><keyword>university campuses</keyword></themeKeys><placeKeys xmlns=""><keyword>University of California Berkeley campus</keyword></placeKeys><placeKeys xmlns=""><keyword>Berkeley (Calif.)</keyword></placeKeys><placeKeys xmlns=""><keyword>Alameda County (Calif.)</keyword></placeKeys><placeKeys xmlns=""><keyword>California</keyword></placeKeys><tpCat><TopicCatCd value="017" /></tpCat><tpCat><TopicCatCd value="012" /></tpCat><tpCat><TopicCatCd value="018" /></tpCat><tempKeys xmlns=""><keyword>1911</keyword></tempKeys></dataIdInfo>
+        <idPurp>&#28246;&#33457;</idPurp><themeKeys xmlns=""><keyword>Topographic maps</keyword></themeKeys><themeKeys xmlns=""><keyword>Quadrangle maps</keyword></themeKeys><placeKeys xmlns=""><keyword>Schaffhausen, Switzerland</keyword></placeKeys><placeKeys xmlns=""><keyword>Switzerland</keyword></placeKeys><tpCat><TopicCatCd value="010" /></tpCat><tempKeys xmlns=""><keyword>1994</keyword></tempKeys><resConst><Consts><useLimit>my</useLimit></Consts></resConst></dataIdInfo>
     <metainfo>
         <langmeta Sync="TRUE">en</langmeta>
         <metstdn Sync="TRUE">FGDC Content Standards for Digital Geospatial Metadata</metstdn>

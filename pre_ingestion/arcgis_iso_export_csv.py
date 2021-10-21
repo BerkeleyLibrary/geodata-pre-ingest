@@ -28,6 +28,7 @@ class ExportCsv(object):
 
 
     def _add_common_metadata(self,ls,arcgisiso):
+        ls.append("")
         ls.append(self._format())
         ls.append(arcgisiso.ark)
         ls.append(arcgisiso.filename)

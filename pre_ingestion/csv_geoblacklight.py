@@ -47,7 +47,7 @@ class CsvGeoblacklight(object):
                 self._add_from_iso19139(json_data)
 
             with (open(geoblacklight_file,"w+")) as geo_json:
-                geo_json.write(json.dumps(json_data,sort_keys=True,indent=4,separators=(',',':'))) #pretty print
+                geo_json.write(json.dumps(json_data,sort_keys=True,ensure_ascii=False,indent=4,separators=(',',':'))) #pretty print
 
         geoblacklight_file = geoblacklight_file()
         save_pretty()

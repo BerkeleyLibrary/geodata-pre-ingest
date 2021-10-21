@@ -242,7 +242,7 @@ class CsvIso(object):
             rights = {}
             for h in par.CSV_HEADER_TRANSFORM:
                 if  h <> "resourceType":  # do not write resourceType to ESRI ISO xml
-                    val = final_value(h) # new workflow: write all back to ESRI ISO
+                    val = final_value(h).decode('utf-8') # new workflow: write all back to ESRI ISO
                     if len(val) > 0 :
                         if h in par.CSV_HEADER_COLUMNS_RIGHTS: # combine mulitple right elements into one
                             rights[h] = val
