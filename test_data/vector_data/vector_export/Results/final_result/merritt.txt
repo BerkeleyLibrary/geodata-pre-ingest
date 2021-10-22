@@ -1,4 +1,0 @@
-fileUrl | hashAlgorithm | hashValue | fileSize | fileName | primaryIdentifier | creator | title | date
-https://spatial.lib.berkeley.edu/public/berkeley-s7w117/data.zip|MD5|8d5280f647226a8b08f62dd0966a7987|759922|Data.zip|ark:/28722/s7w117|me|1950prj_city ark:/28722/s7w117|2021-08-18
-https://spatial.lib.berkeley.edu/UCB/berkeley-a7gt36/data.zip|MD5|ba3a211d17a184891b9993a99e9572ff|2001485|Data.zip|ark:/28722/a7gt36|me|1950prj_county ark:/28722/a7gt36|2021-08-18
-https://spatial.lib.berkeley.edu/public/berkeley-b8gq99/data.zip|MD5|2706493bf48a5896a6d9d4c9ae4a17d7|370305|Data.zip|ark:/28722/b8gq99|me|1950prj_prov ark:/28722/b8gq99|2021-08-18

@@ -94,7 +94,7 @@ class CsvIso(object):
         esriiso_to_iso19139()
 
 
-    # Only 010 and 006 goes to citation responsible party
+    # Only 010 and 006 go to citation responsible party
     def _seperate_resp_parties(self,raws):
         for raw in raws:
             role = raw["role"].strip()
@@ -321,7 +321,7 @@ class CsvIso(object):
 
     def _add_responsible_party(self,resp_raw,parent_path,tag):
         def value(name):
-            return resp_raw[name].strip()
+            return resp_raw[name].strip().decode('utf-8')
 
         def add_sub_node(parent_node,child_node_name,val):
             if len(val.strip()) > 0:

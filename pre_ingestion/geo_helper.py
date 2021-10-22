@@ -206,6 +206,7 @@ class GeoHelper:
     @staticmethod
     def responsibleParty_csv_update_header():
         header = []
+        header.extend(par.CSV_BOM)
         header.extend(par.CSV_HEADER_RESPONSIBLE_PARTY[:2])
         header.extend(par.CSV_HEADER_COMMON)
         header.extend(par.CSV_HEADER_RESPONSIBLE_PARTY[2:])

@@ -12,7 +12,6 @@ class Merrit(object):
         self.process_path = process_path
         self.final_result_dir = final_result_dir
 
-
     def _content(self):
         content = ""
         geoblacklight_dir =  GeoHelper.geoblacklight_path(self.process_path)
@@ -41,6 +40,7 @@ class ArkMerritt(object):
         self.process_path = process_path
         self.json_data = self._geobacklight_json_data()
         self.download_data_zip_file = self._download_data_zip_file()
+
 
     def row(self):
         _row = "{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|{8}".format(
@@ -71,7 +71,7 @@ class ArkMerritt(object):
     	return json_data
 
     def file_url(self):
-        access_right = self.json_data["dct_accessRights_s"]
+        access_right = self.json_data["dct_accessRights_s"].encode('utf-8')
         download_host = "https://spatial.lib.berkeley.edu/public" if access_right.lower()  == "public" else "https://spatial.lib.berkeley.edu/UCB"
         return  "{0}/berkeley-{1}/data.zip".format(download_host,self.ark)
 
@@ -92,15 +92,17 @@ class ArkMerritt(object):
         str = ""
         ls = self.json_data["dct_creator_sm"]
         if ls:
-            str = ",".join(ls)
+            ls_encoded = [l.encode('utf-8') for l in ls]
+            str = ",".join(ls_encoded)
         return self._rm_pipe(str)
 
     def title(self):
-        _title =  "{0} {1}".format(self.json_data["dct_title_s"],self.primary_identifer())
+        _title =  "{0} {1}".format(self.json_data["dct_title_s"].encode('utf-8'),self.primary_identifer())
+
         return self._rm_pipe(_title)
 
     def date(self):
-        return self.json_data["gbl_mdModified_dt"].strip()[:10]
+        return self.json_data["gbl_mdModified_dt"].strip().encode('utf-8')[:10]
 
     def _rm_pipe(self,str):
         return str.replace("|","_")

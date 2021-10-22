@@ -28,11 +28,12 @@ class ExportCsv(object):
 
 
     def _add_common_metadata(self,ls,arcgisiso):
-        ls.append("")
         ls.append(self._format())
         ls.append(arcgisiso.ark)
         ls.append(arcgisiso.filename)
 
+    def _add_bom(self,ls):
+        ls.append("")
 
     def _main_csv_raw(self,arcgisiso):
         metadata_obj = arcgisiso.main_csv_metadata
@@ -49,6 +50,7 @@ class ExportCsv(object):
                 val = column_val(name)
                 ls.append(val)
 
+        self._add_bom(ls)
         self._add_common_metadata(ls,arcgisiso)
         add_transformed_metadata()
         return ls
@@ -64,7 +66,7 @@ class ExportCsv(object):
                 txt = resp_obj.__dict__[attr_key]
             return txt
 
-        def add_from_column():
+        def add_extra_columns():
             ls.append(resp_obj.__dict__["_from"])
             ls.append(resp_obj.__dict__["_individual"])
 
@@ -73,7 +75,8 @@ class ExportCsv(object):
                 val = column_val(name)
                 ls.append(val)
 
-        add_from_column()
+        self._add_bom(ls)
+        add_extra_columns()
         self._add_common_metadata(ls,arcgisiso)
         add_transformed_metadata()
         return ls
@@ -92,6 +95,7 @@ class ExportCsv(object):
         raws = []
 
         def get_main_csv_header_with_o():
+            header.extend(par.CSV_BOM)
             header.extend(par.CSV_HEADER_COMMON)
             header.extend(par.CSV_ORDERED_HEADERS)
 

@@ -3,7 +3,8 @@ from datetime import datetime
 
 
 #CSV_HEADER_COMMON = ["format_s","arkid","filename"]
-CSV_HEADER_COMMON = [u"\uFEFF他们 (für)","format_s","arkid","filename"]
+CSV_BOM = [u"\uFEFF他们 (für)"]
+CSV_HEADER_COMMON = ["format_s","arkid","filename"]
 
 # The Main CSV File: columns with below headers are extracted,updated and written to ESRI ISO;
 # an extracted value from ESIR ISO is stored at a column with a header of "*_o".
