@@ -32,8 +32,9 @@ class ExportCsv(object):
         ls.append(arcgisiso.ark)
         ls.append(arcgisiso.filename)
 
-    def _add_bom(self,ls):
-        ls.append("")
+    def _add_bom(self,ls,full_path_filename):
+        filename = os.path.basename(full_path_filename)
+        ls.append(filename)
 
     def _main_csv_raw(self,arcgisiso):
         metadata_obj = arcgisiso.main_csv_metadata
@@ -50,7 +51,7 @@ class ExportCsv(object):
                 val = column_val(name)
                 ls.append(val)
 
-        self._add_bom(ls)
+        self._add_bom(ls,arcgisiso.filename)
         self._add_common_metadata(ls,arcgisiso)
         add_transformed_metadata()
         return ls
@@ -75,7 +76,7 @@ class ExportCsv(object):
                 val = column_val(name)
                 ls.append(val)
 
-        self._add_bom(ls)
+        self._add_bom(ls,arcgisiso.filename)
         add_extra_columns()
         self._add_common_metadata(ls,arcgisiso)
         add_transformed_metadata()
