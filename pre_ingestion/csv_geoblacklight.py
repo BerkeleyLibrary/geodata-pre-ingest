@@ -39,12 +39,11 @@ class CsvGeoblacklight(object):
 
         def save_pretty():
             json_data = {}
-            self._add_from_csv(json_data)
-            self._add_from_raw_obj(json_data)
+            self._add_from_main_csv(json_data)
+            self._add_from_responsible_csv(json_data)
             self._add_from_default(json_data)
             self._add_from_arkid(json_data)
-            if os.name == "nt":
-                self._add_from_iso19139(json_data)
+            self._add_boundary(json_data)
 
             with (open(geoblacklight_file,"w+")) as geo_json:
                 geo_json.write(json.dumps(json_data,sort_keys=True,ensure_ascii=False,indent=4,separators=(',',':'))) #pretty print
@@ -53,7 +52,7 @@ class CsvGeoblacklight(object):
         save_pretty()
 
 
-    def _add_from_raw_obj(self,json_data): # from updated reponsible party csv, previous workflow is from ISO19139
+    def _add_from_responsible_csv(self,json_data): # from updated reponsible party csv, previous workflow is from ISO19139
         originators = self.raw_obj.__dict__["_originators"]
         publishers = self.raw_obj.__dict__["_publishers"]
         owners = self.raw_obj.__dict__["_owners"]
@@ -63,7 +62,7 @@ class CsvGeoblacklight(object):
         if owners :json_data['dct_rightsHolder_sm'] = owners
 
 
-    def _add_from_csv(self,json_data):
+    def _add_from_main_csv(self,json_data):
         def has_original_column(header):
             return (header in par.CSV_HEADER_TRANSFORM)
 
@@ -186,6 +185,48 @@ class CsvGeoblacklight(object):
         tree =  ET.parse(iso_19139)
         root = tree.getroot()
         self._geoblacklight_boundary(root,json_data)
+
+
+    def _add_boundary(self,json_data):
+        if os.name == "nt":
+            env = None
+            geo_type = GeoHelper.geo_type(self.geofile)
+            if geo_type == "vector":
+                env = self._vector_boundary()
+            if geo_type == "raster":
+                env = self._raster_boundary()
+
+            if env:
+                json_data["locn_geometry"] = env
+            else:
+                GeoHelper.arcgis_message("{0} - {1}: No boundary found .".format(self.geofile,self.arkid))
+
+
+
+    def _raster_boundary(self):
+        try:
+            raster = arcpy.Raster(self.geofile)
+            W = raster.extent.XMin
+            E = raster.extent.XMax
+            N = raster.extent.YMax
+            S = raster.extent.YMin
+            return  "ENVELOPE({0},{1},{2},{3})".format(W,E,N,S)  # "ENVELOPE(-122.839783, -122.406402, 38.194766, 37.802318)"
+        except:
+            return None
+        return None
+
+    def _vector_boundary(self):
+        try:
+            extent = arcpy.Describe(self.geofile).extent
+            W = extent.XMin
+            E = extent.XMax
+            N = extent.YMax
+            S = extent.YMin
+            return "ENVELOPE({0},{1},{2},{3})".format(W,E,N,S)
+        except:
+            return None
+        return None
+
 
 
     # From ISO19139

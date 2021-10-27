@@ -330,3 +330,14 @@ class GeoHelper:
                 raw["filename"] = os.path.join(export_work,raw["filename"])
                 vals = [raw[h] for h in header]
                 csv_writer.writerow(vals)
+
+    @staticmethod
+    def geo_type(geofile):
+        desc = arcpy.Describe(geofile)
+        data_type = desc.dataType
+        if data_type == "RasterDataset":
+            return "raster"
+        elif data_type == "ShapeFile":
+            return "vector"
+        GeoHelper.arcgis_message("{0} - may not existing, or maybe it is neither a GeoTIFF nor a ShapeFile".format(geofile))
+        return None
