@@ -5,7 +5,8 @@ import csv
 import par
 import json
 import re
-from datetime import datetime
+# from datetime import datetime
+import datetime
 from geo_helper import GeoHelper
 if os.name == "nt":
     import arcpy
@@ -74,11 +75,22 @@ class CsvGeoblacklight(object):
             HEADER_UPCASE = ["spatialSubject","subject"]
             return (header in HEADER_UPCASE)
 
-        def d_sub_str(val): # val = "04072021"
-            return GeoHelper.datetime(val.strip())
+        def d_sub_str(val): # val = "20210407"
+            str = val.strip()
+            num = len(str)
+            try:
+                if num == 6:
+                    return datetime.datetime.strptime(str,"%Y%m%d").strftime("%Y-%m")
+                if num == 8:
+                    return datetime.datetime.strptime(str,"%Y%m%d").strftime("%Y-%m-%d")
+            except:
+                GeoHelper.arcgis_message("{0}, 'date_s' value :{2} - in {1}, seems not valid,please check".format(self.geofile,self.arkid,str))
+                return str
+            return str
 
-        def d_time(val):  # val = "04072021"
-            return d_sub_str(val) + "T23:34:35.206Z"
+        def d_time(val):  # add validation
+            str = val.strip()
+            return datetime.datetime.strptime(str,"%Y%m%d").strftime("%Y-%m-%d") + "T23:34:35.206Z"
 
         def isoTopics(val):
             codes = val.split("$")
@@ -91,7 +103,7 @@ class CsvGeoblacklight(object):
                 header_o = "{0}_o".format(header)
                 val = self.main_csv_raw[header_o].strip()
                 if len(val) > 0:
-                    if header_o == "modified_date_dt_o" : val = d_time(val)  # only use original modified date for geoblacklight
+                    if header_o == "modified_date_dt_o" : val = d_time(val)
                     if header_o == "topicISO_o": val = isoTopics(val)
 
             return val
@@ -99,6 +111,7 @@ class CsvGeoblacklight(object):
         def corrected_current_val(header):
             val = self.main_csv_raw[header].strip()
             if len(val) > 0:
+                if header == "modified_date_dt" : val = d_time(val)
                 if header == "date_s": val = d_sub_str(val)
                 if header == "topicISO": val = isoTopics(val)
                 if header == "accessRights_s": val = val.lower().capitalize()

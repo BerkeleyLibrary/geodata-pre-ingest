@@ -157,9 +157,6 @@ class ArcGisIso(object):
 
 	def _main_csv_metadata(self):
 
-
-
-
 		obj = MetadataContainer() #xml element defined in dictionary
 		for header,tag_info in par.transform_elements.iteritems():
 			element_value = self._element_value(tag_info,self.root)
