@@ -24,6 +24,7 @@ class CsvGeoblacklight(object):
     def __init__(self,raw_obj,process_path):
         self.raw_obj = raw_obj
         self.main_csv_raw = raw_obj.__dict__["_main_csv_raw"]
+        self.main_csv_headers = self.main_csv_raw.keys()
 
         self.arkid = self.main_csv_raw["arkid"].strip()
         self.geofile = self.main_csv_raw["filename"].strip()
@@ -97,19 +98,36 @@ class CsvGeoblacklight(object):
             topics = [par.isoTopic[code] for code in codes]
             return "$".join(topics)
 
-        def corrected_original_val(header):
-            val = ""
-            if has_original_column(header): # some elements in csv files have no original elements
-                header_o = "{0}_o".format(header)
-                val = self.main_csv_raw[header_o].strip()
-                if len(val) > 0:
-                    if header_o == "modified_date_dt_o" : val = d_time(val)
-                    if header_o == "topicISO_o": val = isoTopics(val)
+        # def corrected_original_val(header):
+        #     val = ""
+        #     if has_original_column(header): # some elements in csv files have no original elements
+        #         header_o = "{0}_o".format(header)
+        #         val = self.main_csv_raw[header_o].strip()
+        #
+        #         if len(val) > 0:
+        #             if header_o == "modified_date_dt_o" : val = d_time(val)
+        #             if header_o == "topicISO_o": val = isoTopics(val)
+        #
+        #     return val
+        #
+        # def corrected_current_val(header):
+        #     val = self.main_csv_raw[header].strip()
+        #
+        #     if len(val) > 0:
+        #         if header == "modified_date_dt" : val = d_time(val)
+        #         if header == "date_s": val = d_sub_str(val)
+        #         if header == "topicISO": val = isoTopics(val)
+        #         if header == "accessRights_s": val = val.lower().capitalize()
+        #     return val
+        #
+        # def val_from_csv(header): # string
+        #     val = corrected_current_val(header)
+        #     if len(val) == 0:
+        #         val = corrected_original_val(header)
+        #     return val
 
-            return val
-
-        def corrected_current_val(header):
-            val = self.main_csv_raw[header].strip()
+        def correct_val(str,header):
+            val = str if str else ""
             if len(val) > 0:
                 if header == "modified_date_dt" : val = d_time(val)
                 if header == "date_s": val = d_sub_str(val)
@@ -117,11 +135,15 @@ class CsvGeoblacklight(object):
                 if header == "accessRights_s": val = val.lower().capitalize()
             return val
 
-        def val_from_csv(header): # string
-            val = corrected_current_val(header)
-            if len(val) == 0:
-                val = corrected_original_val(header)
-            return val
+        def main_csv_column_val(header):
+            input_val = self.main_csv_raw[header].strip()
+            header_o = "{0}_o".format(header)
+            original_val = self.main_csv_raw[header_o].strip() if header_o in self.main_csv_headers else None
+            new_val = original_val if (len(input_val)==0 and not original_val) else input_val
+
+            return correct_val(new_val,header)
+
+
 
         def captilize_str(str):
         	noCapWords = ["and", "is", "it", "or","if"]
@@ -143,7 +165,7 @@ class CsvGeoblacklight(object):
         def add_rights(): # conslidate multiple columns of rights to one
             all_ls = []
             for h in par.CSV_HEADER_COLUMNS_RIGHTS:
-                right = val_from_csv(h)
+                right = main_csv_column_val(h)
                 if len(right) > 0:
                     ls = right.split("$")
                     all_ls.extend(ls)
@@ -152,7 +174,7 @@ class CsvGeoblacklight(object):
 
         def add_metadata():
             for header,element_name in par.CSV_HEADER_GEOBLACKLIGHT_MAP.iteritems():
-                column_val = val_from_csv(header)
+                column_val = main_csv_column_val(header)
                 if len(column_val) > 0:
                     meta_value = format_metadata(header,column_val)
                     json_data[element_name] = meta_value
