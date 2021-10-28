@@ -65,6 +65,7 @@ class CsvGeoblacklight(object):
 
 
     def _add_from_main_csv(self,json_data):
+
         def has_original_column(header):
             return (header in par.CSV_HEADER_TRANSFORM)
 
@@ -108,6 +109,7 @@ class CsvGeoblacklight(object):
                 if header == "date_s": val = d_sub_str(val)
                 if header == "topicISO": val = isoTopics(val)
                 if header == "accessRights_s": val = val.lower().capitalize()
+                
             return val
 
         def main_csv_column_val(header):
@@ -133,8 +135,11 @@ class CsvGeoblacklight(object):
         def format_metadata(header,column_val):
             val = column_val
             if is_multiple_values(header):
-                val = column_val.split("$")
-                val = captilize_arr(header,val)
+                ls = column_val.split("$")
+                val = captilize_arr(header,ls)
+            if GeoHelper.bool_header(header):
+                val = True if val.lower() == "true" else False # validated: value will be either "true","false"
+
             return val
 
         def add_rights(): # conslidate multiple columns of rights to one

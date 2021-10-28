@@ -52,6 +52,18 @@ class ValidateCSV(object):
 
     def validate_main_csv_file(self):
         messages = []
+
+        def check_boolean_fields(raw):
+            headers = raw.keys()
+            for header in headers:
+                if GeoHelper.bool_header(header):
+                    val = raw[header].lower()
+                    if not val in ["true","false"]:
+                        arkid = raw["arkid"].strip()
+                        warning_msg = "Line {2}:  {0} - '{1}': needs a Boolean value ".format(arkid,header,self.main_ark_line[arkid])
+                        messages.append(warning_msg)
+
+
         # main csv - 1. make sure columns with header in par.CSV_REQUIRED_HEADERS have values, mandatory metadata elementes
         def check_required_elements(raw):
             required_headers = par.CSV_REQUIRED_HEADERS
@@ -143,6 +155,7 @@ class ValidateCSV(object):
             check_all()
 
 
+
         def validate_all():
             with open(self.csv_files[0],'r') as csv_file:
                 csv_reader = csv.DictReader(csv_file)
@@ -152,6 +165,7 @@ class ValidateCSV(object):
                     check_topiciso(raw)
                     check_accessright(raw)
                     check_solr_year(raw)
+                    check_boolean_fields(raw)
                     # check_sourcetype(raw)
                 return messages
 

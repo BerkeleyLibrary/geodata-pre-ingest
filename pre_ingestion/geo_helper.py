@@ -341,3 +341,7 @@ class GeoHelper:
             return "vector"
         GeoHelper.arcgis_message("{0} - may not existing, or maybe it is neither a GeoTIFF nor a ShapeFile".format(geofile))
         return None
+
+    @staticmethod
+    def bool_header(header):
+        return True if header.strip().endswith("_b") else False
