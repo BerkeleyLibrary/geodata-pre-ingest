@@ -80,13 +80,16 @@ class CsvGeoblacklight(object):
             str = val.strip()
             num = len(str)
             try:
+                if num == 4:
+                    return str
                 if num == 6:
                     return datetime.datetime.strptime(str,"%Y%m%d").strftime("%Y-%m")
                 if num == 8:
                     return datetime.datetime.strptime(str,"%Y%m%d").strftime("%Y-%m-%d")
             except:
-                GeoHelper.arcgis_message("{0}, 'date_s' value :{2} - in {1}, seems not valid,please check".format(self.geofile,self.arkid,str))
+                GeoHelper.arcgis_message("Warning !!!: {0}, 'date_s' value :{2} - in {1}, seems not valid,please check".format(self.geofile,self.arkid,str))
                 return str
+            GeoHelper.arcgis_message("Warning !!!: {0}, 'date_s' value :{2} - in {1}, may not valid,please check".format(self.geofile,self.arkid,str))
             return str
 
         def d_time(val):  # add validation
@@ -97,34 +100,6 @@ class CsvGeoblacklight(object):
             codes = val.split("$")
             topics = [par.isoTopic[code] for code in codes]
             return "$".join(topics)
-
-        # def corrected_original_val(header):
-        #     val = ""
-        #     if has_original_column(header): # some elements in csv files have no original elements
-        #         header_o = "{0}_o".format(header)
-        #         val = self.main_csv_raw[header_o].strip()
-        #
-        #         if len(val) > 0:
-        #             if header_o == "modified_date_dt_o" : val = d_time(val)
-        #             if header_o == "topicISO_o": val = isoTopics(val)
-        #
-        #     return val
-        #
-        # def corrected_current_val(header):
-        #     val = self.main_csv_raw[header].strip()
-        #
-        #     if len(val) > 0:
-        #         if header == "modified_date_dt" : val = d_time(val)
-        #         if header == "date_s": val = d_sub_str(val)
-        #         if header == "topicISO": val = isoTopics(val)
-        #         if header == "accessRights_s": val = val.lower().capitalize()
-        #     return val
-        #
-        # def val_from_csv(header): # string
-        #     val = corrected_current_val(header)
-        #     if len(val) == 0:
-        #         val = corrected_original_val(header)
-        #     return val
 
         def correct_val(str,header):
             val = str if str else ""
@@ -209,19 +184,6 @@ class CsvGeoblacklight(object):
         json_data['dct_identifier_sm'] = ["http://spatial.lib.berkeley.edu/viewpublic/{0}{1}".format(par.PREFIX,arkid)]
         json_data['dct_references_s'] = dc_references(arkid)
 
-
-    def _add_from_iso19139(self,json_data):
-        def iso19139_file():
-            iso19139_dir = GeoHelper.iso19139_path(self.process_path)
-            path = os.path.join(iso19139_dir,self.arkid)
-            return os.path.join(path,"iso19139.xml")
-
-        iso_19139 =iso19139_file()
-        tree =  ET.parse(iso_19139)
-        root = tree.getroot()
-        self._geoblacklight_boundary(root,json_data)
-
-
     def _add_boundary(self,json_data):
         if os.name == "nt":
             env = None
@@ -235,8 +197,6 @@ class CsvGeoblacklight(object):
                 json_data["locn_geometry"] = env
             else:
                 GeoHelper.arcgis_message("{0} - {1}: No boundary found .".format(self.geofile,self.arkid))
-
-
 
     def _raster_boundary(self):
         try:
@@ -261,25 +221,3 @@ class CsvGeoblacklight(object):
         except:
             return None
         return None
-
-
-
-    # From ISO19139
-    def _geoblacklight_boundary(self,root,json_data):
-        parent_path = "./{0}identificationInfo/{0}MD_DataIdentification/{0}extent/{0}EX_Extent/{0}geographicElement/{0}EX_GeographicBoundingBox".format("{http://www.isotc211.org/2005/gmd}")
-        east_path = "./{0}eastBoundLongitude/{1}Decimal".format("{http://www.isotc211.org/2005/gmd}","{http://www.isotc211.org/2005/gco}")
-        north_path = "./{0}northBoundLatitude/{1}Decimal".format("{http://www.isotc211.org/2005/gmd}","{http://www.isotc211.org/2005/gco}")
-        south_path = "./{0}southBoundLatitude/{1}Decimal".format("{http://www.isotc211.org/2005/gmd}","{http://www.isotc211.org/2005/gco}")
-        west_path = "./{0}westBoundLongitude/{1}Decimal".format("{http://www.isotc211.org/2005/gmd}","{http://www.isotc211.org/2005/gco}")
-
-        parent_node = root.find(parent_path)
-        if not parent_node is None:
-            E = parent_node.find(east_path).text
-            N = parent_node.find(north_path).text
-            S = parent_node.find(south_path).text
-            W = parent_node.find(west_path).text
-
-            env = "ENVELOPE({0},{1},{2},{3})".format(W,E,N,S)
-            json_data["locn_geometry"] = env
-        else:
-            GeoHelper.arcgis_message("{0} - {1}: No boundary found .".format(self.geofile,self.arkid))
