@@ -345,3 +345,10 @@ class GeoHelper:
     @staticmethod
     def bool_header(header):
         return True if header.strip().endswith("_b") else False
+
+    @staticmethod
+    def valid_date(str,format):
+        try:
+            return bool(datetime.strptime(date_str, '%Y%m%d'))
+        except ValueError:
+            return False

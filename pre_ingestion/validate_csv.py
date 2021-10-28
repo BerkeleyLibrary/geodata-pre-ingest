@@ -52,6 +52,13 @@ class ValidateCSV(object):
 
     def validate_main_csv_file(self):
         messages = []
+        arkid = raw["arkid"].strip()
+
+        def check_Modified_field(raw):
+            dt = raw['gbl_mdModified_dt'].strip()
+            if not GeoHelper.valid_date(dt,'%Y%m%d'):
+                warning_msg = "Line {2}:  {0} - '{1}': needs a Boolean value ".format(arkid,'gbl_mdModified_dt',self.main_ark_line[arkid])
+                messages.append(warning_msg)
 
         def check_boolean_fields(raw):
             headers = raw.keys()
@@ -59,7 +66,6 @@ class ValidateCSV(object):
                 if GeoHelper.bool_header(header):
                     val = raw[header].lower()
                     if not val in ["true","false"]:
-                        arkid = raw["arkid"].strip()
                         warning_msg = "Line {2}:  {0} - '{1}': needs a Boolean value ".format(arkid,header,self.main_ark_line[arkid])
                         messages.append(warning_msg)
 
@@ -70,7 +76,6 @@ class ValidateCSV(object):
             for header in required_headers:
                 val = GeoHelper.metadata_from_csv(header,raw)
                 if not GeoHelper.isNotNullorEmpty(val):
-                    arkid = raw["arkid"].strip()
                     warning_msg = "Line {2}:  {0} - '{1}': missing required value ".format(arkid,header,self.main_ark_line[arkid])
                     messages.append(warning_msg)
 
