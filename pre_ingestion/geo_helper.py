@@ -4,7 +4,7 @@ import sys
 import re
 import json
 import shutil
-import datetime
+from datetime import datetime
 import xml.dom.minidom
 import csv
 import par
@@ -349,6 +349,6 @@ class GeoHelper:
     @staticmethod
     def valid_date(str,format):
         try:
-            return bool(datetime.strptime(date_str, '%Y%m%d'))
+            return bool(datetime.strptime(str,format))
         except ValueError:
             return False

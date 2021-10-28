@@ -3,6 +3,7 @@ import os
 import sys
 import csv
 import json
+import datetime
 from geo_helper import GeoHelper
 import par
 import re
@@ -50,15 +51,19 @@ class ValidateCSV(object):
         return messages
 
 
-    def validate_main_csv_file(self):
+    def validate_main_csv_raw(self,raw):
         messages = []
-        arkid = raw["arkid"].strip()
 
-        def check_Modified_field(raw):
-            dt = raw['gbl_mdModified_dt'].strip()
+        def add_warning(raw,msg):
+            arkid = raw["arkid"].strip()
+            warning_msg = "Warning: line {0}:  {1} - {2}".format(self.main_ark_line[arkid],arkid,msg)
+            messages.append(warning_msg)
+
+        def check_modified_date_field(raw):
+            dt = raw['modified_date_dt'].strip()
             if not GeoHelper.valid_date(dt,'%Y%m%d'):
-                warning_msg = "Line {2}:  {0} - '{1}': needs a Boolean value ".format(arkid,'gbl_mdModified_dt',self.main_ark_line[arkid])
-                messages.append(warning_msg)
+                msg = "'{0}' needs format in YYYYMMDD".format('modified_date_dt')
+                add_warning(raw,msg)
 
         def check_boolean_fields(raw):
             headers = raw.keys()
@@ -66,9 +71,8 @@ class ValidateCSV(object):
                 if GeoHelper.bool_header(header):
                     val = raw[header].lower()
                     if not val in ["true","false"]:
-                        warning_msg = "Line {2}:  {0} - '{1}': needs a Boolean value ".format(arkid,header,self.main_ark_line[arkid])
-                        messages.append(warning_msg)
-
+                        msg = "'{0}': needs a Boolean value ".format(header)
+                        add_warning(raw,msg)
 
         # main csv - 1. make sure columns with header in par.CSV_REQUIRED_HEADERS have values, mandatory metadata elementes
         def check_required_elements(raw):
@@ -76,17 +80,16 @@ class ValidateCSV(object):
             for header in required_headers:
                 val = GeoHelper.metadata_from_csv(header,raw)
                 if not GeoHelper.isNotNullorEmpty(val):
-                    warning_msg = "Line {2}:  {0} - '{1}': missing required value ".format(arkid,header,self.main_ark_line[arkid])
-                    messages.append(warning_msg)
+                    msg = "'{0}': missing required value ".format(header)
+                    add_warning(raw,msg)
 
         # main csv - 2. To avoid typo in accessright element
         def check_accessright(raw):
-            arkid = raw["arkid"].strip()
             rights = ["public","restricted"]
             right = raw["accessRights_s"].strip().lower()
             if len(right) > 0 and (not right in rights):
-                warning_msg = "Line {3}:  {0} - '{1}' value should not be '{2}'.".format(arkid,"accessRights_s",right,self.main_ark_line[arkid])
-                messages.append(warning_msg)
+                msg = "'{0}' value not correct.".format("accessRights_s")
+                add_warning(raw,msg)
 
         # main csv - 3. Make sure input correct topicis code
         def check_topiciso(raw):
@@ -104,7 +107,6 @@ class ValidateCSV(object):
         # main csv - 4. Make sure Geofile work directory is the same as in main csv file. A user may move the updated CSV files around
         def check_geofile(raw):
             geofile = raw["filename"].strip()
-            arkid = raw["arkid"].strip()
             geopath = GeoHelper.geo_path_from_CSV_geofile(geofile)
             workpath = GeoHelper.work_path(self.process_path)
 
@@ -113,68 +115,72 @@ class ValidateCSV(object):
                 if os.path.isfile(geofile):
                     correct_geofile = True
                 else:
-                    messages.append("Line {1}: Missing Geofile - {0}".format(geofile,self.main_ark_line[arkid]))
+                    msg = "Missing Geofile: {0}".format(geofile)
+                    add_warning(raw,msg)
             else:
-                messages.append("Line {2}: Work Directory is different! From CSV file - {0}; Actual work directory - {1}".format(geopath,workpath,self.main_ark_line[arkid]))
+                msg = "Work Directory is different! From CSV file - {0}; Actual work directory - {1}".format(geopath,workpath)
+                add_warning(raw,msg)
             return correct_geofile
 
         # def check_sourcetype(raw):
         #     warning_msgs = self.check_default_codes(raw,par.resourceType,"resourceType")
         def check_solr_year(raw):
-            four_digit_reg = '^\d{4}$'
-            all_digit_reg = '^-?[1-9]\d*$'
-
-            column_val = raw["solrYear"]
-            arkid = raw["arkid"].strip()
-            line = self.main_ark_line[arkid]
-
             def match(reg,str):
                 return len(re.findall(reg,str)) == 1
 
-            def all_match(arr,reg):
+            def match_arr(arr,reg):
                 for str in arr:
                     if not match(reg,str):
                         return False
                 return True
 
-            def valid_all_years(years):
-                if all_match(years,all_digit_reg):
+            def valid_full_years(years):
+                reg = '^-?[1-9]\d*$'
+                if match_arr(years,reg):
                     return True
                 else:
-                    messages.append("Line {0}: solrYear has an invalid year.".format(line))
+                    msg = "'solrYear' has an invalid year."
+                    add_warning(raw,msg)
                     return False
 
             def valid_four_digit_years(years):
-                if  not all_match(years,four_digit_reg):
-                    messages.append("Line {0}: solrYear is not a 4 digital year.".format(line))
-
+                reg = '^\d{4}$'
+                if  not match_arr(years,reg):
+                    msg = "'solrYear'is a valid year but not a 4 digital year."
+                    add_warning(raw,msg)
 
             def check_all():
-                if column_val:
-                    years = [val.strip() for val in column_val.split("$")]
-                    if valid_all_years(years):
+                solr_years = raw["solrYear"]
+                if solr_years:
+                    years = [yr.strip() for yr in solr_years.split("$")]
+                    if valid_full_years(years):
                         valid_four_digit_years(years)
+                    else:
+                        msg = "'solrYear' is not valid."
+                        add_warning(raw,msg)
                 else:
-                    messages.append("Line {0}: solrYear has no value.".format(line))
-
-            check_all()
-
+                    msg = "'solrYear' has no value."
+                    add_warning(raw,msg)
 
 
-        def validate_all():
-            with open(self.csv_files[0],'r') as csv_file:
-                csv_reader = csv.DictReader(csv_file)
-                for raw in csv_reader:  # should we check ISOTopic ?
-                    check_geofile(raw)
-                    check_required_elements(raw)
-                    check_topiciso(raw)
-                    check_accessright(raw)
-                    check_solr_year(raw)
-                    check_boolean_fields(raw)
-                    # check_sourcetype(raw)
-                return messages
+        check_geofile(raw)
+        check_required_elements(raw)
+        check_topiciso(raw)
+        check_accessright(raw)
+        check_solr_year(raw)
+        check_boolean_fields(raw)
+        check_modified_date_field(raw)
+        # check_sourcetype(raw)
+        return messages
 
-        return validate_all()
+    def validate_main_csv_file(self):
+        messages = []
+        with open(self.csv_files[0],'r') as csv_file:
+            csv_reader = csv.DictReader(csv_file)
+            for raw in csv_reader:  # should we check ISOTopic ?
+                raw_msgs = self.validate_main_csv_raw(raw)
+                if len(raw_msgs) > 0:  messages.extend(raw_msgs)
+        return messages
 
 
     def validate_resp_update_csv_file(self):
