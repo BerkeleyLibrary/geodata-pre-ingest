@@ -16,9 +16,8 @@ if os.name == "nt":
 # 1) CSV
 # 2) Default values
 # 3) Drived from arkid
-# 4) Extracted from iso19139
-# 5) From obj - gotten from reponsible party csv file
-# 6) Todo: add multiple resource download after geoblacklight v4
+# 4) From obj - gotten from reponsible party csv file
+# 5) Todo: add multiple resource download after geoblacklight v4
 
 class CsvGeoblacklight(object):
     def __init__(self,raw_obj,process_path):
@@ -109,7 +108,7 @@ class CsvGeoblacklight(object):
                 if header == "date_s": val = d_sub_str(val)
                 if header == "topicISO": val = isoTopics(val)
                 if header == "accessRights_s": val = val.lower().capitalize()
-                
+
             return val
 
         def main_csv_column_val(header):

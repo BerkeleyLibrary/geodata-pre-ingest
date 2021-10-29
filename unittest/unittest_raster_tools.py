@@ -158,10 +158,9 @@ class TranformGeoblacklightTestCase(unittest.TestCase):
         valid_updated_csv = validate_csv.ValidateCSV(raster_export_process_path)
         if valid_updated_csv.updated_csv_files_existed():
             if valid_updated_csv.updated_csv_files_valid():
-                if valid_updated_csv.iso19139_files_existed():
-                    updated_csv_files = geo_helper.GeoHelper.dest_csv_files_updated(raster_export_process_path)
-                    csv_collection = csv_iso_collection.CsvIsoCollection(updated_csv_files).csv_collection()
-                    self.csvtransform = csv_tranform.CsvTransform(csv_collection,raster_export_process_path)
+                updated_csv_files = geo_helper.GeoHelper.dest_csv_files_updated(raster_export_process_path)
+                csv_collection = csv_iso_collection.CsvIsoCollection(updated_csv_files).csv_collection()
+                self.csvtransform = csv_tranform.CsvTransform(csv_collection,raster_export_process_path)
     def runTest(self):
         self.csvtransform.transform_geoblacklight()
         geoblacklight_file = os.path.join(raster_export_geoblacklight,"s7w117","geoblacklight.json")

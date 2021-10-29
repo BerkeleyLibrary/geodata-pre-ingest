@@ -15,13 +15,12 @@ def main():
 
         if valid_updated_csv.updated_csv_files_existed():
             if valid_updated_csv.updated_csv_files_valid():
-                if valid_updated_csv.iso19139_files_existed():
-                    updated_csv_files = geo_helper.GeoHelper.dest_csv_files_updated(process_path)
-                    csv_collection = csv_iso_collection.CsvIsoCollection(updated_csv_files).csv_collection()
-                    csvtransform = csv_tranform.CsvTransform(csv_collection,process_path)
-                    csvtransform.transform_geoblacklight()
-                    if os.name == "nt":
-                        arcpy.RefreshCatalog(geoblacklight_dir)
+                updated_csv_files = geo_helper.GeoHelper.dest_csv_files_updated(process_path)
+                csv_collection = csv_iso_collection.CsvIsoCollection(updated_csv_files).csv_collection()
+                csvtransform = csv_tranform.CsvTransform(csv_collection,process_path)
+                csvtransform.transform_geoblacklight()
+                if os.name == "nt":
+                    arcpy.RefreshCatalog(geoblacklight_dir)
 
     except Exception, e:
         txt = "Code exception: {0}  ;   {1}".format(__file__,str(e))
