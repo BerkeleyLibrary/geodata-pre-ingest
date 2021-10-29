@@ -293,14 +293,15 @@ class ValidateCSV(object):
             GeoHelper.arcgis_message(par.PASS_CSV_VALIDATION)
             return True
 
-
     def updated_csv_files_existed(self):
-        existed = True
-        if len(self.csv_files) <> 2:
-            base
-            GeoHelper.arcgis_message("Missing updated CSV file in directory '{0}'".format(updated_csv_files_path))
-            existed = False
-        return existed
+        existing = True
+        for file in self.csv_files:
+            if not os.path.isfile(file):
+                existing = False
+                csv_updated_dir = GeoHelper.csv_path_updated(self.process_path)
+                GeoHelper.arcgis_message("Warning: Missing updated CSV file at '{0}'".format(csv_updated_dir))
+                break
+        return existing
 
 
     #### Not CSV file - other validations ####
