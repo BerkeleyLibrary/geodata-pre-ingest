@@ -40,13 +40,25 @@ class ValidateCSV(object):
         self.arkids = arkids
 
 
-    def check_default_codes(self,arkid,column_val,code_list,header,line):
+    # def check_default_codes(self,arkid,column_val,code_list,header,line):
+    #     messages = []
+    #     if len(column_val) > 0:
+    #         vals = [txt.strip() for txt in column_val.split("$")]
+    #         for val in vals:
+    #             if not int(val) in code_list:
+    #                 warning_msg = "Line {3}: {0} - column '{1}' has incorrect code value -- '{2}' ".format(arkid,header,val,line)
+    #                 messages.append(warning_msg)
+    #     return messages
+
+    def check_default_codes(self,raw,code_list,header):
         messages = []
+        column_val = raw[header].strip()
+        arkid = raw["arkid"].strip()
         if len(column_val) > 0:
             vals = [txt.strip() for txt in column_val.split("$")]
             for val in vals:
                 if not int(val) in code_list:
-                    warning_msg = "Line {3}: {0} - column '{1}' has incorrect code value -- '{2}' ".format(arkid,header,val,line)
+                    warning_msg = "Warning: line {0}: - '{1}' has incorrect code value -- '{2}' ".format(self.main_ark_line[arkid],header,val)
                     messages.append(warning_msg)
         return messages
 
@@ -94,15 +106,10 @@ class ValidateCSV(object):
         # main csv - 3. Make sure input correct topicis code
         def check_topiciso(raw):
             codes = range(1,20)
-            arkid = raw["arkid"].strip()
-            column_val = raw["topicISO"].strip()
-            column_val_o = raw["topicISO_o"].strip()
-
-            warning_msgs = self.check_default_codes(arkid,column_val,codes,"topicISO",self.main_ark_line[arkid])
-            warning_msgs_o = self.check_default_codes(arkid,column_val_o,codes,"topicISO_o",self.main_ark_line[arkid])
-            warning_msgs.extend(warning_msgs_o)
-            if len(warning_msgs)>0:
-                messages.extend(warning_msgs)
+            warning_msgs = self.check_default_codes(raw,codes,"topicISO")
+            warning_msgs_o = self.check_default_codes(raw,codes,"topicISO_o")
+            messages.extend(warning_msgs)
+            messages.extend(warning_msgs_o)
 
         # main csv - 4. Make sure Geofile work directory is the same as in main csv file. A user may move the updated CSV files around
         def check_geofile(raw):
