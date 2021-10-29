@@ -1,0 +1,31 @@
+{
+    "dct_accessRights_s":"Public",
+    "dct_creator_sm":[
+        "me"
+    ],
+    "dct_format_s":"Shape File",
+    "dct_identifier_sm":[
+        "http://spatial.lib.berkeley.edu/viewpublic/berkeley-s7w117"
+    ],
+    "dct_language_sm":[
+        "eng"
+    ],
+    "dct_publisher_sm":[
+        "me"
+    ],
+    "dct_references_s":"{\"http://www.opengis.net/def/serviceType/ogc/wfs\":\"https://geoservices.lib.berkeley.edu/geoserver/wfs\",\"http://www.opengis.net/def/serviceType/ogc/wms\":\"https://geoservices.lib.berkeley.edu/geoserver/wms\",\"http://www.isotc211.org/schemas/2005/gmd/\":\"https://spatial.lib.berkeley.edu/metadata/berkeley-s7w117/iso19139.xml\",\"http://schema.org/downloadUrl\":\"https://spatial.lib.berkeley.edu/public/berkeley-s7w117/data.zip\"}",
+    "dct_title_s":"1950prj_city",
+    "gbl_indexYear_im":[
+        "2011",
+        "2019",
+        "1998"
+    ],
+    "gbl_mdModified_dt":"2021-08-18T23:34:35.206Z",
+    "gbl_mdVersion_s":"Aardvark",
+    "gbl_resourceType_sm":[
+        "Point Data"
+    ],
+    "gbl_wxsIdentifier_s":"s7w117",
+    "id":"berkeley-s7w117",
+    "schema_provider_s":"Berkeley"
+}

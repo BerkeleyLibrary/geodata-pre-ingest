@@ -112,14 +112,8 @@ class CsvGeoblacklight(object):
             return val
 
         def main_csv_column_val(header):
-            input_val = self.main_csv_raw[header].strip()
-            header_o = "{0}_o".format(header)
-            original_val = self.main_csv_raw[header_o].strip() if header_o in self.main_csv_headers else None
-            new_val = original_val if (len(input_val)==0 and not original_val) else input_val
-
-            return correct_val(new_val,header)
-
-
+            val = GeoHelper.metadata_from_csv(header,self.main_csv_raw)
+            return correct_val(val,header)
 
         def captilize_str(str):
         	noCapWords = ["and", "is", "it", "or","if"]

@@ -245,6 +245,8 @@ PASS_CSV_VALIDATION = "*** The updated CSV files are valid ***"
 
 FILES_NOT_MOVED = "*** Files not moved to work batch - name not good,please check, or move manually."
 
+REQUIRED_FIELD = "Required field '{0}' - missing value."
+
 # Keys are used as CSV headers of responsible party csv file
 responsibleparty_elements = {
     "contact_name": {
@@ -400,8 +402,7 @@ transform_elements = {
     }
 
 
-# required elements - header names
-CSV_REQUIRED_HEADERS = ["title_s","accessRights_s","modified_date_dt","resourceClass"] # "solrYear" is validated separatedly
+# required elements - header names : "title_s",  "solrYear",,"accessRights_s","modified_date_dt","resourceClass" 
 
 ResourceClass_Codes = [
                         "collections",

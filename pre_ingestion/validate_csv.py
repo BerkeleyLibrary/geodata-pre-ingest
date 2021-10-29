@@ -85,17 +85,17 @@ class ValidateCSV(object):
             warning_msg = "Warning: line {0}:  {1} - {2}".format(self.main_ark_line[arkid],arkid,msg)
             messages.append(warning_msg)
 
-        def check_empty_field(val,header):
-            if not GeoHelper.isNotNullorEmpty(val):
-                msg = "'{0}': missing required value ".format(header)
-                add_warning(msg)
-                return True
-            return False
+        def is_empty(val):
+            return True if not GeoHelper.isNotNullorEmpty(val) else False
 
         def check_modified_date_field():
-            dt = raw['modified_date_dt'].strip()
-            if not GeoHelper.valid_date(dt,'%Y%m%d'):
-                msg = "'{0}' needs format in YYYYMMDD".format('modified_date_dt')
+            dt = GeoHelper.metadata_from_csv('modified_date_dt',raw)
+            if GeoHelper.isNotNullorEmpty(dt):
+                if not GeoHelper.valid_date(dt,'%Y%m%d'):
+                    msg = "Field '{0}' needs format in YYYYMMDD".format('modified_date_dt')
+                    add_warning(msg)
+            else:
+                msg = par.REQUIRED_FIELD.format("modified_date_dt")
                 add_warning(msg)
 
         def check_boolean_fields():
@@ -107,19 +107,22 @@ class ValidateCSV(object):
                         msg = "'{0}': needs a Boolean value ".format(header)
                         add_warning(msg)
 
-        # main csv - 1. make sure columns with header in par.CSV_REQUIRED_HEADERS have values, mandatory metadata elementes
-        def check_required_elements():
-            required_headers = par.CSV_REQUIRED_HEADERS
-            for header in required_headers:
-                val = GeoHelper.metadata_from_csv(header,raw)
-                is_empty = check_empty_field(val,header)
+        def check_title_s():
+            val = GeoHelper.metadata_from_csv("title_s",raw)
+            if is_empty(val):
+                msg = par.REQUIRED_FIELD.format("title_s")
+                add_warning(msg)
 
         # main csv - 2. To avoid typo in accessright element
         def check_accessright():
             rights = ["public","restricted"]
             right = raw["accessRights_s"].strip().lower()
-            if len(right) > 0 and (not right in rights):
-                msg = "'{0}' value not correct.".format("accessRights_s")
+            if GeoHelper.isNotNullorEmpty(right):
+                if len(right) > 0 and (not right in rights):
+                    msg = "'{0}' value not correct.".format("accessRights_s")
+                    add_warning(msg)
+            else:
+                msg = par.REQUIRED_FIELD.format("accessRights_s")
                 add_warning(msg)
 
         # main csv - 3. Make sure input correct topicis code
@@ -141,7 +144,7 @@ class ValidateCSV(object):
                     correct_geofile = True
                 else:
                     msg = "Missing Geofile: {0}".format(geofile)
-                    add_warning(raw,msg)
+                    add_warning(msg)
             else:
                 msg = "Work Directory is different! From CSV file - {0}; Actual work directory - {1}".format(geopath,workpath)
                 add_warning(msg)
@@ -150,10 +153,11 @@ class ValidateCSV(object):
 
         def check_resourceClass():
             val = raw["resourceClass"]
-            is_empty = check_empty_field(val,"resourceClass")
-            if not is_empty:
+            if  is_empty(val):
+                msg = par.REQUIRED_FIELD.format("resourceClass")
+                add_warning(msg)
+            else:
                 self.check_default_codes(raw,par.ResourceClass_Codes,"resourceClass")
-
 
         def check_solr_year():
             def match(reg,str):
@@ -174,27 +178,28 @@ class ValidateCSV(object):
                     add_warning(msg)
                     return False
 
-            def valid_four_digit_years(years):
+            def messaging_four_digit_years(years): # not validating, just output message
                 reg = '^\d{4}$'
                 if  not match_arr(years,reg):
-                    msg = "'solrYear'is a valid year but not a 4 digital year."
-                    add_warning(msg)
+                    msg = "Message: 'solrYear'is a valid year but not a 4 digital year."
+                    GeoHelper.arcgis_message(msg)
 
-            def check_all():
-                solr_years = raw["solrYear"]
-                if solr_years:
+            def check_all_years():
+                solr_years = raw["solrYear"].strip()
+                if is_empty(solr_years):
+                    msg = par.REQUIRED_FIELD.format("solrYear")
+                    add_warning(msg)
+                else:
                     years = [yr.strip() for yr in solr_years.split("$")]
                     if valid_full_years(years):
-                        valid_four_digit_years(years)
+                        messaging_four_digit_years(years)
                     else:
                         msg = "'solrYear' is not valid."
                         add_warning(msg)
-                else:
-                    msg = "'solrYear' has no value."
-                    add_warning(msg)
+            check_all_years()
 
         check_geofile()
-        check_required_elements()
+        check_title_s()
         check_topiciso()
         check_accessright()
         check_solr_year()
@@ -223,7 +228,7 @@ class ValidateCSV(object):
 
         def add_warning(msg):
             arkid = raw["arkid"].strip()
-            warning_msg = "Warning: arkid {0} in Resp CSV: - {2}".format(arkid,msg)
+            warning_msg = "Warning: arkid {0} in Resp CSV: - {1}".format(arkid,msg)
             messages.append(warning_msg)
 
         # resp_csv - 1. only role 006 can have "individual value"
@@ -233,10 +238,11 @@ class ValidateCSV(object):
                 add_warning(msg)
 
         def ensure_006_010_have_values():
-            if (role == "006") and len(individual) == 0  and len(organization) == 0:
+            if role == "006" and len(individual) == 0  and len(organization) == 0:
                 msg = "Role '006' should have a value in individual or organization."
-                add_warning(raw,msg)
-            if (role == "010") and len(organization) == 0:
+                print msg
+                add_warning(msg)
+            if role == "010" and len(organization) == 0:
                 msg = "Role '010' should have a value in organization."
                 add_warning(msg)
 

@@ -1,0 +1,7 @@
+from,individual,format_s,arkid,filename,role,contact_name,position,organization,contact_info,email,address_type,address,city,state,zip,country,phone_no,fax_no,hours,instruction
+--,,Shape File,s7w117,C:\Process\Raster Batch\Work\1950prj_city\1950prj_city.shp,6,,,me,,,,,,,,,,,,
+--,,Shape File,s7w117,C:\Process\Raster Batch\Work\1950prj_city\1950prj_city.shp,10,,,me,,,,,,,,,,,,
+--,,Shape File,a7gt36,C:\Process\Raster Batch\Work\1950prj_county\1950prj_county.shp,6,,,me,,,,,,,,,,,,
+--,,Shape File,a7gt36,C:\Process\Raster Batch\Work\1950prj_county\1950prj_county.shp,10,,,me,,,,,,,,,,,,
+--,,Shape File,b8gq99,C:\Process\Raster Batch\Work\1950prj_prov\1950prj_prov.shp,6,,,me,,,,,,,,,,,,
+--,,Shape File,b8gq99,C:\Process\Raster Batch\Work\1950prj_prov\1950prj_prov.shp,10,,,me,,,,,,,,,,,,

@@ -15,7 +15,7 @@ from pre_ingestion import csv_tranform,assign_arks,geodata_workspace,arcgis_iso_
                           validate_csv,validate_geodata,check_projection,zip_data,geo_helper,par,\
                           arcgis_iso_collection,csv_iso_collection,merritt
 geo_ext = '.shp'
-dirname = os.path.dirname(os.path.abspath(__file__)).replace("unittest","test_data")
+dirname = os.path.dirname(os.path.abspath(__file__)).replace("unittest","unittest_data")
 vector_original_source = os.path.join(dirname,"vector_data","vector_original_source")
 vector_process_path = os.path.join(dirname,"vector_data","vector")
 vector_ark_file = os.path.join(vector_process_path ,"arks.txt")

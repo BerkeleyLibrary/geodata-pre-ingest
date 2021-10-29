@@ -15,7 +15,7 @@ from pre_ingestion import csv_tranform,assign_arks,geodata_workspace,arcgis_iso_
                           validate_csv,validate_geodata,check_projection,zip_data,geo_helper,par,\
                           arcgis_iso_collection,csv_iso_collection,merritt
 geo_ext = '.tif'
-dirname = os.path.dirname(os.path.abspath(__file__)).replace("unittest","test_data")
+dirname = os.path.dirname(os.path.abspath(__file__)).replace("unittest","unittest_data")
 raster_original_source = os.path.join(dirname,"raster_data","raster_original_source")
 raster_process_path = os.path.join(dirname,"raster_data","raster")
 raster_ark_file = os.path.join(raster_process_path ,"arks.txt")

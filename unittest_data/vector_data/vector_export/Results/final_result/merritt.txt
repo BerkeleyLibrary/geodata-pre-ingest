@@ -1,0 +1,4 @@
+fileUrl | hashAlgorithm | hashValue | fileSize | fileName | primaryIdentifier | creator | title | date
+https://spatial.lib.berkeley.edu/public/berkeley-s7w117/data.zip|MD5|301b6dfc7f16e69122544e1190f898bc|759922|Data.zip|ark:/28722/s7w117|Berkeley|new1950prj_prov1 ark:/28722/s7w117|2021-10-29
+https://spatial.lib.berkeley.edu/UCB/berkeley-a7gt36/data.zip|MD5|cf4787fd110c3bba946c9a413fc05790|2001485|Data.zip|ark:/28722/a7gt36|All China Marketing Research Co., Ltd.|1950prj_city ark:/28722/a7gt36|2021-10-29
+https://spatial.lib.berkeley.edu/public/berkeley-b8gq99/data.zip|MD5|46f5ec59b6350f0f8f86b4e3ffdfb2cc|370305|Data.zip|ark:/28722/b8gq99|Susan|fake name ark:/28722/b8gq99|2021-10-29
