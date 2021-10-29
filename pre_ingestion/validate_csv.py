@@ -30,7 +30,6 @@ class ValidateCSV(object):
         ark_line_dic = {}
         arkids = []
         with open(self.csv_files[0], 'r') as csvfile:
-            print self.csv_files[0]
             csv_reader = csv.DictReader(csvfile)
             line_num = 1
             for main_csv_raw in csv_reader:
@@ -44,7 +43,7 @@ class ValidateCSV(object):
         self.main_ark_line = ark_line_dic
         self.arkids = arkids
 
-    def prepare_resp_csv_validation(self):
+    def prepare_resp_csv_validation(self): # no line-ark dic, multiple lines belong to one ark
         arkids_publisher = []
         arkids_originator = []
         responsible_part_csvfile = self.csv_files[1]
@@ -53,7 +52,6 @@ class ValidateCSV(object):
             line_num = 0
             for raw in csv_reader:
                 arkid = raw["arkid"].strip()
-
                 if len(arkid) == 0:
                     GeoHelper.arcgis_message(" warning: line {1}:  in '{0}' has no arkid".format(self.csv_files[1]),str(line_num))
                 else:
@@ -66,15 +64,14 @@ class ValidateCSV(object):
         self.resp_originator_arkids = arkids_originator
 
 
-
     def check_default_codes(self,raw,code_list,header):
         messages = []
         column_val = raw[header].strip()
         arkid = raw["arkid"].strip()
         if len(column_val) > 0:
-            vals = [txt.strip() for txt in column_val.split("$")]
+            vals = [txt.strip().lower() for txt in column_val.split("$")]
             for val in vals:
-                if not int(val) in code_list:
+                if not val in code_list:
                     warning_msg = "Warning: line {0}: - '{1}' has incorrect code value -- '{2}' ".format(self.main_ark_line[arkid],header,val)
                     messages.append(warning_msg)
         return messages
@@ -87,6 +84,13 @@ class ValidateCSV(object):
             arkid = raw["arkid"].strip()
             warning_msg = "Warning: line {0}:  {1} - {2}".format(self.main_ark_line[arkid],arkid,msg)
             messages.append(warning_msg)
+
+        def check_empty_field(val,header):
+            if not GeoHelper.isNotNullorEmpty(val):
+                msg = "'{0}': missing required value ".format(header)
+                add_warning(raw,msg)
+                return True
+            return False
 
         def check_modified_date_field(raw):
             dt = raw['modified_date_dt'].strip()
@@ -108,9 +112,7 @@ class ValidateCSV(object):
             required_headers = par.CSV_REQUIRED_HEADERS
             for header in required_headers:
                 val = GeoHelper.metadata_from_csv(header,raw)
-                if not GeoHelper.isNotNullorEmpty(val):
-                    msg = "'{0}': missing required value ".format(header)
-                    add_warning(raw,msg)
+                is_empty = check_empty_field(val,header)
 
         # main csv - 2. To avoid typo in accessright element
         def check_accessright(raw):
@@ -122,7 +124,7 @@ class ValidateCSV(object):
 
         # main csv - 3. Make sure input correct topicis code
         def check_topiciso(raw):
-            codes = range(1,20)
+            codes = [str(c) for c in range(1,20)]
             warning_msgs = self.check_default_codes(raw,codes,"topicISO")
             warning_msgs_o = self.check_default_codes(raw,codes,"topicISO_o")
             messages.extend(warning_msgs)
@@ -133,7 +135,6 @@ class ValidateCSV(object):
             geofile = raw["filename"].strip()
             geopath = GeoHelper.geo_path_from_CSV_geofile(geofile)
             workpath = GeoHelper.work_path(self.process_path)
-
             correct_geofile = False
             if geopath == workpath:
                 if os.path.isfile(geofile):
@@ -146,8 +147,14 @@ class ValidateCSV(object):
                 add_warning(raw,msg)
             return correct_geofile
 
-        # def check_sourcetype(raw):
-        #     warning_msgs = self.check_default_codes(raw,par.resourceType,"resourceType")
+
+        def check_resourceClass(raw):
+            val = raw["resourceClass"]
+            is_empty = check_empty_field(val,"resourceClass")
+            if not is_empty:
+                self.check_default_codes(raw,par.ResourceClass_Codes,"resourceClass")
+
+
         def check_solr_year(raw):
             def match(reg,str):
                 return len(re.findall(reg,str)) == 1
@@ -186,7 +193,6 @@ class ValidateCSV(object):
                     msg = "'solrYear' has no value."
                     add_warning(raw,msg)
 
-
         check_geofile(raw)
         check_required_elements(raw)
         check_topiciso(raw)
@@ -194,6 +200,7 @@ class ValidateCSV(object):
         check_solr_year(raw)
         check_boolean_fields(raw)
         check_modified_date_field(raw)
+        check_resourceClass(raw)
         # check_sourcetype(raw)
         return messages
 
@@ -235,7 +242,7 @@ class ValidateCSV(object):
 
         # resp_csv - 4. Make sure input correct role code
         def ensure_correct_role_code():
-            codes = range(1,12)
+            codes = [str(c) for c in range(1,12)]
             msg = self.check_default_codes(raw,codes,"role")
             messages.extend(msg)
 
@@ -256,8 +263,6 @@ class ValidateCSV(object):
         return messages
 
 
-
-
     def validate_required_roles_in_resp_csv(self):
         messeges = []
         for arkid in self.arkids: # main csv file: one geofile - one arkid
@@ -268,7 +273,6 @@ class ValidateCSV(object):
                 msg = "Warning: Responsible party, {0} - missing 'Originator (006)' role".format(arkid)
                 messeges.append(msg)
         return messeges
-
 
 
     def updated_csv_files_valid(self):

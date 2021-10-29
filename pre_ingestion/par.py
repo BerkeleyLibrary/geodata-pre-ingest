@@ -401,8 +401,17 @@ transform_elements = {
 
 
 # required elements - header names
-CSV_REQUIRED_HEADERS = ["title_s","accessRights_s","modified_date_dt"] # "solrYear" is validated separatedly
+CSV_REQUIRED_HEADERS = ["title_s","accessRights_s","modified_date_dt","resourceClass"] # "solrYear" is validated separatedly
 
+ResourceClass_Codes = [
+                        "collections",
+                        "datasets",
+                        "imagery",
+                        "maps",
+                        "web services",
+                        "websites",
+                        "other"
+                        ]
 resourceType = [
         "LiDAR",
         "Line data",
