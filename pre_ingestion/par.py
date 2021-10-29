@@ -239,10 +239,6 @@ MISSING_CVS_VALUES = '*** Found invalid metadata in this csv file: {0}'
 
 INCORRECT_ROLE_FOR_INDIVIDUAL = 'Line {2}: {0} - Role "{1}" should not have individual. Only role 6 could have individual'
 
-MISSING_ROLE =  'Line {2}: Responsible party, {0} - missing "{1}" role'
-
-EMPTY_ROLE =  'Line {2}: {0} - Requred role "{1}" has no value'
-
 PASS_PROJECTION_VALIDATION = "*** All projections are valid ***"
 
 PASS_CSV_VALIDATION = "*** The updated CSV files are valid ***"

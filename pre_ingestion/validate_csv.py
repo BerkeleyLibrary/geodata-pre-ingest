@@ -18,7 +18,12 @@ class ValidateCSV(object):
         self.process_path = process_path
         self.arkids = []
         self.main_ark_line = {}
+
+        self.resp_publisher_arkids = []
+        self.resp_originator_arkids = []
+
         self.prepare_main_csv_validation()
+        self.prepare_resp_csv_validation()
 
 
     def prepare_main_csv_validation(self):
@@ -32,23 +37,35 @@ class ValidateCSV(object):
                 arkid = main_csv_raw["arkid"].strip()
                 line_num += 1
                 if len(arkid) == 0:
-                    GeoHelper.arcgis_message(" Line {1}:  in '{0}' has no arkid".format(self.csv_files[0]),str(line_num))
+                    GeoHelper.arcgis_message(" warning: line {1}:  in '{0}' has no arkid".format(self.csv_files[0]),str(line_num))
                 else:
                     arkids.append(arkid)
                     ark_line_dic[arkid] = str(line_num)
         self.main_ark_line = ark_line_dic
         self.arkids = arkids
 
+    def prepare_resp_csv_validation(self):
+        arkids_publisher = []
+        arkids_originator = []
+        responsible_part_csvfile = self.csv_files[1]
+        with open(responsible_part_csvfile, 'r') as csvfile:
+            csv_reader = csv.DictReader(csvfile)
+            line_num = 0
+            for raw in csv_reader:
+                arkid = raw["arkid"].strip()
 
-    # def check_default_codes(self,arkid,column_val,code_list,header,line):
-    #     messages = []
-    #     if len(column_val) > 0:
-    #         vals = [txt.strip() for txt in column_val.split("$")]
-    #         for val in vals:
-    #             if not int(val) in code_list:
-    #                 warning_msg = "Line {3}: {0} - column '{1}' has incorrect code value -- '{2}' ".format(arkid,header,val,line)
-    #                 messages.append(warning_msg)
-    #     return messages
+                if len(arkid) == 0:
+                    GeoHelper.arcgis_message(" warning: line {1}:  in '{0}' has no arkid".format(self.csv_files[1]),str(line_num))
+                else:
+                    role = raw["role"].strip().zfill(3)
+                    if role == "010":
+                        arkids_publisher.append(arkid)
+                    if role == "006":
+                        arkids_originator.append(arkid)
+        self.resp_publisher_arkids = arkids_publisher
+        self.resp_originator_arkids = arkids_originator
+
+
 
     def check_default_codes(self,raw,code_list,header):
         messages = []
@@ -180,6 +197,7 @@ class ValidateCSV(object):
         # check_sourcetype(raw)
         return messages
 
+
     def validate_main_csv_file(self):
         messages = []
         with open(self.csv_files[0],'r') as csv_file:
@@ -190,85 +208,67 @@ class ValidateCSV(object):
         return messages
 
 
-    def validate_resp_update_csv_file(self):
-        resp_msg = []
-        arkids_with_publisher = []
-        arkids_with_originator = []
-        ark_line = {}
+    def validate_resp_raw(self,raw):
+        messages = []
+        role = raw["role"].strip().zfill(3)
+        individual = raw["individual"].strip()
+        organization = raw["organization"].strip()
 
-        def ark_category(arkid,role):
-            if role == "010":
-                arkids_with_publisher.append(arkid)
-            if role == "006":
-                arkids_with_originator.append(arkid)
+        def add_warning(raw,msg):
+            arkid = raw["arkid"].strip()
+            warning_msg = "Warning: arkid {0} in Resp CSV: - {2}".format(arkid,msg)
+            messages.append(warning_msg)
 
         # resp_csv - 1. only role 006 can have "individual value"
-        def only_role_006_has_individual(arkid,role,individual):
+        def only_role_006_has_individual():
             if len(individual) > 0 and role <> "006":
-                msg = par.INCORRECT_ROLE_FOR_INDIVIDUAL.format(arkid,role,ark_line[arkid])
-                resp_msg.append(msg)
+                msg = "'{0}' should not have individual. Only role 6 could have individual".format(role)
+                add_warning(raw,msg)
 
-        def ensure_006_010_have_values(arkid,role,individual,organization):
-            invlid_originator_value = (role == "006") and len(individual) == 0  and len(organization) == 0
-            invlid_publisher_value = (role == "010") and len(organization) == 0
-            if invlid_originator_value or invlid_publisher_value:
-                msg = par.EMPTY_ROLE.format(arkid,role,ark_line[arkid])
-                resp_msg.append(msg)
-
-        def check_missing_roles(role_msg,role_arks):
-            messeges = []
-            if len(role_arks) > 0:
-                for arkid in self.arkids: # main csv file: one geofile - one arkid
-                    if not arkid in role_arks:
-                        msg = par.MISSING_ROLE.format(arkid,role_msg,ark_line[arkid])
-                        messeges.append(msg)
-            return messeges
-
-        # resp_csv - 3. Each arkid (geofile) may have multiple lines in responsible table, but each Geofile(arkid) should at least have a publisher and a originator
-        def ensure_required_roles_existed():
-            msgs1 = check_missing_roles("Publisher (010)",arkids_with_publisher)
-            resp_msg.extend(msgs1)
-
-            msgs2 = check_missing_roles("Originator (006)",arkids_with_originator)
-            resp_msg.extend(msgs2)
+        def ensure_006_010_have_values():
+            if (role == "006") and len(individual) == 0  and len(organization) == 0:
+                msg = "Role '006' should have a value in individual or organization."
+                add_warning(raw,msg)
+            if (role == "010") and len(organization) == 0:
+                msg = "Role '010' should have a value in organization."
+                add_warning(raw,msg)
 
         # resp_csv - 4. Make sure input correct role code
-        def ensure_correct_role_code(arkid,role_val):
+        def ensure_correct_role_code():
             codes = range(1,12)
-            msg = self.check_default_codes(arkid,role_val,codes,"role",ark_line[arkid])
-            if len(msg)>0:
-                resp_msg.extend(msg)
+            msg = self.check_default_codes(raw,codes,"role")
+            messages.extend(msg)
 
-        def prepare_validation():
-            responsible_part_csvfile = self.csv_files[1]
-            with open(responsible_part_csvfile, 'r') as csvfile:
-                csv_reader = csv.DictReader(csvfile)
-                line_num = 0
-                for raw in csv_reader:
-                    arkid = raw["arkid"].strip()
-                    role = raw["role"].strip().zfill(3)
-                    line_num += 1
-                    ark_line[arkid] = str(line_num)
-                    ark_category(arkid,role)
+        ensure_correct_role_code()
+        only_role_006_has_individual()
+        ensure_006_010_have_values()
+        return messages
 
-        def validate_all():
-            prepare_validation()
-            ensure_required_roles_existed()
-            responsible_part_csvfile = self.csv_files[1]
-            with open(responsible_part_csvfile, 'r') as csvfile:
-                csv_reader = csv.DictReader(csvfile)
-                for raw in csv_reader:
-                    arkid = raw["arkid"].strip()
-                    role = raw["role"].strip().zfill(3)
-                    individual = raw["individual"].strip()
-                    organization = raw["organization"].strip()
 
-                    ensure_correct_role_code(arkid,role)
-                    only_role_006_has_individual(arkid,role,individual)
-                    ensure_006_010_have_values(arkid,role,individual,organization)
-            return resp_msg
+    def validate_resp_csv_file(self):
+        messages = []
+        responsible_part_csvfile = self.csv_files[1]
+        with open(responsible_part_csvfile, 'r') as csvfile:
+            csv_reader = csv.DictReader(csvfile)
+            for raw in csv_reader:
+                resp_msgs = self.validate_resp_raw(raw)
+                messages.extend(resp_msgs)
+        return messages
 
-        return validate_all()
+
+
+
+    def validate_required_roles_in_resp_csv(self):
+        messeges = []
+        for arkid in self.arkids: # main csv file: one geofile - one arkid
+            if not arkid in self.resp_publisher_arkids:
+                msg = "Warning: Responsible party, {0} - missing 'Publisher (010)' role".format(arkid)
+                messeges.append(msg)
+            if not arkid in self.resp_originator_arkids:
+                msg = "Warning: Responsible party, {0} - missing 'Originator (006)' role".format(arkid)
+                messeges.append(msg)
+        return messeges
+
 
 
     def updated_csv_files_valid(self):
@@ -276,7 +276,9 @@ class ValidateCSV(object):
             if ls > 0: GeoHelper._print_files_txt(ls,par.MISSING_CVS_VALUES.format(file))
 
         msg_list_main = self.validate_main_csv_file()
-        msg_list_resp =  self.validate_resp_update_csv_file()
+        msg_list_resp =  self.validate_resp_csv_file()
+        msg_list_resp_missing_roles = self.validate_required_roles_in_resp_csv()
+        msg_list_resp.extend(msg_list_resp_missing_roles)
         msg_list = msg_list_main + msg_list_resp
 
         if len(msg_list) > 0:
