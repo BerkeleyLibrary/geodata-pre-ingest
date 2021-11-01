@@ -1,0 +1,117 @@
+scripts/*_test.py
+
+tool_test_data/raster_data/raster_frame/Results/final_result/*
+tool_test_data/raster_data/raster_frame/Results/precessed_result/The CSV File/*
+tool_test_data/raster_data/raster_frame/Results/precessed_result/Updated CSV Files/*
+tool_test_data/raster_data/raster_frame/Results/precessed_result/GeoFiles for Downloading/*
+tool_test_data/raster_data/raster_frame/Results/precessed_result/GeoFiles for Geoserver(Projected)/*
+tool_test_data/raster_data/raster_frame/Source/*
+tool_test_data/raster_data/raster_frame/Work/*
+!tool_test_data/raster_data/raster_frame/Results/final_result/.keep
+!tool_test_data/raster_data/raster_frame/Results/precessed_result/The CSV File/.keep
+!tool_test_data/raster_data/raster_frame/Results/precessed_result/Updated CSV Files/.keep
+!tool_test_data/raster_data/raster_frame/Results/precessed_result/GeoFiles for Downloading/.keep
+!tool_test_data/raster_data/raster_frame/Results/precessed_result/GeoFiles for Geoserver(Projected)/.keep
+!tool_test_data/raster_data/raster_frame/Source/.keep
+!tool_test_data/raster_data/raster_frame/Work/.keep
+
+tool_test_data/raster_data/raster_output/Results/final_result/*
+tool_test_data/raster_data/raster_output/Results/precessed_result/Geoblacklight Json Files/*
+tool_test_data/raster_data/raster_output/Results/precessed_result/GeoFiles for Downloading/*
+tool_test_data/raster_data/raster_output/Results/precessed_result/GeoFiles for Geoserver(Projected)/*
+tool_test_data/raster_data/raster_original_source/021/021_arkark_s7w117_arkark.txt
+tool_test_data/raster_data/raster_original_source/2528l/2528l_arkark_b8gq99_arkark.txt
+!tool_test_data/raster_data/raster_output/Results/final_result/.keep
+!tool_test_data/raster_data/raster_output/Results/precessed_result/Geoblacklight Json Files/.keep
+!tool_test_data/raster_data/raster_output/Results/precessed_result/GeoFiles for Downloading/.keep
+!tool_test_data/raster_data/raster_output/Results/precessed_result/GeoFiles for Geoserver(Projected)/.keep
+
+tool_test_data/vector_data/vector/Results/final_result/*
+tool_test_data/vector_data/vector/Results/precessed_result/The CSV File/*
+tool_test_data/vector_data/vector/Results/precessed_result/Updated CSV Files/*
+tool_test_data/vector_data/vector/Results/precessed_result/GeoFiles for Downloading/*
+tool_test_data/vector_data/vector/Results/precessed_result/GeoFiles for Geoserver(Projected)/*
+tool_test_data/vector_data/vector/Source/*
+tool_test_data/vector_data/vector/Work/*
+!tool_test_data/vector_data/vector/Results/final_result/.keep
+!tool_test_data/vector_data/vector/Results/precessed_result/The CSV File/.keep
+!tool_test_data/vector_data/vector/Results/precessed_result/Updated CSV Files/.keep
+!tool_test_data/vector_data/vector/Results/precessed_result/GeoFiles for Downloading/.keep
+!tool_test_data/vector_data/vector/Results/precessed_result/GeoFiles for Geoserver(Projected)/.keep
+!tool_test_data/vector_data/vector/Source/.keep
+
+#tool_test_data/vector_data/vector_export/Results/final_result/*
+tool_test_data/vector_data/vector_export/Results/precessed_result/Geoblacklight Json Files/*
+tool_test_data/vector_data/vector_export/Results/precessed_result/GeoFiles for Downloading/*
+tool_test_data/vector_data/vector_export/Results/precessed_result/GeoFiles for Geoserver(Projected)/*
+tool_test_data/vector_data/vector_original_source/1950prj_city/1950prj_city_arkark_s7w117_arkark.txt
+tool_test_data/vector_data/vector_original_source/1950prj_county/1950prj_county_arkark_a7gt36_arkark.txt
+tool_test_data/vector_data/vector_original_source/1950prj_prov/1950prj_prov_arkark_b8gq99_arkark.txt
+#!tool_test_data/vector_data/vector_export/Results/final_result/.keep
+!tool_test_data/vector_data/vector_export/Results/precessed_result/Geoblacklight Json Files/.keep
+!tool_test_data/vector_data/vector_export/Results/precessed_result/GeoFiles for Downloading/.keep
+!tool_test_data/vector_data/vector_export/Results/precessed_result/GeoFiles for Geoserver(Projected)/.keep
+
+metadata_template/test.*
+
+unittest/raster_test_data/result/*
+unittest/raster_test_data/work/*
+
+unittest/raster_test_data/source_batch/batch1/la_america_gsr/la_america_gsr_arkark_a7gt36_arkark.txt
+unittest/raster_test_data/source_batch/batch1/2628img/2628img_arkark_a7mh53_arkark.txt
+unittest/raster_test_data/source_batch/batch1/2528l/2528l_arkark_a7r971_arkark.txt
+test_raster_from/*
+*.pyc
+unittest_data/raster_data/raster/Results/final_result/*
+unittest_data/raster_data/raster/Results/precessed_result/The CSV File/*
+unittest_data/raster_data/raster/Results/precessed_result/Updated CSV Files/*
+unittest_data/raster_data/raster/Results/precessed_result/GeoFiles for Downloading/*
+unittest_data/raster_data/raster/Results/precessed_result/GeoFiles for Geoserver(Projected)/*
+unittest_data/raster_data/raster/Source/*
+unittest_data/raster_data/raster/Work/*
+!unittest_data/raster_data/raster/Results/final_result/.keep
+!unittest_data/raster_data/raster/Results/precessed_result/The CSV File/.keep
+!unittest_data/raster_data/raster/Results/precessed_result/Updated CSV Files/.keep
+!unittest_data/raster_data/raster/Results/precessed_result/GeoFiles for Downloading/.keep
+!unittest_data/raster_data/raster/Results/precessed_result/GeoFiles for Geoserver(Projected)/.keep
+!unittest_data/raster_data/raster/Source/.keep
+!unittest_data/raster_data/raster/Work/.keep
+
+unittest_data/raster_data/raster_output/Results/final_result/*
+unittest_data/raster_data/raster_output/Results/precessed_result/Geoblacklight Json Files/*
+unittest_data/raster_data/raster_output/Results/precessed_result/GeoFiles for Downloading/*
+unittest_data/raster_data/raster_output/Results/precessed_result/GeoFiles for Geoserver(Projected)/*
+unittest_data/raster_data/raster_original_source/021/021_arkark_s7w117_arkark.txt
+unittest_data/raster_data/raster_original_source/2528l/2528l_arkark_b8gq99_arkark.txt
+!unittest_data/raster_data/raster_output/Results/final_result/.keep
+!unittest_data/raster_data/raster_output/Results/precessed_result/Geoblacklight Json Files/.keep
+!unittest_data/raster_data/raster_output/Results/precessed_result/GeoFiles for Downloading/.keep
+!unittest_data/raster_data/raster_output/Results/precessed_result/GeoFiles for Geoserver(Projected)/.keep
+
+unittest_data/vector_data/vector/Results/final_result/*
+unittest_data/vector_data/vector/Results/precessed_result/The CSV File/*
+unittest_data/vector_data/vector/Results/precessed_result/Updated CSV Files/*
+unittest_data/vector_data/vector/Results/precessed_result/GeoFiles for Downloading/*
+unittest_data/vector_data/vector/Results/precessed_result/GeoFiles for Geoserver(Projected)/*
+unittest_data/vector_data/vector/Source/*
+unittest_data/vector_data/vector/Work/*
+!unittest_data/vector_data/vector/Results/final_result/.keep
+!unittest_data/vector_data/vector/Results/precessed_result/The CSV File/.keep
+!unittest_data/vector_data/vector/Results/precessed_result/Updated CSV Files/.keep
+!unittest_data/vector_data/vector/Results/precessed_result/GeoFiles for Downloading/.keep
+!unittest_data/vector_data/vector/Results/precessed_result/GeoFiles for Geoserver(Projected)/.keep
+!unittest_data/vector_data/vector/Source/.keep
+
+#unittest_data/vector_data/vector_export/Results/final_result/*
+unittest_data/vector_data/vector_export/Results/precessed_result/Geoblacklight Json Files/*
+unittest_data/vector_data/vector_export/Results/precessed_result/GeoFiles for Downloading/*
+unittest_data/vector_data/vector_export/Results/precessed_result/GeoFiles for Geoserver(Projected)/*
+unittest_data/vector_data/vector_original_source/1950prj_city/1950prj_city_arkark_s7w117_arkark.txt
+unittest_data/vector_data/vector_original_source/1950prj_county/1950prj_county_arkark_a7gt36_arkark.txt
+unittest_data/vector_data/vector_original_source/1950prj_prov/1950prj_prov_arkark_b8gq99_arkark.txt
+#!unittest_data/vector_data/vector_export/Results/final_result/.keep
+!unittest_data/vector_data/vector_export/Results/precessed_result/Geoblacklight Json Files/.keep
+!unittest_data/vector_data/vector_export/Results/precessed_result/GeoFiles for Downloading/.keep
+!unittest_data/vector_data/vector_export/Results/precessed_result/GeoFiles for Geoserver(Projected)/.keep
+
+!.gitigmore

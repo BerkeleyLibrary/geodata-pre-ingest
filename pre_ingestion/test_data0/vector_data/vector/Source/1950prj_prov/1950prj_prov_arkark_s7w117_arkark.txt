@@ -1,0 +1,1 @@
+ark:/28722/s7w117	/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/test_data/vector_data/vector/Work/1950prj_prov/1950prj_prov.shp

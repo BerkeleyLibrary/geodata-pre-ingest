@@ -1,0 +1,1 @@
+ark:/28722/b8gq99	/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/test_data/vector_data/vector/Work/1950prj_county/1950prj_county.shp
