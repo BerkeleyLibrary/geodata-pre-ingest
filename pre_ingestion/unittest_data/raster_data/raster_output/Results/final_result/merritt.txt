@@ -1,3 +1,0 @@
-fileUrl | hashAlgorithm | hashValue | fileSize | fileName | primaryIdentifier | creator | title | date
-https://spatial.lib.berkeley.edu/UCB/berkeley-s7w117/data.zip|MD5|c1e09ed47461be5140925972af7b773a|55197865|Data.zip|ark:/28722/s7w117|me,Earth Sciences and Map Library University of California, Berkeley|Schaffhausen (Sheet 205), Switzerland 1:50,000 topographic map, 1994 ark:/28722/s7w117|2021-10-19
-https://spatial.lib.berkeley.edu/UCB/berkeley-b8gq99/data.zip|MD5|decf3d34cfa235c396959777c8ddbed0|28555155|Data.zip|ark:/28722/b8gq99|苏珊|Stein am Rhein (Sheet 206), Switzerland 1:50,000 topographic map, 1997 ark:/28722/b8gq99|2021-10-19

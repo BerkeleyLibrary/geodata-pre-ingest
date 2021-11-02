@@ -1,3 +1,0 @@
-ArK	GeoFile in Working Directory
-ark:/28722/s7w117	/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/unittest_data/raster_data/raster_frame/Work/021/021.tif
-ark:/28722/b8gq99	/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/unittest_data/raster_data/raster_frame/Work/2528l/2528l.tif

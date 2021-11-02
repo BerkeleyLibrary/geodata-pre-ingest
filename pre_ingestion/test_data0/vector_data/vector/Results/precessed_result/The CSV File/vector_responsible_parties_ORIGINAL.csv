@@ -1,8 +1,0 @@
-﻿他们 (für),from,individual,format_s,arkid,filename,role,contact_name,position,organization,contact_info,email,address_type,address,city,state,zip,country,phone_no,fax_no,hours,instruction
-1950prj_prov.shp,--,,Shape File,s7w117,/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/test_data/vector_data/vector/Work/1950prj_prov/1950prj_prov.shp,006,,,,,,,,,,,,,,,
-1950prj_prov.shp,--,,Shape File,s7w117,/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/test_data/vector_data/vector/Work/1950prj_prov/1950prj_prov.shp,010,,,,,,,,,,,,,,,
-1950prj_city.shp,./dataIdInfo/idCitation/citRespParty,,Shape File,a7gt36,/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/test_data/vector_data/vector/Work/1950prj_city/1950prj_city.shp,006,,,"All China Marketing Research Co., Ltd.",,,,,,,,,,,,
-1950prj_city.shp,./dataIdInfo/idCitation/citRespParty,,Shape File,a7gt36,/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/test_data/vector_data/vector/Work/1950prj_city/1950prj_city.shp,010,,,"China Data Center, University of Michigan",,,,,,,,,,,,
-1950prj_city.shp,./dataIdInfo/idPoC,,Shape File,a7gt36,/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/test_data/vector_data/vector/Work/1950prj_city/1950prj_city.shp,007,,,"China Data Center, University of Michigan",,,,,,,,,,,,
-1950prj_county.shp,--,,Shape File,b8gq99,/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/test_data/vector_data/vector/Work/1950prj_county/1950prj_county.shp,006,,,,,,,,,,,,,,,
-1950prj_county.shp,--,,Shape File,b8gq99,/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/test_data/vector_data/vector/Work/1950prj_county/1950prj_county.shp,010,,,,,,,,,,,,,,,
