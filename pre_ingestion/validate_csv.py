@@ -43,6 +43,7 @@ class ValidateCSV(object):
         self.main_ark_line = ark_line_dic
         self.arkids = arkids
 
+
     def prepare_resp_csv_validation(self): # no line-ark dic, multiple lines belong to one ark
         arkids_publisher = []
         arkids_originator = []
@@ -85,17 +86,19 @@ class ValidateCSV(object):
             warning_msg = "Warning: line {0}:  {1} - {2}".format(self.main_ark_line[arkid],arkid,msg)
             messages.append(warning_msg)
 
-        def is_empty(val):
-            return True if not GeoHelper.isNotNullorEmpty(val) else False
-
-        def check_modified_date_field():
-            dt = GeoHelper.metadata_from_csv('modified_date_dt',raw)
-            if GeoHelper.isNotNullorEmpty(dt):
-                if not GeoHelper.valid_date(dt,'%Y%m%d'):
-                    msg = "Field '{0}' needs format in YYYYMMDD".format('modified_date_dt')
-                    add_warning(msg)
+        def check_empty(val,header):
+            if GeoHelper.isNotNullorEmpty(val):
+                return False
             else:
-                msg = par.REQUIRED_FIELD.format("modified_date_dt")
+                msg = par.REQUIRED_FIELD.format(header)
+                add_warning(msg)
+                return True
+
+        def check_modified_date():
+            dt = GeoHelper.metadata_from_csv('modified_date_dt',raw)
+            empty = check_empty(dt,'modified_date_dt')
+            if not empty and not GeoHelper.valid_date(dt,'%Y%m%d'):
+                msg = "Field '{0}' needs format in YYYYMMDD".format('modified_date_dt')
                 add_warning(msg)
 
         def check_boolean_fields():
@@ -109,20 +112,15 @@ class ValidateCSV(object):
 
         def check_title_s():
             val = GeoHelper.metadata_from_csv("title_s",raw)
-            if is_empty(val):
-                msg = par.REQUIRED_FIELD.format("title_s")
-                add_warning(msg)
+            empty = check_empty(val,"title_s")
 
         # main csv - 2. To avoid typo in accessright element
         def check_accessright():
-            rights = ["public","restricted"]
+            right_definition = ["public","restricted"]
             right = raw["accessRights_s"].strip().lower()
-            if GeoHelper.isNotNullorEmpty(right):
-                if len(right) > 0 and (not right in rights):
-                    msg = "'{0}' value not correct.".format("accessRights_s")
-                    add_warning(msg)
-            else:
-                msg = par.REQUIRED_FIELD.format("accessRights_s")
+            empty = check_empty(right,"accessRights_s")
+            if (not empty) and (not right in right_definition):
+                msg = "'{0}' value not correct.".format("accessRights_s")
                 add_warning(msg)
 
         # main csv - 3. Make sure input correct topicis code
@@ -136,30 +134,25 @@ class ValidateCSV(object):
         # main csv - 4. Make sure Geofile work directory is the same as in main csv file. A user may move the updated CSV files around
         def check_geofile():
             geofile = raw["filename"].strip()
-            geopath = GeoHelper.geo_path_from_CSV_geofile(geofile)
-            workpath = GeoHelper.work_path(self.process_path)
-            correct_geofile = False
-            if geopath == workpath:
-                if os.path.isfile(geofile):
-                    correct_geofile = True
+            empty = check_empty(geofile,"filename")
+            if not empty:
+                geopath = GeoHelper.geo_path_from_CSV_geofile(geofile)
+                workpath = GeoHelper.work_path(self.process_path)
+                if geopath == workpath:
+                    if not os.path.isfile(geofile):
+                        msg = "Missing Geofile: {0}".format(geofile)
+                        add_warning(msg)
                 else:
-                    msg = "Missing Geofile: {0}".format(geofile)
+                    msg = "Work Directory is different! From CSV file - {0}; Actual work directory - {1}".format(geopath,workpath)
                     add_warning(msg)
-            else:
-                msg = "Work Directory is different! From CSV file - {0}; Actual work directory - {1}".format(geopath,workpath)
-                add_warning(msg)
-            return correct_geofile
-
 
         def check_resourceClass():
             val = raw["resourceClass"]
-            if  is_empty(val):
-                msg = par.REQUIRED_FIELD.format("resourceClass")
-                add_warning(msg)
-            else:
+            empty = check_empty(val,"resourceClass")
+            if not empty:
                 self.check_default_codes(raw,par.ResourceClass_Codes,"resourceClass")
 
-        def check_solr_year():
+        def check_solr_years():
             def match(reg,str):
                 return len(re.findall(reg,str)) == 1
 
@@ -178,33 +171,36 @@ class ValidateCSV(object):
                     add_warning(msg)
                     return False
 
-            def messaging_four_digit_years(years): # not validating, just output message
+            def messaging_four_digit_years(years):
                 reg = '^\d{4}$'
                 if  not match_arr(years,reg):
                     msg = "Message: 'solrYear'is a valid year but not a 4 digital year."
-                    GeoHelper.arcgis_message(msg)
+                    GeoHelper.arcgis_message(msg)  # not validating, just output message
 
             def check_all_years():
                 solr_years = raw["solrYear"].strip()
-                if is_empty(solr_years):
-                    msg = par.REQUIRED_FIELD.format("solrYear")
-                    add_warning(msg)
-                else:
+                empty = check_empty(solr_years,"solrYear")
+                if not empty:
                     years = [yr.strip() for yr in solr_years.split("$")]
                     if valid_full_years(years):
                         messaging_four_digit_years(years)
-                    
+
             check_all_years()
 
-        check_geofile()
+
+        # ucb geoblacklight required fields
         check_title_s()
-        check_topiciso()
         check_accessright()
-        check_solr_year()
-        check_boolean_fields()
-        check_modified_date_field()
+        check_solr_years()
+        check_modified_date()
         check_resourceClass()
-        # check_sourcetype(raw)
+
+        # other fields
+        check_geofile()
+        check_topiciso()
+        check_boolean_fields()
+
+
         return messages
 
 
@@ -414,3 +410,33 @@ class ValidateCSV(object):
                             validation(json_file)
 
         validation_all()
+
+
+
+# # def check_modified_date():
+# #     dt = GeoHelper.metadata_from_csv('modified_date_dt',raw)
+# #     if GeoHelper.isNotNullorEmpty(dt):
+# #         if not GeoHelper.valid_date(dt,'%Y%m%d'):
+# #             msg = "Field '{0}' needs format in YYYYMMDD".format('modified_date_dt')
+# #             add_warning(msg)
+# #     else:
+# #         msg = par.REQUIRED_FIELD.format("modified_date_dt")
+# #         add_warning(msg)
+#
+#
+# # main csv - 4. Make sure Geofile work directory is the same as in main csv file. A user may move the updated CSV files around
+# def check_geofile():
+#     geofile = raw["filename"].strip()
+#     geopath = GeoHelper.geo_path_from_CSV_geofile(geofile)
+#     workpath = GeoHelper.work_path(self.process_path)
+#     correct_geofile = False
+#     if geopath == workpath:
+#         if os.path.isfile(geofile):
+#             correct_geofile = True
+#         else:
+#             msg = "Missing Geofile: {0}".format(geofile)
+#             add_warning(msg)
+#     else:
+#         msg = "Work Directory is different! From CSV file - {0}; Actual work directory - {1}".format(geopath,workpath)
+#         add_warning(msg)
+#     return correct_geofile
