@@ -219,30 +219,12 @@ class CsvIso(object):
                 right_node = ET.SubElement(resConst_node,right_tag(key))
                 useLimit_node = ET.SubElement(right_node,"useLimit")
                 useLimit_node.text = value
-
-        # get value for updating to the temp ESRI ISO xml file - prepare for ISO 19139 transforming
-        def final_value(h):
-            h_o = "{0}_o".format(h)
-            new_val = self.main_csv_raw[h].strip()
-            old_val = self.main_csv_raw[h_o].strip()
-            return new_val if len(new_val) > 0 else old_val
-
-        # def update_csv_to_temp_ESRIISO():
-        #     rights = {}
-        #     for h in par.CSV_HEADER_TRANSFORM:
-        #         val = final_value(h) # new workflow: write all back to ESRI ISO
-        #         if len(val) > 0 :
-        #             if h in par.CSV_HEADER_COLUMNS_RIGHTS:
-        #                 rights[h] = val
-        #             else:
-        #                 update_metadata(h,val)
-        #     if bool(rights):
-        #         update_metadata_rights(rights)
+        
         def update_csv_to_temp_ESRIISO():
             rights = {}
             for h in par.CSV_HEADER_TRANSFORM:
                 if  h <> "resourceType":  # do not write resourceType to ESRI ISO xml
-                    val = final_value(h).decode('utf-8') # new workflow: write all back to ESRI ISO
+                    val = GeoHelper.metadata_from_csv(h,self.main_csv_raw).decode('utf-8') # new workflow: write all back to ESRI ISO
                     if len(val) > 0 :
                         if h in par.CSV_HEADER_COLUMNS_RIGHTS: # combine mulitple right elements into one
                             rights[h] = val
