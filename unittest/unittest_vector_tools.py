@@ -6,6 +6,7 @@ import shutil
 
 # when changing csv header, headers of below testing csv files have to be updated accordingly.
 # 1)  ~/vector_export/Resultes/processed_result/updated CSV Files/template.csv
+# 2) Sometime, geoblacklight.json may not generated before before running merritt, try to run this unittest the second time
 
 # To test directory layout, go to run: test/v_test_0_1_create_resultspace.py
 
@@ -17,7 +18,7 @@ from pre_ingestion import csv_tranform,assign_arks,geodata_workspace,arcgis_iso_
 geo_ext = '.shp'
 dirname = os.path.dirname(os.path.abspath(__file__)).replace("unittest","unittest_data")
 vector_original_source = os.path.join(dirname,"vector_data","vector_original_source")
-vector_process_path = os.path.join(dirname,"vector_data","vector")
+vector_process_path = os.path.join(dirname,"vector_data","vector_frame")
 vector_ark_file = os.path.join(vector_process_path ,"arks.txt")
 vector_work = os.path.join(vector_process_path,"Work")
 vector_source = os.path.join(vector_process_path,"Source")
@@ -92,8 +93,8 @@ class ExportCsvTestCase(unittest.TestCase):
             self.assertTrue(is_file)
 
         self.csv.export_csv_files()
-        csv_files = [os.path.join(vector_csv,"vector_UPDATE.csv"),os.path.join(vector_csv,"vector_responsible_parties_UPDATE.csv"),\
-                     os.path.join(vector_csv,"vector_ORIGINAL.csv"),os.path.join(vector_csv,"vector_responsible_parties_ORIGINAL.csv")]
+        csv_files = [os.path.join(vector_csv,"vector_frame_UPDATE.csv"),os.path.join(vector_csv,"vector_frame_responsible_parties_UPDATE.csv"),\
+                     os.path.join(vector_csv,"vector_frame_ORIGINAL.csv"),os.path.join(vector_csv,"vector_frame_responsible_parties_ORIGINAL.csv")]
         for f in csv_files:
             file_existed(f)
 
@@ -101,7 +102,7 @@ class ExportCsvTestCase(unittest.TestCase):
 # use date from vector_data/vector_export - export data
 #  Test fixture files not removed in these directory: 1)updated CSV Files, 2)ISO19139 XML files, 3) GeoFiles in Work Directory, 4) GeoFiles in Source Directory
 #  output: 1) Geoblacklgiht json files; 2) map zip files, 3) download data zip files; 3) Merritt manifest ; 0) ISO19139 run code without generating ISO 19139 in local
-vector_export_process_path = os.path.join(dirname,"vector_data","vector_export")
+vector_export_process_path = os.path.join(dirname,"vector_data","vector_output")
 vector_export_results = os.path.join(vector_export_process_path,"Results")
 
 # Files under these directory are input data:
@@ -116,9 +117,10 @@ vector_export_19139 = os.path.join(vector_export_results,par.RESULT_DIRECTORY_PA
 vector_export_geoblacklight = os.path.join(vector_export_results,par.RESULT_DIRECTORY_PARENTS[0],par.RESULT_DIRECTORY[2])
 vector_export_merritt = os.path.join(vector_export_results,par.RESULT_DIRECTORY_PARENTS[1])
 
+# Use template to save filenames to make sure output CSV files have correct full_path names in any machine
 def new_main_csv_file():
     temp_file = os.path.join(vector_export_updated_csv,"template.csv")
-    main_file = os.path.join(vector_export_updated_csv,"vector_export_UPDATE.csv")
+    main_file = os.path.join(vector_export_updated_csv,"vector_output_UPDATE.csv")
     geo_helper.GeoHelper.update_main_csv_file(vector_export_work,temp_file,main_file)
 
 class ValidateCsvTestCase(unittest.TestCase):
@@ -130,7 +132,7 @@ class ValidateCsvTestCase(unittest.TestCase):
 
 class TranformISO19139TestCase(unittest.TestCase):
     def setUp(self):
-        # Attention !!!!! not to delete files under vector_export_19139 in local, they cannot be created due to the lack of arcpy !!!!
+        # Attention !!!!! no ISO19139 files generated under raster_output_19139 in local, due to the lack of arcpy !!!!
         if os.name == "nt":
             dirs = [vector_export_19139]
             empty_result_dir(dirs)

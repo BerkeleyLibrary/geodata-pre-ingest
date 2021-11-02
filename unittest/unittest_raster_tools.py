@@ -6,7 +6,7 @@ import shutil
 
 # when changing csv header, headers of below testing csv files have to be updated accordingly.
 # 1)  ~/rastter_output/Resultes/processed_result/updated CSV Files/template.csv
-# 2) Sometime, depended files may not generated before the second testing, try to run this unittest the second time
+# 2) Sometime, geoblacklight.json may not generated before before running merritt, try to run this unittest the second time
 
 # To test directory layout, go to run: go to run: tool_test/test_r_frame1_0_1_create_resultspace.py
 
@@ -133,7 +133,7 @@ class ValidateCsvTestCase(unittest.TestCase):
 
 class TranformISO19139TestCase(unittest.TestCase):
     def setUp(self):
-        # Attention !!!!! not to delete files under raster_export_19139 in local, they cannot be created due to the lack of arcpy !!!!
+        # Attention !!!!! no ISO19139 files generated under raster_output_19139 in local, due to the lack of arcpy !!!!
         if os.name == "nt":
             dirs = [raster_export_19139]
             empty_result_dir(dirs)

@@ -1,0 +1,4 @@
+ArK	GeoFile in Working Directory
+ark:/28722/s7w117	/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/unittest_data/vector_data/vector_frame/Work/1950prj_prov/1950prj_prov.shp
+ark:/28722/a7gt36	/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/unittest_data/vector_data/vector_frame/Work/1950prj_city/1950prj_city.shp
+ark:/28722/b8gq99	/Users/zhouyu/git_projects/BerkelyLibrary_Github/geodata_pre_ingest/unittest_data/vector_data/vector_frame/Work/1950prj_county/1950prj_county.shp
