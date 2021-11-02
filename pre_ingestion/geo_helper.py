@@ -328,8 +328,6 @@ class GeoHelper:
             csv_writer.writerow(header)
             for raw in raws:
                 raw["filename"] = os.path.join(export_work,raw["filename"])
-
-                print "2: " + raw["filename"]
                 vals = [raw[h] for h in header]
                 csv_writer.writerow(vals)
 

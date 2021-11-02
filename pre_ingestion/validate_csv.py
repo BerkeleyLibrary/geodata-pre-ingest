@@ -174,7 +174,7 @@ class ValidateCSV(object):
                 if match_arr(years,reg):
                     return True
                 else:
-                    msg = "'solrYear' has an invalid year."
+                    msg = "'solrYear' is not valid."
                     add_warning(msg)
                     return False
 
@@ -193,9 +193,7 @@ class ValidateCSV(object):
                     years = [yr.strip() for yr in solr_years.split("$")]
                     if valid_full_years(years):
                         messaging_four_digit_years(years)
-                    else:
-                        msg = "'solrYear' is not valid."
-                        add_warning(msg)
+                    
             check_all_years()
 
         check_geofile()
