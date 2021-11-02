@@ -4,7 +4,7 @@ import sys
 import unittest
 import shutil
 
-# when changing csv header, headers of below testing csv files have to be updated accordingly.
+# when changing a csv header, related header of below csv file needs to be updated
 # 1)  ~/rastter_output/Resultes/processed_result/updated CSV Files/template.csv
 # 2) Sometime, geoblacklight.json may not generated before before running merritt, try to run this unittest the second time
 
