@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-
-#CSV_HEADER_COMMON = ["format_s","arkid","filename"]
 CSV_BOM = [u"\uFEFF他们 (für)"]
 CSV_HEADER_COMMON = ["format_s","arkid","filename"]
 
 # The Main CSV File: columns with below headers are extracted,updated and written to ESRI ISO;
-# an extracted value from ESIR ISO is stored at a column with a header of "*_o".
+# An extracted value from ESIR ISO is stored at a column with a header of "*_o".
 # with one field exception:  "resourceType" is gotten from ArcPy, it is not written to ESRI ISO, but with column "*_o" in column
 
 CSV_HEADER_TRANSFORM = [
@@ -30,7 +28,7 @@ CSV_HEADER_TRANSFORM = [
          "temporalCoverage"]
 
 
-# Main CSV File headers: the order of this array define the order the CSV file
+# Main CSV File headers: the order of this array define the order the main CSV file
 CSV_ORDERED_HEADERS = [
         "title_s_o",
         "title_s",
@@ -83,25 +81,6 @@ CSV_ORDERED_HEADERS = [
         "modified_date_dt"
          ]
 
-
-
-##Below fields do not need mapping because the are gotten from other places:
-# dct_creator_sm
-# dct_publisher_sm
-# schema_provider_s
-# locn_geometry
-# dct_rights_sm
-# dct_rightsHolder_sm
-# gbl_wxsIdentifier_s
-# dct_references_s
-# id
-# dct_identifier_sm
-# gbl_mdVersion_s
-
-## geoblacklight metadata not included by UCB:
-# dcat_centroid_ss
-# gbl_fileSize_s
-
 # Mapping between csv header and geoblacklight elements:
 # "dateRange_drsim" using string "[1980 TO 1995]"
 CSV_HEADER_GEOBLACKLIGHT_MAP = {
@@ -137,6 +116,47 @@ CSV_HEADER_GEOBLACKLIGHT_MAP = {
 # Combine three rights to "dct_rights_sm" in Geoblacklight
 CSV_HEADER_COLUMNS_RIGHTS = [ "rights_general","rights_legal","rights_security",]
 
+# CSV file for ingestion app
+CSV_HEADER_GEOBLACKLIGHT = [
+    "dct_format_s",
+    "dct_title_s",
+    "dct_alternative_sm",
+    "dct_description_sm",
+    "dct_language_sm",
+    "gbl_resourceType_sm",
+    "dct_subject_sm",
+    "dcat_theme_sm",
+    "dcat_keyword_sm",
+    "dct_temporal_sm",
+    "dct_issued_s",
+    "gbl_indexYear_im",
+    "gbl_dateRange_drsim",
+    "dct_relation_sm",
+    "dct_spatial_sm",
+    "pcdm_memberOf_sm",
+    "dct_isPartOf_sm",
+    "dct_source_sm",
+    "dct_isVersionOf_sm",
+    "dct_replaces_sm",
+    "dct_isReplacedBy_sm",
+    "dct_license_sm",
+    "dct_accessRights_s",
+    "gbl_mdModified_dt",
+    "gbl_resourceClass_sm",
+    "gbl_suppressed_b",
+    "gbl_georeferenced_b",
+    "dct_creator_sm",
+    "dct_publisher_sm",
+    # "schema_provider_s",
+    "locn_geometry",
+    "dct_rights_sm",
+    "dct_rightsHolder_sm",
+    # gbl_wxsIdentifier_s,
+    # dct_references_s,
+    "id"
+    # dct_identifier_sm,
+    # gbl_mdVersion_s,
+]
 
 CSV_HEADER_RESPONSIBLE_PARTY = [ "from",
          "individual",
@@ -402,7 +422,7 @@ transform_elements = {
     }
 
 
-# required elements - header names : "title_s",  "solrYear",,"accessRights_s","modified_date_dt","resourceClass" 
+# required elements - header names : "title_s",  "solrYear",,"accessRights_s","modified_date_dt","resourceClass"
 
 ResourceClass_Codes = [
                         "collections",

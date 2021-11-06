@@ -5,7 +5,6 @@ import csv
 import par
 import json
 import re
-# from datetime import datetime
 import datetime
 from geo_helper import GeoHelper
 if os.name == "nt":
@@ -18,6 +17,7 @@ if os.name == "nt":
 # 3) Drived from arkid
 # 4) From obj - gotten from reponsible party csv file
 # 5) Todo: add multiple resource download after geoblacklight v4
+# 6) Export row for ingestion csv file
 
 class CsvGeoblacklight(object):
     def __init__(self,raw_obj,process_path):
@@ -38,6 +38,25 @@ class CsvGeoblacklight(object):
                 os.makedirs(path)
             return os.path.join(path,"geoblacklight.json")
 
+
+        def geoblacklight_row(json_data):
+            row = [""]
+            keys = json_data.keys()
+            def value(header):
+                _val = ""
+                if header in keys:
+                    _val = json_data[header]
+                    if GeoHelper.arr_header(header):
+                        _val = "$".join(_val)
+                    if GeoHelper.bool_header(header):
+                        _val = "True" if header else  "False"
+                return _val
+            for header in par.CSV_HEADER_GEOBLACKLIGHT:
+                val = value(header)
+                row.append(val)
+            return row
+
+
         def save_pretty():
             json_data = {}
             self._add_from_main_csv(json_data)
@@ -47,10 +66,13 @@ class CsvGeoblacklight(object):
             self._add_boundary(json_data)
 
             with (open(geoblacklight_file,"w+")) as geo_json:
-                geo_json.write(json.dumps(json_data,sort_keys=True,ensure_ascii=False,indent=4,separators=(',',':'))) #pretty print
+                geo_json.write(json.dumps(json_data,sort_keys=True,ensure_ascii=False,indent=4,separators=(',',':')))
+
+            return geoblacklight_row(json_data)
 
         geoblacklight_file = geoblacklight_file()
-        save_pretty()
+        return save_pretty()
+
 
 
     def _add_from_responsible_csv(self,json_data): # from updated reponsible party csv, previous workflow is from ISO19139
@@ -68,11 +90,7 @@ class CsvGeoblacklight(object):
         def has_original_column(header):
             return (header in par.CSV_HEADER_TRANSFORM)
 
-        def is_multiple_values(header):
-            multiple = re.search("_sm|_im$",par.CSV_HEADER_GEOBLACKLIGHT_MAP[header].strip())
-            return True if multiple else False
-
-        def need_captilize(header):  # only elements in from csv file needs capitlizsed
+        def need_captilize(header):  # only elements from csv file needs capitlizsed
             HEADER_UPCASE = ["spatialSubject","subject"]
             return (header in HEADER_UPCASE)
 
@@ -92,7 +110,7 @@ class CsvGeoblacklight(object):
             GeoHelper.arcgis_message("Warning !!!: {0}, 'date_s' value :{2} - in {1}, may not valid,please check".format(self.geofile,self.arkid,str))
             return str
 
-        def d_time(val):  # add validation
+        def d_time(val):
             str = val.strip()
             return datetime.datetime.strptime(str,"%Y%m%d").strftime("%Y-%m-%d") + "T23:34:35.206Z"
 
@@ -127,7 +145,8 @@ class CsvGeoblacklight(object):
 
         def format_metadata(header,column_val):
             val = column_val
-            if is_multiple_values(header):
+            geoblacklight_field = par.CSV_HEADER_GEOBLACKLIGHT_MAP[header]
+            if GeoHelper.arr_header(geoblacklight_field):
                 ls = column_val.split("$")
                 val = captilize_arr(header,ls)
             if GeoHelper.bool_header(header):
@@ -203,7 +222,7 @@ class CsvGeoblacklight(object):
             E = raster.extent.XMax
             N = raster.extent.YMax
             S = raster.extent.YMin
-            return  "ENVELOPE({0},{1},{2},{3})".format(W,E,N,S)  # "ENVELOPE(-122.839783, -122.406402, 38.194766, 37.802318)"
+            return  "ENVELOPE({0},{1},{2},{3})".format(W,E,N,S)
         except:
             return None
         return None

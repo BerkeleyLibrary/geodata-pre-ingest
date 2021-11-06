@@ -347,8 +347,21 @@ class GeoHelper:
         return True if header.strip().endswith("_b") else False
 
     @staticmethod
+    def arr_header(header):
+        multiple = re.search("_sm|_im$",header.strip())
+        return True if multiple else False
+
+    @staticmethod
     def valid_date(str,format):
         try:
             return bool(datetime.strptime(str,format))
         except ValueError:
             return False
+
+    @staticmethod
+    def write_csv(file,headers,raws):
+        with open(file, 'wb') as csvfile:
+            csvWriter = csv.writer(csvfile)
+            csvWriter.writerow([h.encode("utf-8") for h in headers])
+            for raw in raws:
+                csvWriter.writerow([v if v else "" for v in raw])
