@@ -114,7 +114,7 @@ CSV_HEADER_GEOBLACKLIGHT_MAP = {
             }
 
 # Combine three rights to "dct_rights_sm" in Geoblacklight
-CSV_HEADER_COLUMNS_RIGHTS = [ "rights_general","rights_legal","rights_security",]
+CSV_HEADER_COLUMNS_RIGHTS = [ "rights_general","rights_legal","rights_security"]
 
 # CSV file for ingestion app
 CSV_HEADER_GEOBLACKLIGHT = [

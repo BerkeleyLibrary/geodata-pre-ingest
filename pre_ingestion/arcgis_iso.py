@@ -167,6 +167,9 @@ class ArcGisIso(object):
 		obj.__dict__["_{0}_o".format("temporalCoverage")] = self._temporalCoverage()
 		obj.__dict__["_{0}_o".format("modified_date_dt")] = self._modified_date_dt()
 		obj.__dict__["_{0}_o".format("resourceType")] = self._resource_type()
+		topic_iso_o_val = obj.__dict__["_{0}_o".format("topicISO")].strip().strip("0")
+		obj.__dict__["_{0}_o".format("topicISO")] = topic_iso_o_val
+
 		return obj
 
 
