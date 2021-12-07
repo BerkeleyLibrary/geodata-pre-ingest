@@ -5,6 +5,7 @@ import re
 import json
 import shutil
 from datetime import datetime
+from dateutil.parser import parse
 import xml.dom.minidom
 import csv
 import par
@@ -187,6 +188,15 @@ class GeoHelper:
     def datetime(str):
         return datetime.datetime.strptime(str,"%Y%m%d").strftime("%Y-%m-%d")
         # return datetime.datetime.strptime(str,"%m%d%Y").strftime("%m-%d-%Y")
+
+
+    @staticmethod
+    def is_date(string, fuzzy=False):
+        try:
+            parse(string, fuzzy=fuzzy)
+            return True
+        except ValueError:
+            return False
 
     @staticmethod
     def beautify_file(f_file,t_file):

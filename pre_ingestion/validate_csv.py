@@ -98,8 +98,38 @@ class ValidateCSV(object):
             dt = GeoHelper.metadata_from_csv('modified_date_dt',raw)
             empty = check_empty(dt,'modified_date_dt')
             if not empty and not GeoHelper.valid_date(dt,'%Y%m%d'):
-                msg = "Field '{0}' needs format in YYYYMMDD".format('modified_date_dt')
+                msg = "Field '{0}' needs in YYYYMMDD format".format('modified_date_dt')
                 add_warning(msg)
+
+        def check_date(header):
+            # validated date format: YYYY,YYYYMM,YYYYMMDD,YYYY-MM-DD,YYYY-MM-DDXXXXXXXX...:
+            def warning(dt,text):
+                msg = "Warning: Field {0} - {1} needs in {2} format".format(header,dt,text)
+                add_warning(msg)
+
+            def valid_with_dash(dt):
+                val = dt[:10]
+                if not self.is_date(dt):
+                    warning(dt,"YYYY-MM-DD")
+
+            def valid_no_dash(dt):
+                num = len(dt)
+                if num == 4 and not GeoHelper.valid_date(dt,'%Y'):
+                    warning(dt,"YYYY")
+                if num == 6 and not GeoHelper.valid_date(dt,'%Y%m'):
+                    warning(dt,"YYYYMM")
+                if num == 8 and not GeoHelper.valid_date(dt,'%Y%m%d'):
+                    warning(dt,"YYYYMMDD")
+                if num not in [4,6,8]:
+                    warning(dt,"correct")
+
+            dt = GeoHelper.metadata_from_csv(header,raw).strip()
+            if GeoHelper.isNotNullorEmpty(dt):
+                if "-" in dt:
+                    valid_with_dash(dt)
+                else:
+                    valid_no_dash(dt)
+
 
         def check_title_s():
             val = GeoHelper.metadata_from_csv("title_s",raw)
@@ -195,6 +225,7 @@ class ValidateCSV(object):
         check_resourceClass()
 
         # other fields
+        check_date("date_s") # will check both "date_s","date_s_o"
         check_geofile()
         check_topiciso()
         check_boolean_fields()

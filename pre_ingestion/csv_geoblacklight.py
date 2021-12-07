@@ -94,21 +94,29 @@ class CsvGeoblacklight(object):
             HEADER_UPCASE = ["spatialSubject","subject"]
             return (header in HEADER_UPCASE)
 
-        def d_sub_str(val): # val = "20210407"
+        def d_time_with_dash(val): # val = "20210407"
+            def warning(str):
+                GeoHelper.arcgis_message("Warning !!!: {0}, 'date_s or date_s_o' value :{2} - in {1}, seems not valid,please check".format(self.geofile,self.arkid,str))
+                return str
+
             str = val.strip()
             num = len(str)
             try:
-                if num == 4:
+                if num == 4 and self.is_date(dt):
                     return str
                 if num == 6:
                     return datetime.datetime.strptime(str,"%Y%m%d").strftime("%Y-%m")
                 if num == 8:
                     return datetime.datetime.strptime(str,"%Y%m%d").strftime("%Y-%m-%d")
+                if num > 9: # str = "2012-07-03XXXXXXXXX" - from origianl ESRIISO mxl
+                    dt = str[:10]
+                    if ("-" in dt) and self.is_date(dt):
+                        return str[:10]
             except:
-                GeoHelper.arcgis_message("Warning !!!: {0}, 'date_s' value :{2} - in {1}, seems not valid,please check".format(self.geofile,self.arkid,str))
-                return str
-            GeoHelper.arcgis_message("Warning !!!: {0}, 'date_s' value :{2} - in {1}, may not valid,please check".format(self.geofile,self.arkid,str))
-            return str
+                return warning(str)
+
+            return warning(str)
+
 
         def d_time(val):
             str = val.strip()
@@ -123,7 +131,7 @@ class CsvGeoblacklight(object):
             val = str if str else ""
             if len(val) > 0:
                 if header == "modified_date_dt" : val = d_time(val)
-                if header == "date_s": val = d_sub_str(val)
+                if header == "date_s": val = d_time_with_dash(val)
                 if header == "topicISO": val = isoTopics(val)
                 if header == "accessRights_s": val = val.lower().capitalize()
 
