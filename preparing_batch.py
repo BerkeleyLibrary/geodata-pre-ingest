@@ -9,15 +9,14 @@ from datetime import datetime
 ################################################################################################
 #                             1. class                                                         #
 ################################################################################################
+
+
 class SourceBatch(object):
     def __init__(self, source_dir, logging):
         self.logging = logging
         self.source_dir = source_dir
         self.file_paths = self._file_paths("")
-        self.geofile_paths = []
-        self.geo_type = None
         self._geo_init()
-        self.expected_exts = self._expected_exts()
 
     def checkup(self):
         paths = self._missed_file_paths()
@@ -25,27 +24,44 @@ class SourceBatch(object):
         paths = self._unclaimed_file_paths()
         self._logger("Unclaimed files:", paths)
 
+    def shp_projection(self, workspace):
+        if self.geo_type == "tif":
+            return
+        for file in self.geofile_paths:
+            geofile = GeoFile(file)
+            geofile.projection(workspace, self.logging)
+
+    def tif_pyramid(self):
+        if self.geo_type == "shp":
+            return
+        for file in self.geofile_paths:
+            geofile = GeoFile(file)
+            geofile.pyramid(self.logging)
+
     def _geo_init(self):
         shapefile_paths = self._file_paths("shp")
         tiffile_paths = self._file_paths("tif")
-        shp_num = len(shapefile_paths)
-        tif_num = len(tiffile_paths)
-        if shp_num > 0 and tif_num > 0:
-            self.logging.info(
-                "Can not run with mixing shapefiles and raster files in the same directory!"
-            )
-            raise NotImplementedError
-        if shp_num == 0 and tif_num == 0:
+        if not shapefile_paths and not tiffile_paths:
             self.logging.info(
                 "No shapefiles or raster files found in the source directory!"
             )
             raise NotImplementedError
-        if shp_num > 0:
+
+        if shapefile_paths and tiffile_paths:
+            self.logging.info(
+                "Cannot run with mixing shapefiles and raster files in the same directory!"
+            )
+            raise NotImplementedError
+
+        if shapefile_paths:
             self.geofile_paths = shapefile_paths
             self.geo_type = "shp"
-        else:
+        elif tiffile_paths:
             self.geofile_paths = tiffile_paths
             self.geo_type = "tif"
+        else:
+            self.geofile_paths = []
+            self.geo_type = None
 
     def _expected_exts(self):
         if self.geo_type is None:
@@ -54,8 +70,11 @@ class SourceBatch(object):
 
     def _missed_file_paths(self):
         paths = []
+        expected_exts = self._expected_exts()
         for geofile_path in self.geofile_paths:
-            paths.extend(self._missed_file_paths_from_geofile(geofile_path))
+            paths.extend(
+                self._missed_file_paths_from_geofile(geofile_path, expected_exts)
+            )
         return paths
 
     def _unclaimed_file_paths(self):
@@ -75,10 +94,10 @@ class SourceBatch(object):
             for l in list:
                 self.logging.info(f"{l}")
 
-    def _missed_file_paths_from_geofile(self, geofile) -> List:
+    def _missed_file_paths_from_geofile(self, geofile, expected_exts) -> List:
         paths = []
         base = os.path.splitext(geofile)[0]
-        for ext in self.expected_exts:
+        for ext in expected_exts:
             expected_file_path = f"{base}{ext}"
             if expected_file_path not in self.file_paths:
                 paths.append(expected_file_path)
@@ -93,18 +112,51 @@ class SourceBatch(object):
         ]
 
 
+class GeoFile(object):
+    def __init__(self, geofile):
+        self.geofile = geofile
+
+    def projection(self, workspace, logging):
+        name = os.path.basename(self.geofile)
+        prj_file = os.path.join(workspace, name)
+        try:
+            wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]'
+            sr = arcpy.SpatialReference()
+            sr.loadFromString(wkt)
+            arcpy.Project_management(self.geofile, prj_file, sr)
+        except Exception as ex:
+            logging.info(f"{self.geofile} - {ex}")
+
+    def pyramid(self, logging):
+        pylevel = "7"
+        skipfirst = "NONE"
+        resample = "NEAREST"
+        compress = "Default"
+        quality = "70"
+        skipexist = "SKIP_EXISTING"
+        try:
+            arcpy.BuildPyramids_management(
+                self.geofile, pylevel, skipfirst, resample, compress, quality, skipexist
+            )
+        except Exception as ex:
+            logging.info(f"{self.geofile} - {ex}")
+
+
 ################################################################################################
 #                                 2. set up                                                    #
 ################################################################################################
-# Source data directory
+# 1. Please update source data directory here
 source_batch_path = "D:\small_test\Vector_sample_fake"
 
-# Log file
+# 2. Please updare Workspace directory here, using replace '\\' with '\'
+workspace_path = "D:\\workspace"
+
+# 3. Plese update Log file
 logfile = "D:\Log\shpfile_projection.log"
 logging.basicConfig(
     filename=logfile,
     level=logging.INFO,
-    format="%(message)s - %(asctime)s - %(levelname)s",
+    format="%(message)s - %(asctime)s - %(funcName)s - %(levelname)s",
 )
 
 # Default geofile extensions
@@ -133,8 +185,10 @@ source_batch = SourceBatch(source_batch_path, logging)
 source_batch.checkup()
 
 # 2. Vector projection
+source_batch.shp_projection(workspace_path)
 
 # 3. Raster grid
+source_batch.tif_pyramid()
 
 
 logging.info(f"***'batch_preparing' finished.")
