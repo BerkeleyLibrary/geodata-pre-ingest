@@ -148,7 +148,7 @@ class GeoFile(object):
 # 1. Please update source data directory here
 source_batch_path = "D:\small_test\Vector_sample_fake"
 
-# 2. Please updare Workspace directory here, using replace '\\' with '\'
+# 2. Please updare Workspace directory here, using '\\' to replace '\' in the path
 workspace_path = "D:\\workspace"
 
 # 3. Plese update Log file
