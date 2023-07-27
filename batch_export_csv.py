@@ -1,9 +1,12 @@
 import arcpy
 import os
 import logging
-from typing import List
 from pathlib import Path
-from datetime import datetime
+import xml.etree.ElementTree as ET
+import csv
+import re
+from datetime import date
+from typing import List
 
 
 ################################################################################################
@@ -11,184 +14,481 @@ from datetime import datetime
 ################################################################################################
 
 
-class SourceBatch(object):
-    def __init__(self, source_dir, logging):
+class BatchExportCsv(object):
+    def __init__(self, workspace_dir, results_dir, logging):
         self.logging = logging
-        self.source_dir = source_dir
-        self.file_paths = self._file_paths("")
-        self._geo_init()
+        self.workspace_dir = workspace_dir
+        self.geofile_paths = self._geofile_paths()
+        self.dir = results_dir
 
-    def checkup(self):
-        paths = self._missed_file_paths()
-        self._logger("Missing files:", paths)
-        paths = self._unclaimed_file_paths()
-        self._logger("Unclaimed files:", paths)
+    def main_csv(self):
+        file = self._filename(self.dir, "main")
+        raws = [GeoFile(geofile_path).main_row() for geofile_path in self.geofile_paths]
+        self._write_csv(file, GeoFile.main_headers, raws)
 
-    def shp_projection(self, workspace):
-        if self.geo_type == "tif":
-            return
-        for file in self.geofile_paths:
-            geofile = GeoFile(file)
-            geofile.projection(workspace, self.logging)
+    def resp_csv(self):
+        file = self._filename(self.dir, "resp")
+        rows = []
+        for geofile_path in self.geofile_paths:
+            resp_rows = GeoFile(geofile_path).resp_rows()
+            rows.extend(resp_rows)
+        self._write_csv(file, GeoFile.resp_headers, rows)
 
-    def tif_pyramid(self):
-        if self.geo_type == "shp":
-            return
-        for file in self.geofile_paths:
-            geofile = GeoFile(file)
-            geofile.pyramid(self.logging)
-
-    def _geo_init(self):
+    def _geofile_paths(self):
         shapefile_paths = self._file_paths("shp")
         tiffile_paths = self._file_paths("tif")
         if not shapefile_paths and not tiffile_paths:
             self.logging.info(
-                "No shapefiles or raster files found in the source directory!"
+                f"No shapefiles or raster files found in {self.workspace_dir}!"
             )
             raise NotImplementedError
 
         if shapefile_paths and tiffile_paths:
             self.logging.info(
-                "Cannot run with mixing shapefiles and raster files in the same directory!"
+                f"Mixing shapefiles and raster files found in {self.workspace_dir}."
             )
             raise NotImplementedError
-
+        # 1. todo: check with Susan to exclude geotye
         if shapefile_paths:
-            self.geofile_paths = shapefile_paths
-            self.geo_type = "shp"
+            return shapefile_paths
+            # self.geo_type = "shp"
         elif tiffile_paths:
-            self.geofile_paths = tiffile_paths
-            self.geo_type = "tif"
-        else:
-            self.geofile_paths = []
-            self.geo_type = None
+            return tiffile_paths
+            # self.geo_type = "tif"
+        return []
+        # self.geofile_paths = []
+        # self.geo_type = None
 
-    def _expected_exts(self):
-        if self.geo_type is None:
-            raise NotImplementedError
-        return DEFAULT_VECTOR_EXTS if self.geo_type == "shp" else DEFAULT_RASTER_EXTS
+    # 2. todo: check with Susan to test language sepcific collection, may not need endode, decode, bom for csv file
+    def _write_csv(self, file, header, raws):
+        with open(file, "w") as csvfile:
+            csvWriter = csv.writer(csvfile)
+            # csvWriter.writerow([h.encode("utf-8") for h in header])
+            csvWriter.writerow([h for h in header])
+            for raw in raws:
+                # print str(raw["_modified_date_dt"])
+                # csvWriter.writerow([v.encode("utf-8") if v else "" for v in raw])
+                csvWriter.writerow([col if col else "" for col in raw])
 
-    def _missed_file_paths(self):
-        paths = []
-        expected_exts = self._expected_exts()
-        for geofile_path in self.geofile_paths:
-            paths.extend(
-                self._missed_file_paths_from_geofile(geofile_path, expected_exts)
-            )
-        return paths
+    def _filename(self, dir, prefix):
+        basename = os.path.basename(self.workspace_dir)
+        name = f"{prefix}_{basename}.csv"
+        return os.path.join(dir, name)
 
-    def _unclaimed_file_paths(self):
-        paths = []
-        geo_stems = [
-            Path(geofile_path).stem for geofile_path in self.geofile_paths
-        ]  # abc.shp => abc
-        for file_path in self.file_paths:
-            stem = Path(file_path).stem
-            if stem not in geo_stems:
-                paths.append(file_path)
-        return paths
-
-    def _logger(self, summary, list):
-        if len(list) > 0:
-            self.logging.info(f"{summary}")
-            for l in list:
-                self.logging.info(f"{l}")
-
-    def _missed_file_paths_from_geofile(self, geofile, expected_exts) -> List:
-        paths = []
-        base = os.path.splitext(geofile)[0]
-        for ext in expected_exts:
-            expected_file_path = f"{base}{ext}"
-            if expected_file_path not in self.file_paths:
-                paths.append(expected_file_path)
-        return paths
-
+    ## common methods to be moved
     def _file_paths(self, ext) -> List:
         return [
             os.path.join(dirpath, filename)
-            for dirpath, dirs, filenames in os.walk(self.source_dir)
+            for dirpath, dirs, filenames in os.walk(self.workspace_dir)
             for filename in filenames
             if filename.endswith(ext)
         ]
 
+    ## common functions end
+
 
 class GeoFile(object):
+    main_headers = []
+    main_elements = {}
+    resp_headers = []
+    resp_elements = {}
+
     def __init__(self, geofile):
         self.geofile = geofile
+        self.root = self._root()
 
-    def projection(self, workspace, logging):
-        name = os.path.basename(self.geofile)
-        prj_file = os.path.join(workspace, name)
-        try:
-            wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]'
-            sr = arcpy.SpatialReference()
-            sr.loadFromString(wkt)
-            arcpy.Project_management(self.geofile, prj_file, sr)
-        except Exception as ex:
-            logging.info(f"{self.geofile} - {ex}")
+    def main_row(self):
+        if not self.root:
+            return [""] * 52
 
-    def pyramid(self, logging):
-        pylevel = "7"
-        skipfirst = "NONE"
-        resample = "NEAREST"
-        compress = "Default"
-        quality = "70"
-        skipexist = "SKIP_EXISTING"
-        try:
-            arcpy.BuildPyramids_management(
-                self.geofile, pylevel, skipfirst, resample, compress, quality, skipexist
+        row = [
+            self._main_column(header.strip()[:-2]) if header.endswith("_o") else ""
+            for header in self.main_headers
+        ]
+        self._update_row(row, self.main_headers, "geofile", self.geofile)
+        # todo: add document column to the end of the row
+        return row
+
+    def resp_rows(self):
+        rows = []
+        citation_rows = self._resp_rows_from_path(
+            "./dataIdInfo/idCitation/citRespParty"
+        )
+        rows.extend(citation_rows)
+
+        idpoc_rows = self._resp_rows_from_path("./dataIdInfo/idPoC")
+        rows.extend(idpoc_rows)
+
+        self._add_defalut_role("010", rows)
+        self._add_defalut_role("006", rows)
+
+        return rows
+
+    def _root(self):
+        xml_file = f"{self.geofile}.xml"
+        if Path(xml_file).is_file():
+            tree = ET.parse(xml_file)
+            return tree.getroot()
+
+        return None
+
+    # TODO: make functions the same format
+    def _main_column(self, tag):
+        tag_functions = {
+            "collectionTitle": self._collection_title,
+            "temporalCoverage": self._temporalCoverage,
+            "resourceType": self._resource_type,
+            "modified_date_dt": self._modified_date_dt,
+        }
+        fun = tag_functions.get(tag, None)
+        if fun:
+            return fun()
+        else:
+            val = self._tag_value(tag).strip()
+            if tag == "topicISO":  # check import later
+                val = val.strip("0")
+            return val
+
+    def _tag_value(self, tag):
+        keys = self.main_elements.keys()
+        if tag in keys:
+            dic = self.main_elements[tag]
+            from_attribute = dic.get("attribute")
+            path = dic.get("path")
+            return self._field_value(path, from_attribute)
+
+        return ""
+
+    def _node_value(self, node, from_attribute):
+        tags = re.compile("<.*?>")
+        if node is not None and len(list(node)) == 0:  # leaf node
+            txt = node.get("value") if from_attribute else node.text
+            if txt:
+                return re.sub(tags, "", txt.strip())
+
+        return ""
+
+    def _field_value(self, path, from_attribute, parent_node=None):
+        if parent_node is None:
+            parent_node = self.root
+
+        content = ""
+        nodes = parent_node.findall(path)
+        for node in nodes:
+            value = self._node_value(node, from_attribute)
+            if len(value) > 0:
+                content += f"{value}$"  # test to remove utf encoding, decoding
+            # content += f"{value.encode("utf-8")}$" # test to remove utf encoding, decoding
+
+        return content.strip().rstrip("$").strip()
+        # return content.strip().rstrip("$").strip().decode('utf-8')
+
+    def _collection_title(self):
+        coll_title = self._field_value("dataIdInfo/idCitation/collTitle", False)
+        if coll_title:
+            return coll_title
+
+        code = self._field_value("dataIdInfo/aggrInfo/assocType/AscTypeCd", True)
+        if code == "002":
+            res_title = self._field_value(
+                "dataIdInfo/aggrInfo/aggrDSName/resTitle", False
             )
-        except Exception as ex:
-            logging.info(f"{self.geofile} - {ex}")
+            if res_title:
+                return res_title
+
+        return ""
+
+    def _temporalCoverage(self):
+        xpaths = [
+            "dataIdInfo/tempKeys/keyword",
+            "dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Period",
+            "dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Instant",
+        ]
+
+        for xpath in xpaths:
+            txt = self._field_value(xpath, False)
+            if len(txt) > 0:
+                return txt
+
+        return ""
+
+    def _modified_date_dt(self):
+        return date.today().strftime("%Y%m%d")
+
+    def _resource_type(self):
+        desc = arcpy.Describe(self.geofile)
+        data_type = desc.dataType
+        if data_type == "RasterDataset":
+            return "Raster data"
+
+        if data_type == "ShapeFile":
+            shape_mapping = {
+                "polyline": "Line data",
+                "polygon": "Polygon data",
+                "point": "Point data",
+            }
+            shape = desc.shapeType.lower()
+            return shape_mapping.get(shape, "")
+        return ""
+
+    ####
+    def _resp_tag_value(self, name, node):
+        path_info_dic = self.resp_elements[name]
+        # from_attribute = path_info_dic.get("attribute")
+        path = path_info_dic.get("path")
+        return self._field_value(path, False, node)
+
+    def _resp_row(self, node):
+        role = node.find("./role/RoleCd").get("value")
+        if role:
+            keys = self.resp_elements.keys()
+            row = [
+                self._resp_tag_value(name, node) if name in keys else ""
+                for name in self.resp_headers
+            ]
+            self._update_row(row, self.resp_headers, "role", role)
+            self._update_row(row, self.resp_headers, "geofile", self.geofile)
+            return row
+
+        return None
+
+    def _update_row(self, row, headers, header_name, value):
+        index = headers.index(header_name)
+        row[index] = value
+
+    def _resp_rows_from_path(self, path):
+        nodes = self.root.findall(path)
+        if nodes:
+            rows = [self._resp_row(node) for node in nodes]
+            return [row for row in rows if row is not None]
+
+        return []
+
+    #### responsible party csv data ######
+    # To ensure a geofile has at least one "006" and one "010" roles in repsponsible parties
+    def _add_defalut_role(self, role_code, rows):
+        index = self.resp_headers.index("role")
+        role_codes = [row[index] for row in rows]
+        if role_code not in role_codes:
+            new_row = [""] * 18
+            self._update_row(new_row, self.resp_headers, "role", role_code)
+            self._update_row(new_row, self.resp_headers, "geofile", self.geofile)
+            rows.append(new_row)
+
+    def doc_name(self):
+        pass
 
 
 ################################################################################################
-#                                 2. set up                                                    #
+#                             2. constant variables                                                        #
 ################################################################################################
-# 1. Please update source data directory here
-source_batch_path = "D:\small_test\Vector_sample_fake"
-
-# 2. Please updare Workspace directory here, using '\\' to replace '\' in the path
-workspace_path = "D:\\workspace"
-
-# 3. Plese update Log file
-logfile = "D:\Log\shpfile_projection.log"
-logging.basicConfig(
-    filename=logfile,
-    level=logging.INFO,
-    format="%(message)s - %(asctime)s - %(funcName)s - %(levelname)s",
-)
-
-# Default geofile extensions
-# Add or remove extenstions in below lists based on requirements
-DEFAULT_RASTER_EXTS = [".tif", ".aux", ".tfw", ".tif.xml", ".tif.ovr"]
-DEFAULT_VECTOR_EXTS = [
-    ".cpg",
-    ".dbf",
-    ".prj",
-    ".sbn",
-    ".sbx",
-    ".shp",
-    ".shp.xml",
-    ".shx",
+# Main CSV File headers: the order of this array define the order the main CSV file
+main_headers = [
+    "arkid",
+    "geofile",
+    "title_s_o",
+    "title_s",
+    "alternativeTitle_o",
+    "alternativeTitle",
+    "date_s_o",
+    "date_s",
+    "summary_o",
+    "summary",
+    "description_o",
+    "description",
+    "topicISO_o",
+    "topicISO",
+    "subject_o",
+    "subject",
+    "keyword_o",
+    "keyword",
+    "spatialSubject_o",
+    "spatialSubject",
+    "temporalCoverage_o",
+    "temporalCoverage",
+    "solrYear",
+    "dateRange_drsim",
+    "language_o",
+    "language",
+    "resourceClass",
+    "resourceType_o",
+    "resourceType",
+    "collectionTitle_o",
+    "collectionTitle",
+    "relation",
+    "isPartOf",
+    "isMemberOf",
+    "source",
+    "isVersionOf",
+    "replaces",
+    "isReplacedBy",
+    "accessRights_s",
+    "rights_general_o",
+    "rights_general",
+    "rights_legal_o",
+    "rights_legal",
+    "rights_security_o",
+    "rights_security",
+    "rightsHolder",
+    "license",
+    "suppressed_b",
+    "georeferenced_b",
+    "modified_date_dt_o",
+    "modified_date_dt",
 ]
 
 
+# 1) Keys are used as CSV headers of the main CSV file, header sequence is from CSV_HEADER_TRANSFORM
+# 2) Elements with "key_path":True are supposed to have multiple occurrences in ISO19139
+main_elements = {
+    "title_s": {"path": "dataIdInfo/idCitation/resTitle", "type": "string"},
+    "alternativeTitle": {"path": "dataIdInfo/idCitation/resAltTitle", "type": "string"},
+    "summary": {"path": "dataIdInfo/idPurp", "type": "string"},
+    "description": {"path": "dataIdInfo/idAbs", "type": "string", "html": True},
+    "language": {
+        "path": "dataIdInfo/dataLang/languageCode",
+        "attribute": True,
+        "type": "string",
+    },
+    "subject": {
+        "path": "dataIdInfo/themeKeys/keyword",
+        "key_path": True,
+        "type": "string",
+    },
+    "date_s": {"path": "dataIdInfo/idCitation/date/pubDate", "type": "string"},
+    "spatialSubject": {
+        "path": "dataIdInfo/placeKeys/keyword",
+        "key_path": True,
+        "type": "string",
+    },
+    "rights_general": {
+        "path": "dataIdInfo/resConst/Consts/useLimit",
+        "html": True,
+        "type": "string",
+    },
+    "rights_legal": {
+        "path": "dataIdInfo/resConst/LegConsts/useLimit",
+        "type": "string",
+    },
+    "rights_security": {
+        "path": "dataIdInfo/resConst/SecConsts/useLimit",
+        "type": "string",
+    },
+    "modified_date_dt": {
+        "path": "Esri/ModDate",
+        "type": "date",
+        "default": date.today().strftime("%Y%m%d"),
+    },
+    "topicISO": {
+        "path": "dataIdInfo/tpCat/TopicCatCd",
+        "attribute": True,
+        "key_path": True,
+        "type": "string",
+    },
+    "keyword": {
+        "path": "dataIdInfo/searchKeys/keyword",
+        "key_path": True,
+        "type": "string",
+    },
+    "temporalCoverage": {
+        "path": "dataIdInfo/tempKeys/keyword",
+        "key_path": True,
+        "type": "string",
+    },
+    "collectionTitle": {"path": "dataIdInfo/idCitation/collTitle", "type": "string"},
+}
+
+resp_headers = [
+    "arkid",
+    "geofile",
+    "from",
+    "individual",
+    "role",
+    "contact_name",
+    "position",
+    "organization",
+    "contact_info",
+    "email",
+    "address_type",
+    "address",
+    "city",
+    "state",
+    "zip",
+    "country",
+    "phone_no",
+    "fax_no",
+    "hours",
+    "instruction",
+]
+
+UCB_RESPONSIBLE_PARTY = {
+    "organization": "UC Berkeley Library",
+    "email": "eart@library.berkeley.edu",
+    "address_Type": "Both",
+    "address": "50 McCone Hall",
+    "city": "Berkeley",
+    "state": "CA",
+    "zip": "94720-6000",
+    "country": "UNITED STATES",
+}
+
+
+# Keys are used as CSV headers of responsible party csv file
+resp_elements = {
+    "contact_name": {"path": "rpIndName", "type": "string"},
+    "position": {"path": "rpPosName", "type": "string"},
+    "organization": {"path": "rpOrgName", "type": "string"},
+    "contact_info": {"path": "rpCntInfo", "type": "string"},
+    "email": {"path": "rpCntInfo/cntAddress/eMailAdd", "type": "string"},
+    "address_type": {
+        "path": "rpCntInfo/cntAddress",
+        "type": "attribute",
+        "key": "addressType",
+        "values": [("postal", "postal"), ("physical", "physical"), ("both", "both")],
+    },
+    "address": {"path": "rpCntInfo/cntAddress/delPoint", "type": "string"},
+    "city": {"path": "rpCntInfo/cntAddress/city", "type": "string"},
+    "state": {"path": "rpCntInfo/cntAddress/adminArea", "type": "string"},
+    "zip": {"path": "rpCntInfo/cntAddress/postCode", "type": "string"},
+    "country": {"path": "rpCntInfo/cntAddress/country", "type": "string"},
+    "phone_no": {"path": "rpCntInfo/voiceNum", "type": "string"},
+    "fax_no": {"path": "rpCntInfo/faxNum", "type": "string"},
+    "hours": {"path": "rpCntInfo/cntHours", "type": "string"},
+    "instruction": {"path": "rpCntInfo/cntInstr", "type": "string"},
+}
+
+
 ################################################################################################
-#                                3. Run options                                                #
+#                                 3. set up                                                    #
 ################################################################################################
-logging.info(f"***starting 'batch_preparing'")
-source_batch = SourceBatch(source_batch_path, logging)
+# initial csv infomation to class variables
+GeoFile.resp_headers = resp_headers
+GeoFile.resp_elements = resp_elements
+GeoFile.main_headers = main_headers
+GeoFile.main_elements = main_elements
 
-# options
-# 1. Check Source Batch
-source_batch.checkup()
+# Log file
+logfile = "D:\\Log\\shpfile_projection.log"
+logging.basicConfig(
+    filename=logfile,
+    level=logging.INFO,
+    format="%(message)s - %(asctime)s",
+)
 
-# 2. Vector projection
-source_batch.shp_projection(workspace_path)
+# 1. please update directory information here
+workspace_directory = "D:\\test1\\tijuana_workspace"
 
-# 3. Raster grid
-source_batch.tif_pyramid()
+# 2. please update directory information here
+output_directory = "D:\\results"
 
 
-logging.info(f"***'batch_preparing' finished.")
+################################################################################################
+#                                4. Run options                                                #
+################################################################################################
+logging.info(f"*** starting 'batch_export_csv'")
+
+batch = BatchExportCsv(workspace_directory, output_directory, logging)
+batch.main_csv()
+batch.resp_csv()
+
+logging.info(f"*** end 'batch_export_csv'")
