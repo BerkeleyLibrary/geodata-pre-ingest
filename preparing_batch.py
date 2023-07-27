@@ -43,25 +43,26 @@ class SourceBatch(object):
         tiffile_paths = self._file_paths("tif")
         if not shapefile_paths and not tiffile_paths:
             self.logging.info(
-                "No shapefiles or raster files found in the source directory!"
+                f"No shapefiles or raster files found in {self.source_dir}."
             )
-            raise NotImplementedError
+            raise ValueError(
+                "Directory should include either shapefiles or raster files"
+            )
 
         if shapefile_paths and tiffile_paths:
             self.logging.info(
-                "Cannot run with mixing shapefiles and raster files in the same directory!"
+                f"Mixing shapefiles and raster files found in {self.source_dir}."
             )
-            raise NotImplementedError
+            raise ValueError(
+                "Both shapefiles and raster files found. Directory should include either shapefiles or raster files."
+            )
 
         if shapefile_paths:
             self.geofile_paths = shapefile_paths
             self.geo_type = "shp"
-        elif tiffile_paths:
+        else:
             self.geofile_paths = tiffile_paths
             self.geo_type = "tif"
-        else:
-            self.geofile_paths = []
-            self.geo_type = None
 
     def _expected_exts(self):
         if self.geo_type is None:

@@ -37,37 +37,28 @@ class BatchExportCsv(object):
     def _geofile_paths(self):
         shapefile_paths = self._file_paths("shp")
         tiffile_paths = self._file_paths("tif")
+
         if not shapefile_paths and not tiffile_paths:
             self.logging.info(
                 f"No shapefiles or raster files found in {self.workspace_dir}!"
             )
-            raise NotImplementedError
+            return []
 
         if shapefile_paths and tiffile_paths:
             self.logging.info(
                 f"Mixing shapefiles and raster files found in {self.workspace_dir}."
             )
-            raise NotImplementedError
-        # 1. todo: check with Susan to exclude geotye
-        if shapefile_paths:
-            return shapefile_paths
-            # self.geo_type = "shp"
-        elif tiffile_paths:
-            return tiffile_paths
-            # self.geo_type = "tif"
-        return []
-        # self.geofile_paths = []
-        # self.geo_type = None
+            raise ValueError(
+                "Both shapefiles and raster files found. Directory should include either shapefiles or raster files."
+            )
 
-    # 2. todo: check with Susan to test language sepcific collection, may not need endode, decode, bom for csv file
+        return shapefile_paths if shapefile_paths else tiffile_paths
+
     def _write_csv(self, file, header, raws):
         with open(file, "w") as csvfile:
             csvWriter = csv.writer(csvfile)
-            # csvWriter.writerow([h.encode("utf-8") for h in header])
             csvWriter.writerow([h for h in header])
             for raw in raws:
-                # print str(raw["_modified_date_dt"])
-                # csvWriter.writerow([v.encode("utf-8") if v else "" for v in raw])
                 csvWriter.writerow([col if col else "" for col in raw])
 
     def _filename(self, dir, prefix):
@@ -106,7 +97,7 @@ class GeoFile(object):
             for header in self.main_headers
         ]
         self._update_row(row, self.main_headers, "geofile", self.geofile)
-        # todo: add document column to the end of the row
+
         return row
 
     def resp_rows(self):
@@ -177,11 +168,9 @@ class GeoFile(object):
         for node in nodes:
             value = self._node_value(node, from_attribute)
             if len(value) > 0:
-                content += f"{value}$"  # test to remove utf encoding, decoding
-            # content += f"{value.encode("utf-8")}$" # test to remove utf encoding, decoding
+                content += f"{value}$"
 
         return content.strip().rstrip("$").strip()
-        # return content.strip().rstrip("$").strip().decode('utf-8')
 
     def _collection_title(self):
         coll_title = self._field_value("dataIdInfo/idCitation/collTitle", False)
@@ -231,10 +220,8 @@ class GeoFile(object):
             return shape_mapping.get(shape, "")
         return ""
 
-    ####
     def _resp_tag_value(self, name, node):
         path_info_dic = self.resp_elements[name]
-        # from_attribute = path_info_dic.get("attribute")
         path = path_info_dic.get("path")
         return self._field_value(path, False, node)
 
@@ -432,8 +419,6 @@ UCB_RESPONSIBLE_PARTY = {
     "country": "UNITED STATES",
 }
 
-
-# Keys are used as CSV headers of responsible party csv file
 resp_elements = {
     "contact_name": {"path": "rpIndName", "type": "string"},
     "position": {"path": "rpPosName", "type": "string"},
