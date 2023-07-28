@@ -453,7 +453,7 @@ GeoFile.main_headers = main_headers
 GeoFile.main_elements = main_elements
 
 # Log file
-logfile = "D:\\Log\\shpfile_projection.log"
+logfile = r"D:/Log/shpfile_projection.log"
 logging.basicConfig(
     filename=logfile,
     level=logging.INFO,
@@ -461,10 +461,10 @@ logging.basicConfig(
 )
 
 # 1. please update directory information here
-workspace_directory = "D:\\test1\\tijuana_workspace"
+workspace_directory = r"D:/test1/tijuana_workspace"
 
 # 2. please update directory information here
-output_directory = "D:\\results"
+output_directory = r"D:/results"
 
 
 ################################################################################################

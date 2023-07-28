@@ -147,13 +147,13 @@ class GeoFile(object):
 #                                 2. set up                                                    #
 ################################################################################################
 # 1. Please update source data directory here
-source_batch_path = "D:\\small_test\\Vector_sample_fake"
+source_batch_path = r"D:/small_test/Vector_sample_fake"
 
 # 2. Please updare Workspace directory here
-workspace_path = "D:\\workspace"
+workspace_path = r"D:/workspace"
 
 # 3. Plese update Log file
-logfile = "D:\\Log\\shpfile_projection.log"
+logfile = r"D:/Log/shpfile_projection.log"
 logging.basicConfig(
     filename=logfile,
     level=logging.INFO,
