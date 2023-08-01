@@ -23,8 +23,8 @@ class BatchExportCsv(object):
 
     def main_csv(self):
         file = self._filename(self.dir, "main")
-        raws = [GeoFile(geofile_path).main_row() for geofile_path in self.geofile_paths]
-        self._write_csv(file, GeoFile.main_headers, raws)
+        rows = [GeoFile(geofile_path).main_row() for geofile_path in self.geofile_paths]
+        self._write_csv(file, GeoFile.main_headers, rows)
 
     def resp_csv(self):
         file = self._filename(self.dir, "resp")
@@ -54,12 +54,12 @@ class BatchExportCsv(object):
 
         return shapefile_paths if shapefile_paths else tiffile_paths
 
-    def _write_csv(self, file, header, raws):
-        with open(file, "w") as csvfile:
+    def _write_csv(self, file, header, rows):
+        with open(file, "w", newline="") as csvfile:
             csvWriter = csv.writer(csvfile)
             csvWriter.writerow([h for h in header])
-            for raw in raws:
-                csvWriter.writerow([col if col else "" for col in raw])
+            for row in rows:
+                csvWriter.writerow([col if col else "" for col in row])
 
     def _filename(self, dir, prefix):
         basename = os.path.basename(self.workspace_dir)
@@ -453,7 +453,7 @@ GeoFile.main_headers = main_headers
 GeoFile.main_elements = main_elements
 
 # Log file
-logfile = r"D:/Log/shpfile_projection.log"
+logfile = r"D:\Log\shpfile_projection.log"
 logging.basicConfig(
     filename=logfile,
     level=logging.INFO,
@@ -461,10 +461,10 @@ logging.basicConfig(
 )
 
 # 1. please update directory information here
-workspace_directory = r"D:/test1/tijuana_workspace"
+workspace_directory = r"D:\test1\tijuana_workspace"
 
 # 2. please update directory information here
-output_directory = r"D:/results"
+output_directory = r"D:\results"
 
 
 ################################################################################################
