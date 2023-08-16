@@ -35,7 +35,6 @@ def add_arkids_rows(csv_path, hash=None):
         with open(csv_path, "r", encoding="utf-8") as csvfile:
             csv_reader = csv.DictReader(csvfile)
             for row in csv_reader:
-                print(row.keys())
                 if not row["arkid"]:
                     id = mint_ark() if need_new_arkid else hash[row["geofile"]]
                     if id:
@@ -114,6 +113,7 @@ def write_csv(filename_path, rows):
 #                                 2. set up                                                    #
 ################################################################################################
 
+# 1. Please setup log file path
 logfile = r"D:\Log\shpfile_projection.log"
 logging.basicConfig(
     filename=logfile,
@@ -121,10 +121,12 @@ logging.basicConfig(
     format="%(message)s - %(asctime)s - %(funcName)s - %(levelname)s",
 )
 
-# 1. please setup main_csv file path:
+# 2. please setup EZID url, username and password at section 1
+
+# 3. please setup main_csv file path:
 main_csv_path = r"D:\results\main_test_vector_workspace_2023-08.csv"
 
-# 2. pleas setup resp_csv file path:
+# 4. please setup resp_csv file path:
 resp_csv_path = r"D:\results\resp_test_vector_workspace_2023-08.csv"
 
 
@@ -146,12 +148,15 @@ resp_csv_path = r"D:\results\resp_test_vector_workspace_2023-08.csv"
 #                                        "D:\results\main_test_vector_workspace_2023-08_arkids.csv"
 #                                        "D:\results\resp_test_vector_workspace_2023-08_arkids.csv"
 ################################################################################################
-s_msg = f"***starting 'assign_arkid'"
-logging.info(f"***starting 'assign_arkid'")
-print(s_msg)
+def output(msg):
+    logging.info(msg)
+    print(msg)
 
-# 1. add arkids to main_csv file
-# it will only add arkid to rows which have no arkid
+
+output(f"***starting 'assign_arkid'")
+
+# 1. add arkids to main_csv file:
+# it will only add arkids to rows which have no existing arkids
 updated_main_csv_path = add_arkid_to_name(main_csv_path)
 updated_resp_csv_path = add_arkid_to_name(resp_csv_path)
 
@@ -172,6 +177,4 @@ if not has_arkid_added(updated_resp_csv_path):
         f" {resp_csv_path} has missing arkids, please check log file for details"
     )
 
-c_msg = f"***completed 'assign_arkid'"
-logging.info(c_msg)
-print(c_msg)
+output(f"***completed 'assign_arkid'")

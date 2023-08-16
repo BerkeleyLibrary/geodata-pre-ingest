@@ -101,7 +101,7 @@ class GeoFile(object):
             for header in self.main_headers
         ]
         self._update_row(row, self.main_headers, "geofile", self.geofile)
-
+        print(row)
         return row
 
     def resp_rows(self):
@@ -277,43 +277,43 @@ class GeoFile(object):
 main_headers = [
     "arkid",
     "geofile",
-    "title_s_o",
-    "title_s",
-    "alternativeTitle_o",
-    "alternativeTitle",
-    "date_s_o",
-    "date_s",
+    "dct_title_s_o",
+    "dct_title_s",
+    "dct_alternative_sm_o",
+    "dct_alternative_sm",
+    "dct_issued_s_o",
+    "dct_issued_s",
     "summary_o",
     "summary",
-    "description_o",
-    "description",
-    "topicISO_o",
-    "topicISO",
-    "subject_o",
-    "subject",
-    "keyword_o",
-    "keyword",
-    "spatialSubject_o",
-    "spatialSubject",
-    "temporalCoverage_o",
-    "temporalCoverage",
-    "solrYear",
-    "dateRange_drsim",
-    "language_o",
-    "language",
-    "resourceClass",
-    "resourceType_o",
-    "resourceType",
-    "collectionTitle_o",
-    "collectionTitle",
-    "relation",
-    "isPartOf",
+    "dct_description_sm_o",
+    "dct_description_sm",
+    "dcat_theme_sm_o",
+    "dcat_theme_sm",
+    "dct_subject_sm_o",
+    "dct_subject_sm",
+    "dcat_keyword_sm_o",
+    "dcat_keyword_sm",
+    "dct_spatial_sm_o",
+    "dct_spatial_sm",
+    "dct_temporal_sm_o",
+    "dct_temporal_sm",
+    "gbl_indexYear_im",
+    "gbl_dateRange_drsim",
+    "dct_language_sm_o",
+    "dct_language_sm",
+    "gbl_resourceClass_sm",
+    "gbl_resourceType_sm_o",
+    "gbl_resourceType_sm",
+    "pcdm_memberOf_sm_o",
+    "pcdm_memberOf_sm",
+    "dct_relation_sm",
+    "dct_isPartOf_sm",
     "isMemberOf",
-    "source",
-    "isVersionOf",
-    "replaces",
-    "isReplacedBy",
-    "accessRights_s",
+    "dct_source_sm",
+    "dct_isVersionOf_sm",
+    "dct_replaces_sm",
+    "dct_isReplacedBy_sm",
+    "dct_accessRights_s",
     "rights_general_o",
     "rights_general",
     "rights_legal_o",
@@ -321,37 +321,28 @@ main_headers = [
     "rights_security_o",
     "rights_security",
     "rightsHolder",
-    "license",
-    "suppressed_b",
-    "georeferenced_b",
-    "modified_date_dt_o",
-    "modified_date_dt",
+    "dct_license_sm",
+    "gbl_suppressed_b",
+    "gbl_georeferenced_b",
+    "gbl_mdModified_dt_o",
+    "gbl_mdModified_dt",
 ]
 
 
 # 1) Keys are used as CSV headers of the main CSV file, header sequence is from CSV_HEADER_TRANSFORM
-# 2) Elements with "key_path":True are supposed to have multiple occurrences in ISO19139
+# 2) An element with "keys" in it's path has multiple occurrences in ISO19139
 main_elements = {
-    "title_s": {"path": "dataIdInfo/idCitation/resTitle", "type": "string"},
-    "alternativeTitle": {"path": "dataIdInfo/idCitation/resAltTitle", "type": "string"},
+    "dct_title_s": {"path": "dataIdInfo/idCitation/resTitle", "type": "string"},
+    "dct_alternative_sm": {
+        "path": "dataIdInfo/idCitation/resAltTitle",
+        "type": "string",
+    },
     "summary": {"path": "dataIdInfo/idPurp", "type": "string"},
-    "description": {"path": "dataIdInfo/idAbs", "type": "string", "html": True},
-    "language": {
-        "path": "dataIdInfo/dataLang/languageCode",
-        "attribute": True,
-        "type": "string",
-    },
-    "subject": {
-        "path": "dataIdInfo/themeKeys/keyword",
-        "key_path": True,
-        "type": "string",
-    },
-    "date_s": {"path": "dataIdInfo/idCitation/date/pubDate", "type": "string"},
-    "spatialSubject": {
-        "path": "dataIdInfo/placeKeys/keyword",
-        "key_path": True,
-        "type": "string",
-    },
+    "dct_description_sm": {"path": "dataIdInfo/idAbs", "type": "string", "html": True},
+    "dct_language_sm": {"path": "dataIdInfo/dataLang/languageCode", "type": "string"},
+    "dct_subject_sm": {"path": "dataIdInfo/themeKeys/keyword", "type": "string"},
+    "dct_issued_s": {"path": "dataIdInfo/idCitation/date/pubDate", "type": "string"},
+    "dct_spatial_sm": {"path": "dataIdInfo/placeKeys/keyword", "type": "string"},
     "rights_general": {
         "path": "dataIdInfo/resConst/Consts/useLimit",
         "html": True,
@@ -365,28 +356,15 @@ main_elements = {
         "path": "dataIdInfo/resConst/SecConsts/useLimit",
         "type": "string",
     },
-    "modified_date_dt": {
-        "path": "Esri/ModDate",
-        "type": "date",
-        "default": date.today().strftime("%Y%m%d"),
-    },
-    "topicISO": {
+    "gbl_mdModified_dt": {"path": "Esri/ModDate", "type": "date"},
+    "dcat_theme_sm": {
         "path": "dataIdInfo/tpCat/TopicCatCd",
         "attribute": True,
-        "key_path": True,
         "type": "string",
     },
-    "keyword": {
-        "path": "dataIdInfo/searchKeys/keyword",
-        "key_path": True,
-        "type": "string",
-    },
-    "temporalCoverage": {
-        "path": "dataIdInfo/tempKeys/keyword",
-        "key_path": True,
-        "type": "string",
-    },
-    "collectionTitle": {"path": "dataIdInfo/idCitation/collTitle", "type": "string"},
+    "dcat_keyword_sm": {"path": "dataIdInfo/searchKeys/keyword", "type": "string"},
+    "dct_temporal_sm": {"path": "dataIdInfo/tempKeys/keyword", "type": "string"},
+    "pcdm_memberOf_sm": {"path": "dataIdInfo/idCitation/collTitle", "type": "string"},
 }
 
 resp_headers = [
@@ -474,10 +452,15 @@ output_directory = r"D:\results"
 ################################################################################################
 #                                4. Run options                                                #
 ################################################################################################
-logging.info(f"*** starting 'batch_export_csv'")
+def output(msg):
+    logging.info(msg)
+    print(msg)
+
+
+output(f"*** starting 'batch_export_csv'")
 
 batch = BatchExportCsv(workspace_directory, output_directory, logging)
 batch.main_csv()
 batch.resp_csv()
 
-logging.info(f"*** end 'batch_export_csv'")
+output(f"*** end 'batch_export_csv'")

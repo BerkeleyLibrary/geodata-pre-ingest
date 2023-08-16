@@ -147,9 +147,9 @@ class GeoFile(object):
 #                                 2. set up                                                    #
 ################################################################################################
 # 1. Please update source data directory here
-source_batch_path = r"D:\small_test\Vector_sample_fake"
+source_batch_path = r"D:\from_susan\sample_raster"
 
-# 2. Please updare Workspace directory here
+# 2. Please update Workspace directory here
 workspace_path = r"D:\workspace"
 
 # 3. Plese update Log file
@@ -178,7 +178,13 @@ DEFAULT_VECTOR_EXTS = [
 ################################################################################################
 #                                3. Run options                                                #
 ################################################################################################
-logging.info(f"***starting 'batch_preparing'")
+def output(msg):
+    logging.info(msg)
+    print(msg)
+
+
+output(f"***starting 'batch_preparing'")
+
 source_batch = SourceBatch(source_batch_path, logging)
 
 # options
@@ -191,5 +197,4 @@ source_batch.shp_projection(workspace_path)
 # 3. Raster grid
 source_batch.tif_pyramid()
 
-
-logging.info(f"***'batch_preparing' finished.")
+output(f"***'batch_preparing' finished.")
