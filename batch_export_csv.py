@@ -93,15 +93,12 @@ class GeoFile(object):
         self.root = self._root()
 
     def main_row(self):
-        if not self.root:
-            return [""] * 52
-
         row = [
             self._main_column(header.strip()[:-2]) if header.endswith("_o") else ""
             for header in self.main_headers
         ]
         self._update_row(row, self.main_headers, "geofile", self.geofile)
-        print(row)
+
         return row
 
     def resp_rows(self):
@@ -120,12 +117,21 @@ class GeoFile(object):
         return rows
 
     def _root(self):
-        xml_file = f"{self.geofile}.xml"
-        if Path(xml_file).is_file():
-            tree = ET.parse(xml_file)
-            return tree.getroot()
+        xml_filepath = f"{self.geofile}.xml"
+        if not Path(xml_filepath).is_file():
+            self._export_xml_file(xml_filepath)
+        tree = ET.parse(xml_filepath)
+        return tree.getroot()
 
-        return None
+    def _export_xml_file(self, xml_filepath):
+        try:
+            basename = os.path.splitext(self.geofile)[0]
+            item_md = md.Metadata(basename)
+            item_md.saveAsXML(xml_filepath, "EXACT_COPY")
+        except Exception as ex:
+            msg = f"Could not export to xml file from {self.geofile}"
+            self.logging.info(f"{msg} - {ex}")
+            raise ValueError(msg)
 
     # TODO: make functions the same format
     def _main_column(self, tag):
@@ -443,7 +449,7 @@ logging.basicConfig(
 )
 
 # 1. please update directory information here
-workspace_directory = r"D:\from_susan\test_vector_workspace_2023-08"
+workspace_directory = r"D:\from_susan\test_vector_workspace_2023-08 - Copy"
 
 # 2. please update directory information here
 output_directory = r"D:\results"
