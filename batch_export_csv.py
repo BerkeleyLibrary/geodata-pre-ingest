@@ -440,7 +440,7 @@ GeoFile.resp_elements = resp_elements
 GeoFile.main_headers = main_headers
 GeoFile.main_elements = main_elements
 
-# Log file
+# 1. Please provide your local log file path
 logfile = r"D:\Log\shpfile_projection.log"
 logging.basicConfig(
     filename=logfile,
@@ -448,10 +448,12 @@ logging.basicConfig(
     format="%(message)s - %(asctime)s",
 )
 
-# 1. please update directory information here
-workspace_directory = r"D:\from_susan\test_vector_workspace_2023-08 - Copy"
+# 2. Please provide source data directory path here
+source_batch_path = r"D:\from_susan\test_vector_workspace_2023-08 - Copy"
 
-# 2. please update directory information here
+# 3. please provide result directory path - a place to save main csv and resp csv files:
+#   attention: Please do not use the original batch directory path or projected directory path
+#              Suggest to provide a specific directory path for result files
 output_directory = r"D:\results"
 
 
@@ -465,7 +467,7 @@ def output(msg):
 
 output(f"*** starting 'batch_export_csv'")
 
-batch = BatchExportCsv(workspace_directory, output_directory, logging)
+batch = BatchExportCsv(source_batch_path, output_directory, logging)
 batch.main_csv()
 batch.resp_csv()
 

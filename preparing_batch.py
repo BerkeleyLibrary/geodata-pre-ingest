@@ -143,23 +143,6 @@ class GeoFile(object):
             logging.info(f"{self.geofile} - {ex}")
 
 
-################################################################################################
-#                                 2. set up                                                    #
-################################################################################################
-# 1. Please update source data directory here
-source_batch_path = r"D:\from_susan\sample_raster"
-
-# 2. Please update Workspace directory here
-workspace_path = r"D:\workspace"
-
-# 3. Plese update Log file
-logfile = r"D:\Log\shpfile_projection.log"
-logging.basicConfig(
-    filename=logfile,
-    level=logging.INFO,
-    format="%(message)s - %(asctime)s - %(funcName)s - %(levelname)s",
-)
-
 # Default geofile extensions
 # Add or remove extenstions in below lists based on requirements
 DEFAULT_RASTER_EXTS = [".tif", ".aux", ".tfw", ".tif.xml", ".tif.ovr"]
@@ -173,6 +156,24 @@ DEFAULT_VECTOR_EXTS = [
     ".shp.xml",
     ".shx",
 ]
+
+################################################################################################
+#                                 2. set up                                                    #
+################################################################################################
+
+# 1. Please provide your local log file path
+logfile = r"D:\Log\shpfile_projection.log"
+logging.basicConfig(
+    filename=logfile,
+    level=logging.INFO,
+    format="%(message)s - %(asctime)s - %(funcName)s - %(levelname)s",
+)
+
+# 2. Please provide source data directory path
+source_batch_path = r"D:\from_susan\sample_raster"
+
+# 3. Please provide projected data directory path
+projected_directory_path = r"D:\workspace"
 
 
 ################################################################################################
@@ -192,7 +193,7 @@ source_batch = SourceBatch(source_batch_path, logging)
 source_batch.checkup()
 
 # 2. Vector projection
-source_batch.shp_projection(workspace_path)
+source_batch.shp_projection(projected_directory_path)
 
 # 3. Raster grid
 source_batch.tif_pyramid()

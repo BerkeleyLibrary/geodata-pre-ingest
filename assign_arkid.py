@@ -113,7 +113,7 @@ def write_csv(filename_path, rows):
 #                                 2. set up                                                    #
 ################################################################################################
 
-# 1. Please setup log file path
+# 1. Please provide your local log file path
 logfile = r"D:\Log\shpfile_projection.log"
 logging.basicConfig(
     filename=logfile,
@@ -121,12 +121,12 @@ logging.basicConfig(
     format="%(message)s - %(asctime)s - %(funcName)s - %(levelname)s",
 )
 
-# 2. please setup EZID url, username and password at section 1
+# 2. please provide EZID url, username and password at script in section 1
 
-# 3. please setup main_csv file path:
+# 3. please provide main_csv file path:
 main_csv_path = r"D:\results\main_test_vector_workspace_2023-08.csv"
 
-# 4. please setup resp_csv file path:
+# 4. please provide resp_csv file path:
 resp_csv_path = r"D:\results\resp_test_vector_workspace_2023-08.csv"
 
 
@@ -140,6 +140,7 @@ resp_csv_path = r"D:\results\resp_test_vector_workspace_2023-08.csv"
 #                based on the column 'geofile' value(geofile name path) from both files .
 #               -  One row in main_csv file may be related to multiple rows in resp_csv file
 #  c: after running this script two output files will be generated with arkids assigned
+#  d: new files will be named as "*_arkids.csv"
 #  example:
 #         input two files:
 #                       main_csv_path = r"D:\results\main_test_vector_workspace_2023-08.csv"
