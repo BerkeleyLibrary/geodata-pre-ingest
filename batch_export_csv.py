@@ -1,4 +1,5 @@
 import arcpy
+from arcpy import metadata as md
 import os
 import logging
 from pathlib import Path
@@ -23,14 +24,17 @@ class BatchExportCsv(object):
 
     def main_csv(self):
         file = self._filename(self.dir, "main")
-        rows = [GeoFile(geofile_path).main_row() for geofile_path in self.geofile_paths]
+        rows = [
+            GeoFile(geofile_path, self.logging).main_row()
+            for geofile_path in self.geofile_paths
+        ]
         self._write_csv(file, GeoFile.main_headers, rows)
 
     def resp_csv(self):
         file = self._filename(self.dir, "resp")
         rows = []
         for geofile_path in self.geofile_paths:
-            resp_rows = GeoFile(geofile_path).resp_rows()
+            resp_rows = GeoFile(geofile_path, self.logging).resp_rows()
             rows.extend(resp_rows)
         self._write_csv(file, GeoFile.resp_headers, rows)
 
@@ -88,9 +92,10 @@ class GeoFile(object):
     resp_headers = []
     resp_elements = {}
 
-    def __init__(self, geofile):
+    def __init__(self, geofile, logging):
         self.geofile = geofile
         self.root = self._root()
+        self.logging = logging
 
     def main_row(self):
         row = [
@@ -441,7 +446,7 @@ GeoFile.main_headers = main_headers
 GeoFile.main_elements = main_elements
 
 # 1. Please provide your local log file path
-logfile = r"D:\Log\shpfile_projection.log"
+logfile = r"Y:\GeoBlacklight\testing\Log\vector_2023-08-22.log"
 logging.basicConfig(
     filename=logfile,
     level=logging.INFO,
@@ -449,12 +454,12 @@ logging.basicConfig(
 )
 
 # 2. Please provide source data directory path here
-source_batch_path = r"D:\from_susan\test_vector_workspace_2023-08 - Copy"
+source_batch_path = r"Y:\GeoBlacklight\testing\test_vector_source_2023-08"
 
 # 3. please provide result directory path - a place to save main csv and resp csv files:
 #   attention: Please do not use the original batch directory path or projected directory path
 #              Suggest to provide a specific directory path for result files
-output_directory = r"D:\results"
+output_directory = r"Y:\GeoBlacklight\testing\test_vector_csv_2023-08"
 
 
 ################################################################################################
