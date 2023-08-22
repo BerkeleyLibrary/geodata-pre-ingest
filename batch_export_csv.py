@@ -337,6 +337,8 @@ main_headers = [
     "gbl_georeferenced_b",
     "gbl_mdModified_dt_o",
     "gbl_mdModified_dt",
+    "gbl_displayNote_sm",
+    "doc_zipfile_path",
 ]
 
 
