@@ -13,8 +13,6 @@ import arcpy
 #                             1. class                                                         #
 ################################################################################################
 # batch from workspace directory to include boundary info
-
-
 class Batch_Iso19139s(object):
     def __init__(self, logging, directory_path=None):
         self.directory_path = directory_path
@@ -519,15 +517,29 @@ def output(msg):
     print(msg)
 
 
+def verify_setup(dir_pathname, *args):
+    verified = True
+    for arg in args:
+        if not Path(arg).is_file():
+            print(f"{arg} does not exit.")
+            verified = False
+
+    if not Path(dir_pathname).is_dir():
+        print(f"{dir_pathname} does not exit.")
+        verified = False
+    return verified
+
+
 output(f"*** starting 'batch_iso19139s'")
 
-# 1. Get a geofile name from main csv file
-# 2. Find the geofile in projected directory
-# 3. Create an iso19139 xml file for each geofile found in 2
-batch_iso19139s = Batch_Iso19139s(logging, projected_directory_path)
-batch_iso19139s(main_csv_filepath, resp_csv_filepath)
+if verify_setup(projected_directory_path, main_csv_filepath, resp_csv_filepath):
+    # 1. Get a geofile name from main csv file
+    # 2. Find the geofile in projected directory
+    # 3. Create an iso19139 xml file for each geofile found in 2
+    batch_iso19139s = Batch_Iso19139s(logging, projected_directory_path)
+    batch_iso19139s(main_csv_filepath, resp_csv_filepath)
 
-output(f"*** end 'batch_iso19139s'")
+    output(f"*** end 'batch_iso19139s'")
 
 
 # todo in csv validation script:

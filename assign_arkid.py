@@ -1,15 +1,13 @@
 import requests
 import logging
 import csv
-import shutil
 import os
+from pathlib import Path
 
 
 ################################################################################################
 #                             1. functions                                                      #
 ################################################################################################
-
-
 def mint_ark():
     url = ""
     username = ""
@@ -154,28 +152,37 @@ def output(msg):
     print(msg)
 
 
+def verify_setup(*args):
+    verified = True
+    for arg in args:
+        if not Path(arg).is_file():
+            print(f"{arg} does not exit.")
+            verified = False
+
+    return verified
+
+
 output(f"***starting 'assign_arkid'")
 
-# 1. add arkids to main_csv file:
-# it will only add arkids to rows which have no existing arkids
-updated_main_csv_path = add_arkid_to_name(main_csv_path)
-updated_resp_csv_path = add_arkid_to_name(resp_csv_path)
+if verify_setup(main_csv_path, resp_csv_path):
+    # 1. add arkids to main_csv file:
+    # it will only add arkids to rows which have no existing arkids
+    updated_main_csv_path = add_arkid_to_name(main_csv_path)
+    updated_resp_csv_path = add_arkid_to_name(resp_csv_path)
+    update_main_csv(main_csv_path)
 
-update_main_csv(main_csv_path)
+    # 2. add arkids to resp_csv file based on main_csv file
+    if has_arkid_added(updated_main_csv_path):
+        update_resp_csv(updated_main_csv_path, resp_csv_path)
+    else:
+        log_raise_error(
+            f"failed in updating arkids to {resp_csv_path}, since {updated_main_csv_path} missing arkids"
+        )
 
-# 2. add arkids to resp_csv file based on main_csv file
-if has_arkid_added(updated_main_csv_path):
-    update_resp_csv(updated_main_csv_path, resp_csv_path)
-else:
-    log_raise_error(
-        f"failed updated arkids to {resp_csv_path}, since {updated_main_csv_path} missing arkids"
-    )
+    # 3. check arkid exists in resp_csv file
+    if not has_arkid_added(updated_resp_csv_path):
+        log_raise_error(
+            f" {resp_csv_path} has missing arkids, please check log file for details"
+        )
 
-# 3. check arkid exists in resp_csv file
-print(updated_resp_csv_path)
-if not has_arkid_added(updated_resp_csv_path):
-    log_raise_error(
-        f" {resp_csv_path} has missing arkids, please check log file for details"
-    )
-
-output(f"***completed 'assign_arkid'")
+    output(f"***completed 'assign_arkid'")

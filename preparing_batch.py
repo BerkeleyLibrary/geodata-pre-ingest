@@ -184,18 +184,25 @@ def output(msg):
     print(msg)
 
 
+def verify_setup(*args):
+    verified = True
+    for arg in args:
+        if not Path(arg).is_dir():
+            print(f"{arg} does not exit.")
+            verified = False
+    return verified
+
+
 output(f"***starting 'batch_preparing'")
 
-source_batch = SourceBatch(source_batch_path, logging)
+if verify_setup(source_batch_path, projected_directory_path):
+    source_batch = SourceBatch(source_batch_path, logging)
+    # options
+    # 1. Check Source Batch
+    source_batch.checkup()
+    # 2. Vector projection
+    source_batch.shp_projection(projected_directory_path)
+    # 3. Raster grid
+    source_batch.tif_pyramid()
 
-# options
-# 1. Check Source Batch
-source_batch.checkup()
-
-# 2. Vector projection
-source_batch.shp_projection(projected_directory_path)
-
-# 3. Raster grid
-source_batch.tif_pyramid()
-
-output(f"***'batch_preparing' finished.")
+    output(f"***'batch_preparing' finished.")

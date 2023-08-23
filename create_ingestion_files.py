@@ -17,12 +17,12 @@ def create_ingestion_files(
     projected_directory_path,
     main_csv_filepath,
 ):
-    verify_setup(
-        main_csv_filepath,
-        source_batch_path,
-        projected_directory_path,
-        result_directory_path,
-    )
+    # verify_setup(
+    #     main_csv_filepath,
+    #     source_batch_path,
+    #     projected_directory_path,
+    #     result_directory_path,
+    # )
 
     name = source_batch_path.split("\\")[-1]
     to_directory_path = os.path.join(result_directory_path, f"{name}_ingestion_files")
@@ -34,19 +34,6 @@ def create_ingestion_files(
             create_ingestion_files_on_row(
                 row, source_batch_path, projected_directory_path, to_directory_path
             )
-
-
-def verify_setup(main_csv_filepath, *args):
-    verified = True
-    for arg in args:
-        if not Path(arg).is_dir():
-            print(f"{arg} does not exit.")
-            verified = False
-
-    if not Path(main_csv_filepath).is_file():
-        print(f"{main_csv_filepath} does not exit.")
-        verified = False
-    return verified
 
 
 def create_ingestion_files_on_row(
@@ -262,13 +249,32 @@ def output(msg):
     print(msg)
 
 
+def verify_setup(main_csv_filepath, *args):
+    verified = True
+    for arg in args:
+        if not Path(arg).is_dir():
+            print(f"{arg} does not exit.")
+            verified = False
+
+    if not Path(main_csv_filepath).is_file():
+        print(f"{main_csv_filepath} does not exit.")
+        verified = False
+    return verified
+
+
 output(f"*** starting 'creating ingestion files'")
 
-create_ingestion_files(
-    result_directory_path,
+if verify_setup(
+    main_csv_filepath,
     source_batch_path,
     projected_directory_path,
-    main_csv_filepath,
-)
+    result_directory_path,
+):
+    create_ingestion_files(
+        result_directory_path,
+        source_batch_path,
+        projected_directory_path,
+        main_csv_filepath,
+    )
 
-output(f"*** end 'creating ingestion files'")
+    output(f"*** end 'creating ingestion files'")
