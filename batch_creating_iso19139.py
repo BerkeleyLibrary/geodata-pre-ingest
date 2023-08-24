@@ -150,12 +150,17 @@ class RowTransformer(object):
         self.root = self.tree.getroot()
         self.main_row = main_row
         self.resp_rows = resp_rows
+        self.main_fieldnames = self._main_col_names(main_row)
 
     def __call__(self):
         self._transform_main()
         self._transform_resp()
         self._add_ucb_distributor()
         self.tree.write(self.tempfile)
+
+    def _main_col_names(self, main_row):
+        dic = dict(main_row)
+        return list(dic.keys())
 
     def _transform_main(self) -> None:
         def remove_nodes(parent, child_name):
@@ -236,20 +241,29 @@ class RowTransformer(object):
             else:  # add main csv validation befefore removing this code
                 print("Please check main_csv file, it may have no metadata content")
 
+        # not every header has a related header_o
         def col_val(header):
-            val = self.main_row[f"{header}_o"]
-            return val if val else self.main_row[header]
+            if not (header.endswith("_o")) and not (header in self.main_fieldnames):
+                msg = f"{header} is not a column name in main CSV file"
+                print(msg)
+                raise ValueError(msg)
+            return self.main_row[header] if header in self.main_fieldnames else ""
+
+        def element_val(header):
+            val = col_val(header)
+            val_o = col_val(f"{header}_o")
+            return val_o if val_o and (not val) else val
 
         def transform_main_headers():
             for header in self.transform_main_headers:
-                val = col_val(header).strip()
+                val = element_val(header).strip()
                 if val:
                     update_metadata(header, val)
 
         def transform_rights_headers():
             rights = {}
             for header in self.right_headers:
-                val = col_val(header).strip()
+                val = element_val(header).strip()
                 if val:
                     rights[header] = val
             if rights:
