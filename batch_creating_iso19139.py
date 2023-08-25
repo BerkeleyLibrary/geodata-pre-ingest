@@ -531,22 +531,25 @@ def output(msg):
     print(msg)
 
 
-def verify_setup(dir_pathname, *args):
+def verify_setup(file_paths, directory_paths):
     verified = True
-    for arg in args:
-        if not Path(arg).is_file():
-            print(f"{arg} does not exit.")
+    for file_path in file_paths:
+        if not Path(file_path).is_file():
+            print(f"{file_path} does not exit.")
             verified = False
 
-    if not Path(dir_pathname).is_dir():
-        print(f"{dir_pathname} does not exit.")
-        verified = False
+    for directory_path in directory_paths:
+        if not Path(directory_path).is_dir():
+            print(f"{directory_path} does not exit.")
+            verified = False
     return verified
 
 
 output(f"*** starting 'batch_iso19139s'")
 
-if verify_setup(projected_directory_path, main_csv_filepath, resp_csv_filepath):
+if verify_setup(
+    [logfile, main_csv_filepath, resp_csv_filepath], [projected_directory_path]
+):
     # 1. Get a geofile name from main csv file
     # 2. Find the geofile in projected directory
     # 3. Create an iso19139 xml file for each geofile found in 2

@@ -122,10 +122,10 @@ logging.basicConfig(
 # 2. please provide EZID url, username and password at script in section 1
 
 # 3. please provide main_csv file path:
-main_csv_path = r"D:\results\main_test_vector_workspace_2023-08.csv"
+main_csv_filepath = r"D:\results\main_test_vector_workspace_2023-08.csv"
 
 # 4. please provide resp_csv file path:
-resp_csv_path = r"D:\results\resp_test_vector_workspace_2023-08.csv"
+resp_csv_filepath = r"D:\results\resp_test_vector_workspace_2023-08.csv"
 
 
 ################################################################################################
@@ -152,37 +152,41 @@ def output(msg):
     print(msg)
 
 
-def verify_setup(*args):
+def verify_setup(file_paths, directory_paths):
     verified = True
-    for arg in args:
-        if not Path(arg).is_file():
-            print(f"{arg} does not exit.")
+    for file_path in file_paths:
+        if not Path(file_path).is_file():
+            print(f"{file_path} does not exit.")
             verified = False
 
+    for directory_path in directory_paths:
+        if not Path(directory_path).is_dir():
+            print(f"{directory_path} does not exit.")
+            verified = False
     return verified
 
 
 output(f"***starting 'assign_arkid'")
 
-if verify_setup(main_csv_path, resp_csv_path):
+if verify_setup([logfile, main_csv_filepath, resp_csv_filepath], []):
     # 1. add arkids to main_csv file:
     # it will only add arkids to rows which have no existing arkids
-    updated_main_csv_path = add_arkid_to_name(main_csv_path)
-    updated_resp_csv_path = add_arkid_to_name(resp_csv_path)
-    update_main_csv(main_csv_path)
+    updated_main_csv_path = add_arkid_to_name(main_csv_filepath)
+    updated_resp_csv_path = add_arkid_to_name(resp_csv_filepath)
+    update_main_csv(main_csv_filepath)
 
     # 2. add arkids to resp_csv file based on main_csv file
     if has_arkid_added(updated_main_csv_path):
-        update_resp_csv(updated_main_csv_path, resp_csv_path)
+        update_resp_csv(updated_main_csv_path, resp_csv_filepath)
     else:
         log_raise_error(
-            f"failed in updating arkids to {resp_csv_path}, since {updated_main_csv_path} missing arkids"
+            f"failed in updating arkids to {resp_csv_filepath}, since {updated_main_csv_path} missing arkids"
         )
 
     # 3. check arkid exists in resp_csv file
     if not has_arkid_added(updated_resp_csv_path):
         log_raise_error(
-            f" {resp_csv_path} has missing arkids, please check log file for details"
+            f" {resp_csv_filepath} has missing arkids, please check log file for details"
         )
 
     output(f"***completed 'assign_arkid'")

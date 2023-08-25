@@ -214,7 +214,7 @@ source_batch_path = r"D:\from_susan\sample_raster"
 projected_directory_path = r"D:\from_susan\sample_raster"
 
 # 4. Please provide main csv file path which have been assigned with arkids
-main_csv_filepath = r"D:\results\main_sample_raster_arkids3.csv"
+main_csv_filepath = r"D:\results\main_sample_raster_arkids2.csv"
 
 # 5. please provide result directory path
 #   attention: Please do not use the original batch directory path or projected directory path
@@ -249,26 +249,25 @@ def output(msg):
     print(msg)
 
 
-def verify_setup(main_csv_filepath, *args):
+def verify_setup(file_paths, directory_paths):
     verified = True
-    for arg in args:
-        if not Path(arg).is_dir():
-            print(f"{arg} does not exit.")
+    for file_path in file_paths:
+        if not Path(file_path).is_file():
+            print(f"{file_path} does not exit.")
             verified = False
 
-    if not Path(main_csv_filepath).is_file():
-        print(f"{main_csv_filepath} does not exit.")
-        verified = False
+    for directory_path in directory_paths:
+        if not Path(directory_path).is_dir():
+            print(f"{directory_path} does not exit.")
+            verified = False
     return verified
 
 
 output(f"*** starting 'creating ingestion files'")
 
 if verify_setup(
-    main_csv_filepath,
-    source_batch_path,
-    projected_directory_path,
-    result_directory_path,
+    [main_csv_filepath, logfile],
+    [source_batch_path, projected_directory_path, result_directory_path],
 ):
     create_ingestion_files(
         result_directory_path,

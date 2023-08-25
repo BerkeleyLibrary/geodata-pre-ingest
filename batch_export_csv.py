@@ -473,18 +473,23 @@ def output(msg):
     print(msg)
 
 
-def verify_setup(*args):
+def verify_setup(file_paths, directory_paths):
     verified = True
-    for arg in args:
-        if not Path(arg).is_dir():
-            print(f"{arg} does not exit.")
+    for file_path in file_paths:
+        if not Path(file_path).is_file():
+            print(f"{file_path} does not exit.")
+            verified = False
+
+    for directory_path in directory_paths:
+        if not Path(directory_path).is_dir():
+            print(f"{directory_path} does not exit.")
             verified = False
     return verified
 
 
 output(f"*** starting 'batch_export_csv'")
 
-if verify_setup(source_batch_path, output_directory):
+if verify_setup([logfile], [source_batch_path, output_directory]):
     batch = BatchExportCsv(source_batch_path, output_directory, logging)
     batch.main_csv()
     batch.resp_csv()
