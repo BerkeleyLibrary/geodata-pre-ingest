@@ -319,7 +319,6 @@ main_headers = [
     "pcdm_memberOf_sm",
     "dct_relation_sm",
     "dct_isPartOf_sm",
-    "isMemberOf",
     "dct_source_sm",
     "dct_isVersionOf_sm",
     "dct_replaces_sm",
