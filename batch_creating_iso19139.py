@@ -51,7 +51,7 @@ class Batch_Iso19139s(object):
         lines = (line for line in open(csv_filepath, "r", encoding="utf-8"))
         rows = (line.strip().split(",") for line in lines)
         header = next(rows)
-        return (dict(zip(header, row)) for row in rows)
+        return [dict(zip(header, row)) for row in rows]
 
     ## common functions end
 
