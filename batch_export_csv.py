@@ -339,6 +339,7 @@ main_headers = [
     "gbl_mdModified_dt_o",
     "gbl_mdModified_dt",
     "gbl_displayNote_sm",
+    "dct_identifier_sm",
     "doc_zipfile_path",
 ]
 
