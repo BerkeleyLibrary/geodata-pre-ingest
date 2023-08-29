@@ -102,11 +102,7 @@ class GeoFile(object):
             self.column_from_main_elements(header) if header.endswith("_o") else ""
             for header in self.main_headers
         ]
-        self._update_row(row, self.main_headers, "geofile", self.geofile)
-        self._update_row(
-            row, self.main_headers, "gbl_resourceType_sm_o", self._resource_type()
-        )
-
+        self._update_main_row(row)
         return row
 
     def resp_rows(self):
@@ -237,6 +233,15 @@ class GeoFile(object):
             return shape_mapping.get(shape, "")
         return ""
 
+    def _format(self):
+        desc = arcpy.Describe(self.geofile)
+        data_type = desc.dataType
+        if data_type == "RasterDataset":
+            return "GeoTIFF"
+        if data_type == "ShapeFile":
+            return "ShapeFile"
+        return ""
+
     def _resp_tag_value(self, name, node):
         path_info_dic = self.resp_elements[name]
         path = path_info_dic.get("path")
@@ -255,6 +260,13 @@ class GeoFile(object):
             return row
 
         return None
+
+    def _update_main_row(self, row):
+        self._update_row(row, self.main_headers, "geofile", self.geofile)
+        self._update_row(
+            row, self.main_headers, "gbl_resourceType_sm_o", self._resource_type()
+        )
+        self._update_row(row, self.main_headers, "dct_format_s_o", self._format())
 
     def _update_row(self, row, headers, header_name, value):
         index = headers.index(header_name)
@@ -317,6 +329,8 @@ main_headers = [
     "gbl_resourceClass_sm",
     "gbl_resourceType_sm_o",
     "gbl_resourceType_sm",
+    "dct_format_s_o",
+    "dct_format_s",
     "pcdm_memberOf_sm_o",
     "pcdm_memberOf_sm",
     "dct_relation_sm",

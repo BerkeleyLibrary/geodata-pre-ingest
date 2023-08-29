@@ -17,13 +17,6 @@ def create_ingestion_files(
     projected_directory_path,
     main_csv_filepath,
 ):
-    # verify_setup(
-    #     main_csv_filepath,
-    #     source_batch_path,
-    #     projected_directory_path,
-    #     result_directory_path,
-    # )
-
     name = source_batch_path.split("\\")[-1]
     to_directory_path = os.path.join(result_directory_path, f"{name}_ingestion_files")
     ensure_dir_exists(to_directory_path)
@@ -161,6 +154,7 @@ def create_zipfile(dic, zip_filepath):
             zf.write(source, destination)
 
 
+#  "tif": [".tif", ".aux", ".tfw", ".prj", ".tif.ovr"],
 def extenstions(geofile_path):
     ext = geofile_path.split(".")[-1].lower()
     dic = {
@@ -168,15 +162,6 @@ def extenstions(geofile_path):
         "tif": [".tif", ".tfw", ".prj", ".tif.ovr"],
     }
     return dic[ext]
-
-
-# def extenstions(geofile_path):
-#     ext = geofile_path.split(".")[-1].lower()
-#     dic = {
-#         "shp": [".cpg", ".dbf", ".prj", ".sbn", ".sbx", ".shp", ".shx"],
-#         "tif": [".tif", ".aux", ".tfw", ".prj", ".tif.ovr"],
-#     }
-#     return dic[ext]
 
 
 def log_raise_error(text):
