@@ -159,9 +159,15 @@ class GeoFile(object):
 
     def _tag_value(self, tag):
         dic = self.main_elements[tag]
-        from_attribute = dic.get("attribute")
         path = dic.get("path")
-        return self._field_value(path, from_attribute)
+        from_attribute = dic.get("attribute")
+        removal_dollar_sign = True if tag.endswith("m") else False
+
+        hash = {
+            "from_attribute": from_attribute,
+            "removal_dollar_sign": removal_dollar_sign,
+        }
+        return self._field_value(path, hash)
 
     def _node_value(self, node, from_attribute):
         tags = re.compile("<.*?>")
@@ -172,28 +178,34 @@ class GeoFile(object):
 
         return ""
 
-    def _field_value(self, path, from_attribute, parent_node=None):
+    def _field_value(self, path, hash, parent_node=None):
         if parent_node is None:
             parent_node = self.root
 
         content = ""
         nodes = parent_node.findall(path)
         for node in nodes:
-            value = self._node_value(node, from_attribute)
+            value = self._node_value(node, hash.get("from_attribute"))
             if len(value) > 0:
+                if hash.get("removal_dollar_sign"):
+                    value = self.rm_dollar_sign(value)
                 content += f"{value}$"
 
         return content.strip().rstrip("$").strip()
 
     def _collection_title(self):
-        coll_title = self._field_value("dataIdInfo/idCitation/collTitle", False)
+        hash = {"from_attribute": False, "removal_dollar_sign": True}
+        coll_title = self._field_value("dataIdInfo/idCitation/collTitle", hash)
         if coll_title:
             return coll_title
 
-        code = self._field_value("dataIdInfo/aggrInfo/assocType/AscTypeCd", True)
+        hash = {"from_attribute": True, "removal_dollar_sign": True}
+        code = self._field_value("dataIdInfo/aggrInfo/assocType/AscTypeCd", hash)
+
         if code == "002":
+            hash = {"from_attribute": False, "removal_dollar_sign": True}
             res_title = self._field_value(
-                "dataIdInfo/aggrInfo/aggrDSName/resTitle", False
+                "dataIdInfo/aggrInfo/aggrDSName/resTitle", hash
             )
             if res_title:
                 return res_title
@@ -206,9 +218,9 @@ class GeoFile(object):
             "dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Period",
             "dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Instant",
         ]
-
+        hash = {"from_attribute": False, "removal_dollar_sign": True}
         for xpath in xpaths:
-            txt = self._field_value(xpath, False)
+            txt = self._field_value(xpath, hash)
             if len(txt) > 0:
                 return txt
 
@@ -245,7 +257,8 @@ class GeoFile(object):
     def _resp_tag_value(self, name, node):
         path_info_dic = self.resp_elements[name]
         path = path_info_dic.get("path")
-        return self._field_value(path, False, node)
+        hash = {"from_attribute": False, "removal_dollar_sign": False}
+        return self._field_value(path, hash, node)
 
     def _resp_row(self, node):
         role = node.find("./role/RoleCd").get("value")
@@ -291,8 +304,8 @@ class GeoFile(object):
             self._update_row(new_row, self.resp_headers, "geofile", self.geofile)
             rows.append(new_row)
 
-    def doc_name(self):
-        pass
+    def rm_dollar_sign(self, str):
+        return str.replace("$", "_")
 
 
 ################################################################################################
@@ -472,16 +485,22 @@ logging.basicConfig(
 )
 
 # 2. Please provide source data directory path here
-source_batch_path = r"D:\from_susan\test_vector_workspace_2023-08"
+source_batch_path = r"D:\pre_test\export_csv\input\test_vector_workspace_2023-08"
 
-# 3. please provide result directory path - a place to save main csv and resp csv files:
+# 3. please provide result directory path:
 #   attention: Please do not use the original batch directory path or projected directory path
-#              Suggest to provide a specific directory path for result files
-output_directory = r"D:\results"
+output_directory = r"D:\pre_test\export_csv\output"
 
 
 ################################################################################################
-#                                4. Run options                                                #
+#                                4. Run                                                       #
+# Example:
+# input directory paths:
+#      source_batch_path = r"D:\pre_test\export_csv\input\test_vector_workspace_2023-08"
+#      output_directory = r"D:\pre_test\export_csv\output"
+# output csv files:
+#     D:\pre_test\export_csv\output\main_test_vector_workspace_2023-08.csv
+#     D:\pre_test\export_csv\output\resp_test_vector_workspace_2023-08.csv
 ################################################################################################
 def output(msg):
     logging.info(msg)
