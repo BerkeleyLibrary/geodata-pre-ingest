@@ -40,39 +40,43 @@ def validate_resp_row(row):
 
 
 def validate_main_row(row):
-    cols = []
-    empty_cols = get_empty_cols(row, required_fields)
-    cols.extend(empty_cols)
+    cols = get_empty_cols(row, required_fields)
+    cols.extend(invalid_value_cols(row))
+    cols.extend(invalid_date_cols(row))
+    cols.extend(invalid_range_cols(row))
+    return cols
 
+
+def invalid_value_cols(row):
     value_hash = {
         "gbl_resourceClass_sm": ls_gbl_resourceClass_sm,
         "dct_accessRights_s": ls_dct_accessRights_s,
         "dct_format_s": ls_dct_format_s,
     }
-    invalid_cols = get_invalid_cols(row, value_hash, get_unexpected_f_v)
-    cols.extend(invalid_cols)
+    return get_invalid_cols(row, value_hash, get_unexpected_f_v)
 
+
+def invalid_date_cols(row):
     date_hash = {
         "gbl_mdModified_dt": ls_gbl_mdModified_dt,
         "gbl_indexYear_im": ls_gbl_indexYear_im,
         "dct_issued_s": ls_dct_issued_s,
     }
-    invalid_cols = get_invalid_cols(row, date_hash, get_invalid_date_f_v)
-    cols.extend(invalid_cols)
+    return get_invalid_cols(row, date_hash, get_invalid_date_f_v)
 
+
+def invalid_range_cols(row):
     range_hash = {"dcat_theme_sm": rg_dcat_theme_sm}
-    invalid_cols = get_invalid_cols(row, range_hash, get_invalid_range_f_v)
-    cols.extend(invalid_cols)
-
-    return cols
+    return get_invalid_cols(row, range_hash, get_invalid_range_f_v)
 
 
-def get_empty_cols(row, field_names):
+def get_empty_cols(row, fieldnames):
     empty = []
-    for name in field_names:
-        f_v = get_empty_f_v(row, name)
-        if f_v:
-            empty.append(f_v)
+    for fieldname in fieldnames:
+        value = get_value(row, fieldname)
+        if not value:
+            field_value = f_v(fieldname, ' " " ', "and")
+            empty.append(field_value)
     return empty
 
 
@@ -93,19 +97,14 @@ def get_value(row, fieldname):
     return row.get(o_fieldname)
 
 
-def f_v(fieldname, value):
+def f_v(fieldname, value, word="or"):
     fieldname_o = f"{fieldname}_o"
     new_name = (
-        f"{fieldname} or {fieldname_o}"
+        f"{fieldname} {word} {fieldname_o}"
         if fieldname_o in main_csv_headers
         else fieldname
     )
     return [new_name, value]
-
-
-def get_empty_f_v(row, fieldname):
-    value = get_value(row, fieldname)
-    return None if value else f_v(fieldname, ' " " ')
 
 
 def get_unexpected_f_v(row, fieldname, expected_values):
