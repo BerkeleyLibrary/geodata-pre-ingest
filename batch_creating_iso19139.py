@@ -557,10 +557,3 @@ if verify_setup(
     batch_iso19139s(main_csv_filepath, resp_csv_filepath)
 
     output(f"*** end 'batch_iso19139s'")
-
-
-# todo in csv validation script:
-# 1) make sure arkids have been assigned to both csv files
-# 2) make sure geopath is not empty
-# 3) make sure minumn geoblacklight elements existing in the csv files
-# 4) make sure vacabuarly code are correct

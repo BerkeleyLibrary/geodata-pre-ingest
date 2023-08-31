@@ -241,7 +241,7 @@ logging.basicConfig(
     format="%(message)s - %(asctime)s",
 )
 
-# 2. Please provide main csv file path which have been assigned with arkids
+# 2. Please provide csv files path which have been assigned with arkids
 main_csv_filepath = r"D:\pre_test\validate_csv\input\main_sample_raster_arkids8.csv"
 resp_csv_filepath = r"D:\pre_test\validate_csv\input\resp_sample_raster.csv"
 
