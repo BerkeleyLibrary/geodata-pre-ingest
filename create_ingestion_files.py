@@ -48,21 +48,21 @@ def save_ingestion_files(
     arkid_directory_path, row, source_batch_path, projected_directory_path
 ):
     geofile_path = row["geofile"]
-    source_geofile_path = correlated_filepath(source_batch_path, geofile_path)
-    projected_geofile_path = correlated_filepath(projected_directory_path, geofile_path)
+    projected_geofile_path = correlated_filepath(
+        source_batch_path, projected_directory_path, geofile_path
+    )
 
     cp_iso19139(projected_geofile_path, arkid_directory_path)
     create_map_zip(projected_geofile_path, row["arkid"], arkid_directory_path)
-    create_data_zip(source_geofile_path, arkid_directory_path)
+    create_data_zip(geofile_path, arkid_directory_path)
 
     doc_filepath = row["doc_zipfile_path"]
     if doc_filepath:
         cp_document_file(doc_filepath, arkid_directory_path)
 
 
-def correlated_filepath(directory, geofile_path):
-    basename = os.path.basename(geofile_path)
-    filepath = os.path.join(directory, basename)
+def correlated_filepath(origin_batch_path, dest_batch_path, geofile_path):
+    filepath = geofile_path.replace(origin_batch_path, dest_batch_path)
     if Path(filepath).is_file():
         return filepath
     else:
@@ -192,19 +192,20 @@ logging.basicConfig(
     format="%(message)s - %(asctime)s",
 )
 
-# 2. Please provide source data directory path here
-source_batch_path = r"D:\from_susan\sample_raster"
+# 2. Please provide source data directory path,
+#    make sure this is the source directory path from which main.csv file was generated.
+source_batch_path = r"D:\pre_test\create_ingestion_files\source_sample_raster"
 
-# 3. Please provide projected data directory path here
-projected_directory_path = r"D:\from_susan\sample_raster"
+# 3. Please provide projected data directory path
+projected_directory_path = r"D:\pre_test\create_ingestion_files\projected_sample_raster"
 
 # 4. Please provide main csv file path which have been assigned with arkids
-main_csv_filepath = r"D:\results\main_sample_raster_arkids2.csv"
+main_csv_filepath = r"D:\pre_test\create_ingestion_files\main_sample_raster_arkids.csv"
 
 # 5. please provide result directory path
 #   attention: Please do not use the original batch directory path or projected directory path
 #              Suggest to provide a specific directory path for result files
-result_directory_path = r"D:\results"
+result_directory_path = r"D:\pre_test\create_ingestion_files\results"
 
 
 ################################################################################################
