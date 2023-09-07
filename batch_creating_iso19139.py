@@ -514,13 +514,13 @@ logging.basicConfig(
 
 # 2. In order to get projected boundary information for Geoblacklight metadata later,
 #    please provide the projected batch directory path here
-projected_directory_path = r"D:\from_susan\sample_raster"
+projected_directory_path = r"D:\pre_test\create_iso19139\sample_raster"
 
 # 3. please provide main csv and resp csv files here, before running this script:
 #   a) make sure arkids have been assigned to both csv files
 #   b) make sure csv files are validated: script to be created after discussing Monday - ignore it for now
-main_csv_filepath = r"D:\results\main_sample_raster_arkids2.csv"
-resp_csv_filepath = r"D:\results\resp_sample_raster_arkids.csv"
+main_csv_filepath = r"D:\pre_test\create_iso19139\input\main_sample_raster_arkids.csv"
+resp_csv_filepath = r"D:\pre_test\create_iso19139\input\resp_sample_raster_arkids.csv"
 
 
 ################################################################################################
