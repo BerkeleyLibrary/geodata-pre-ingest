@@ -16,7 +16,7 @@ def create_merritt_menifest_file(
     ingestion_files_directory_path,
     output_directory,
 ):
-    name = ingestion_files_directory_path.split("\\")[-1]
+    name = Path(ingestion_files_directory_path).stem
     menifest_filename = os.path.join(output_directory, f"{name}_merritt.txt")
     content = menifest_content(
         main_csv_filepath, resp_csv_filepath, ingestion_files_directory_path

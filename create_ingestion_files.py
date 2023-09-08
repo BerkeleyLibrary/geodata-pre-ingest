@@ -17,7 +17,7 @@ def create_ingestion_files(
     projected_directory_path,
     main_csv_filepath,
 ):
-    name = source_batch_path.split("\\")[-1]
+    name = Path(source_batch_path).stem
     to_directory_path = os.path.join(result_directory_path, f"{name}_ingestion_files")
     ensure_dir_exists(to_directory_path)
 
