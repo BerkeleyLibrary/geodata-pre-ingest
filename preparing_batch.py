@@ -170,10 +170,12 @@ logging.basicConfig(
 )
 
 # 2. Please provide source data directory path
-source_batch_path = r"D:\from_susan\sample_raster"
+source_batch_path = r"D:\pre_test\prepare_batch\test_vector_workspace_2023-08"
 
 # 3. Please provide projected data directory path
-projected_directory_path = r"D:\workspace"
+projected_directory_path = (
+    r"D:\pre_test\prepare_batch\test_vector_workspace_2023-08_projected"
+)
 
 
 ################################################################################################
