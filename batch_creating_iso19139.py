@@ -314,8 +314,22 @@ class RowTransformer(object):
         return child
 
     def _add_resp(self, resp_row, parent_path, tag):
+        def get_name():
+            i_name = resp_row.get("individual")
+            o_name = resp_row.get("organization")
+            role = resp_row.get("role").strip().zfill(3)
+            if i_name and role == "006":
+                return i_name
+            return o_name
+
+        def col_val(col_name):
+            if col_name == "organization":
+                return get_name()
+            else:
+                return resp_row[col_name].strip()
+
         def add_sub_node(parent, child_node_name, col_name):
-            val = resp_row[col_name].strip()
+            val = col_val(col_name)
             if val:
                 child = self._add_element(parent, child_node_name)
                 child.text = val

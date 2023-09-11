@@ -66,19 +66,18 @@ class GeoFile(object):
         self.iso19139_path = self._extended_filepath("_iso19139.xml")
         # print(self._vector_boundary())
 
-    # 1. export out a temp metadata xml file
+    # 1. copy esri xml file(*.shp.xml or *.tif.xml file) to tempfile
     # 2. update above temp metadata xml file with metadata information from main csv and resp csv files
     # 3. import the temp metadata xml file to the geofile
     # 4. export an ISO19139 xml metdata from above geofile
     def create_iso19139_file(self, main_row, resp_row):
-        # make sure to export to a new tempfile from geofile
-        self._copyp_tempfile()
+        self._copy_tempfile()
         self._write_tempfile(main_row, resp_row)
         self._import_tempfile()
         self._transform_iso19139()
         self.logging.info(f"{self.geofile_path} - iso19139.xml created")
 
-    def _copyp_tempfile(self):
+    def _copy_tempfile(self):
         esri_xml = f"{self.geofile_path}.xml"
         if not os.path.isfile(esri_xml):
             print(f"warning: {esri_xml} not found")
@@ -321,8 +320,22 @@ class RowTransformer(object):
         return child
 
     def _add_resp(self, resp_row, parent_path, tag):
+        def get_name():
+            i_name = resp_row.get("individual")
+            o_name = resp_row.get("organization")
+            role = resp_row.get("role").strip().zfill(3)
+            if i_name and role == "006":
+                return i_name
+            return o_name
+
+        def col_val(col_name):
+            if col_name == "organization":
+                return get_name()
+            else:
+                return resp_row[col_name].strip()
+
         def add_sub_node(parent, child_node_name, col_name):
-            val = resp_row[col_name].strip()
+            val = col_val(col_name)
             if val:
                 child = self._add_element(parent, child_node_name)
                 child.text = val
