@@ -405,7 +405,7 @@ class RowTransformer(object):
 
 
 ################################################################################################
-#                    2. set constant variables to class methods                                #
+#                    2. set constant variables and class methods                                #
 ################################################################################################
 
 transform_main_headers = [
@@ -424,8 +424,8 @@ transform_main_headers = [
     "dct_temporal_sm",
 ]
 
-# 1) Keys are used as CSV headers of the main CSV file, header sequence is from CSV_HEADER_TRANSFORM
-# 2) An element with "keys" in it's path has multiple occurrences in ISO19139
+# 1) Keys are headers of main CSV file
+# 2) If an attribute "path" value include "keys", the element has multiple occurrences in ISO19139
 main_elements = {
     "dct_title_s": {"path": "dataIdInfo/idCitation/resTitle", "type": "string"},
     "dct_alternative_sm": {
