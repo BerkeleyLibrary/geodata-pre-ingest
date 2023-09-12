@@ -10,18 +10,10 @@ import hashlib
 ################################################################################################
 
 
-def create_merritt_menifest_file(
-    main_csv_filepath,
-    resp_csv_filepath,
-    ingestion_files_directory_path,
-    result_directory_path,
-):
+def create_merritt_menifest_file():
     name = Path(ingestion_files_directory_path).stem
     menifest_filename = os.path.join(result_directory_path, f"{name}_merritt.txt")
-    content = menifest_content(
-        main_csv_filepath, resp_csv_filepath, ingestion_files_directory_path
-    )
-
+    content = menifest_content()
     header = (
         "fileUrl | hashAlgorithm | hashValue | fileSize | fileName | primaryIdentifier | creator | title | date"
         + os.linesep
@@ -31,58 +23,67 @@ def create_merritt_menifest_file(
         f.write(content)
 
 
-def menifest_content(
-    main_csv_filepath, resp_csv_filepath, ingestion_files_directory_path
-):
-    resp_rows = csv_rows(resp_csv_filepath)
+def menifest_content():
+    resp_rows = resp_csv_dict_list()
     content = ""
     with open(main_csv_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
-            arkid = row["arkid"]
-            creater = get_names(arkid, resp_rows)
-            item = menifest_item(row, creater, ingestion_files_directory_path)
+            item = menifest_item(row, resp_rows)
             content += item
     return content
 
 
-def menifest_item(row, creater, ingestion_files_directory_path):
-    arkid = row["arkid"]
+def menifest_item(row, resp_rows):
+    arkid = row.get("arkid")
+    access_right = row.get("dct_accessRights_s")
+    dct_title_s = col_value(row, "dct_title_s")
+    md_date = col_value(row, "gbl_mdModified_dt")[:10]
+    creater = get_names(arkid, resp_rows)
+
     data_zip_filename = os.path.join(ingestion_files_directory_path, arkid, "data.zip")
-    if not Path(data_zip_filename).is_file():
-        text = f"{data_zip_filename} does not exist."
-        print(text)
-        log_raise_error(text)
 
     value = hash_value(data_zip_filename)
     size = file_size(data_zip_filename)
 
     return (
-        f"{url(row)}|MD5|{value}|{size}|Data.zip|{primary_identifer(arkid)}|{creater}|{title(row)}|{date(row)}"
+        f"{url(arkid, access_right)}|MD5|{value}|{size}|Data.zip|{primary_identifer(arkid)}|{creater}|{title(arkid, dct_title_s)}|{md_date}"
         + os.linesep
     )
 
 
-def url(row):
-    arkid = row["arkid"]
-    access_right = row["dct_accessRights_s"]
-    download_host = (
-        "https://spatial.lib.berkeley.edu/public"
-        if access_right.lower() == "public"
-        else "https://spatial.lib.berkeley.edu/UCB"
-    )
+def url(arkid, access_right):
+    access = access_right.lower()
+    if access == "public":
+        download_host = host_public
+    elif access_right == "restricted":
+        download_host = host_restricted
+    else:
+        print("dct_accessRights_s value is neither public nor restricted")
+        raise ValueError
+
     return f"{download_host}/berkeley-{arkid}/data.zip"
 
 
 def hash_value(data_zip_filename):
-    with open(data_zip_filename, "rb") as f:
-        md5 = hashlib.md5(f.read()).hexdigest()
-    return md5
+    try:
+        with open(data_zip_filename, "rb") as f:
+            md5 = hashlib.md5(f.read()).hexdigest()
+        return md5
+    except FileNotFoundError as e:
+        txt = f"File not found: {data_zip_filename} {e}"
+        print(txt)
+        log_raise_error(txt)
 
 
 def file_size(data_zip_filename):
-    size = os.path.getsize(data_zip_filename)
-    return str(size)
+    try:
+        size = os.path.getsize(data_zip_filename)
+        return str(size)
+    except FileNotFoundError as e:
+        txt = f"File not found: {data_zip_filename} {e}"
+        print(txt)
+        log_raise_error(txt)
 
 
 def primary_identifer(arkid):
@@ -104,17 +105,15 @@ def get_names(arkid, resp_rows):
 
 
 def col_value(row, name):
-    val = row[name]
-    value = val if val else row[f"{name}_o"]
+    val = row.get(name)
+    value = val if val else row.get(f"{name}_o")
     if name.endswith("m"):
         value = value.replace("$", ";")
     return rm_pipe(value)
 
 
-def title(row):
-    val = col_value(row, "dct_title_s")
-    arkid = row["arkid"]
-    return f"{val} {primary_identifer(arkid)}"
+def title(arkid, dct_title_s):
+    return f"{dct_title_s} {primary_identifer(arkid)}"
 
 
 def date(row):
@@ -132,8 +131,8 @@ def log_raise_error(text):
 
 # having an encoding problem when using csv.DictReader to get a dictionary
 # Get lines from CSV can avoid this problem
-def csv_rows(csv_filepath):
-    lines = (line for line in open(csv_filepath, "r", encoding="utf-8"))
+def resp_csv_dict_list():
+    lines = (line for line in open(resp_csv_filepath, "r", encoding="utf-8"))
     rows = (line.strip().split(",") for line in lines)
     header = next(rows)
     return [dict(zip(header, row)) for row in rows]
@@ -142,6 +141,10 @@ def csv_rows(csv_filepath):
 ################################################################################################
 #                                 2. setup                                                    #
 ################################################################################################
+
+host_public = "https://spatial.lib.berkeley.edu/public"
+host_restricted = "https://spatial.lib.berkeley.edu/UCB"
+
 # 1. setup log file path
 logfile = r"D:\Log\shpfile_projection.log"
 logging.basicConfig(
@@ -156,7 +159,7 @@ ingestion_files_directory_path = (
 )
 
 # 2. Please provide csv file path which have been assigned with arkids
-main_csv_filepath = r"D:\pre_test\create_merritt\input\main_sample_raster_arkids.csv"
+main_csv_filepath = r"D:\pre_test\create_merritt\input\main_sample_raster_arkids1.csv"
 resp_csv_filepath = r"D:\pre_test\create_merritt\input\resp_sample_raster_arkids.csv"
 
 # 3. please provide output directory to save merritt menifest file
@@ -192,10 +195,5 @@ if verify_setup(
     [main_csv_filepath, resp_csv_filepath],
     [ingestion_files_directory_path, result_directory_path],
 ):
-    create_merritt_menifest_file(
-        main_csv_filepath,
-        resp_csv_filepath,
-        ingestion_files_directory_path,
-        result_directory_path,
-    )
+    create_merritt_menifest_file()
     output(f"*** completed: 'creating merritt menifest file'")
