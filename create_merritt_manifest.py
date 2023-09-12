@@ -14,10 +14,10 @@ def create_merritt_menifest_file(
     main_csv_filepath,
     resp_csv_filepath,
     ingestion_files_directory_path,
-    output_directory,
+    result_directory_path,
 ):
     name = Path(ingestion_files_directory_path).stem
-    menifest_filename = os.path.join(output_directory, f"{name}_merritt.txt")
+    menifest_filename = os.path.join(result_directory_path, f"{name}_merritt.txt")
     content = menifest_content(
         main_csv_filepath, resp_csv_filepath, ingestion_files_directory_path
     )
@@ -161,7 +161,7 @@ resp_csv_filepath = r"D:\pre_test\create_merritt\input\resp_sample_raster_arkids
 
 # 3. please provide output directory to save merritt menifest file
 #   attention: Please do not use the original batch directory path or projected directory path
-output_directory = r"D:\pre_test\create_merritt\result"
+result_directory_path = r"D:\pre_test\create_merritt\result"
 
 
 ################################################################################################
@@ -190,12 +190,12 @@ output(f"*** starting 'creating merritt menifest file'")
 
 if verify_setup(
     [main_csv_filepath, resp_csv_filepath],
-    [ingestion_files_directory_path, output_directory],
+    [ingestion_files_directory_path, result_directory_path],
 ):
     create_merritt_menifest_file(
         main_csv_filepath,
         resp_csv_filepath,
         ingestion_files_directory_path,
-        output_directory,
+        result_directory_path,
     )
     output(f"*** completed: 'creating merritt menifest file'")

@@ -528,7 +528,7 @@ logging.basicConfig(
 
 # 2. In order to get projected boundary information for Geoblacklight metadata later,
 #    please provide the projected batch directory path here
-projected_directory_path = r"D:\pre_test\create_iso19139\sample_raster"
+projected_batch_directory_path = r"D:\pre_test\create_iso19139\sample_raster"
 
 # 3. please provide main csv and resp csv files here, before running this script:
 #   a) make sure arkids have been assigned to both csv files
@@ -562,12 +562,12 @@ def verify_setup(file_paths, directory_paths):
 output(f"*** starting 'batch_iso19139s'")
 
 if verify_setup(
-    [logfile, main_csv_filepath, resp_csv_filepath], [projected_directory_path]
+    [logfile, main_csv_filepath, resp_csv_filepath], [projected_batch_directory_path]
 ):
     # 1. Get a geofile name from main csv file
     # 2. Find the geofile in projected directory
     # 3. Create an iso19139 xml file for each geofile found in 2
-    batch_iso19139s = Batch_Iso19139s(logging, projected_directory_path)
+    batch_iso19139s = Batch_Iso19139s(logging, projected_batch_directory_path)
     batch_iso19139s(main_csv_filepath, resp_csv_filepath)
 
     output(f"*** end 'batch_iso19139s'")

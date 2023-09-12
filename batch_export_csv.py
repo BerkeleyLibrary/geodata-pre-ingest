@@ -485,19 +485,21 @@ logging.basicConfig(
 )
 
 # 2. Please provide source data directory path here
-source_batch_path = r"D:\pre_test\export_csv\input\test_vector_workspace_2023-08"
+source_batch_directory_path = (
+    r"D:\pre_test\export_csv\input\test_vector_workspace_2023-08"
+)
 
 # 3. please provide result directory path:
 #   attention: Please do not use the original batch directory path or projected directory path
-output_directory = r"D:\pre_test\export_csv\output"
+result_directory_path = r"D:\pre_test\export_csv\output"
 
 
 ################################################################################################
 #                                4. Run                                                       #
 # Example:
 # input directory paths:
-#      source_batch_path = r"D:\pre_test\export_csv\input\test_vector_workspace_2023-08"
-#      output_directory = r"D:\pre_test\export_csv\output"
+#      source_batch_directory_path = r"D:\pre_test\export_csv\input\test_vector_workspace_2023-08"
+#      result_directory_path = r"D:\pre_test\export_csv\output"
 # output csv files:
 #     D:\pre_test\export_csv\output\main_test_vector_workspace_2023-08.csv
 #     D:\pre_test\export_csv\output\resp_test_vector_workspace_2023-08.csv
@@ -523,8 +525,8 @@ def verify_setup(file_paths, directory_paths):
 
 output(f"*** starting 'batch_export_csv'")
 
-if verify_setup([logfile], [source_batch_path, output_directory]):
-    batch = BatchExportCsv(source_batch_path, output_directory, logging)
+if verify_setup([logfile], [source_batch_directory_path, result_directory_path]):
+    batch = BatchExportCsv(source_batch_directory_path, result_directory_path, logging)
     batch.main_csv()
     batch.resp_csv()
 

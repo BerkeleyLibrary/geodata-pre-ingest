@@ -14,7 +14,7 @@ from shutil import copyfile, rmtree
 def create_ingestion_files(
     result_directory_path,
     source_batch_path,
-    projected_directory_path,
+    projected_batch_directory_path,
     main_csv_filepath,
 ):
     name = Path(source_batch_path).stem
@@ -25,14 +25,17 @@ def create_ingestion_files(
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
             create_ingestion_files_on_row(
-                row, source_batch_path, projected_directory_path, to_directory_path
+                row,
+                source_batch_path,
+                projected_batch_directory_path,
+                to_directory_path,
             )
 
 
 def create_ingestion_files_on_row(
     row,
     source_batch_path,
-    projected_directory_path,
+    projected_batch_directory_path,
     to_directory_path,
 ):
     arkid = row["arkid"]
@@ -40,16 +43,16 @@ def create_ingestion_files_on_row(
     ensure_new_content(arkid_directory_path)
 
     save_ingestion_files(
-        arkid_directory_path, row, source_batch_path, projected_directory_path
+        arkid_directory_path, row, source_batch_path, projected_batch_directory_path
     )
 
 
 def save_ingestion_files(
-    arkid_directory_path, row, source_batch_path, projected_directory_path
+    arkid_directory_path, row, source_batch_path, projected_batch_directory_path
 ):
     geofile_path = row["geofile"]
     projected_geofile_path = correlated_filepath(
-        source_batch_path, projected_directory_path, geofile_path
+        source_batch_path, projected_batch_directory_path, geofile_path
     )
 
     cp_iso19139(projected_geofile_path, arkid_directory_path)
@@ -197,7 +200,9 @@ logging.basicConfig(
 source_batch_path = r"D:\pre_test\create_ingestion_files\source_sample_raster"
 
 # 3. Please provide projected data directory path
-projected_directory_path = r"D:\pre_test\create_ingestion_files\projected_sample_raster"
+projected_batch_directory_path = (
+    r"D:\pre_test\create_ingestion_files\projected_sample_raster"
+)
 
 # 4. Please provide main csv file path which have been assigned with arkids
 main_csv_filepath = r"D:\pre_test\create_ingestion_files\main_sample_raster_arkids.csv"
@@ -212,7 +217,7 @@ result_directory_path = r"D:\pre_test\create_ingestion_files\results"
 #                             3. Create ingestion files
 #  Based on input:
 #  source_batch_path = r"D:\from_susan\sample_raster"
-#  projected_directory_path = r"D:\from_susan\sample_raster"
+#  projected_batch_directory_path = r"D:\from_susan\sample_raster"
 #  result_directory_path = r"D:\results"
 #
 #  Ingestion files will be created under below directory
@@ -253,12 +258,12 @@ output(f"*** starting 'creating ingestion files'")
 
 if verify_setup(
     [main_csv_filepath, logfile],
-    [source_batch_path, projected_directory_path, result_directory_path],
+    [source_batch_path, projected_batch_directory_path, result_directory_path],
 ):
     create_ingestion_files(
         result_directory_path,
         source_batch_path,
-        projected_directory_path,
+        projected_batch_directory_path,
         main_csv_filepath,
     )
 

@@ -27,7 +27,7 @@ def validate_csv(csv_filepath, func):
                 key = f"line->{num}, arkid->{arkid}:"
                 row_hash[key] = invalid_cols
     if row_hash:
-        filepath = file_name(csv_filepath, output_directory)
+        filepath = file_name(csv_filepath, result_directory_path)
         print(f"{csv_filepath} is not valid. Please check details in {filepath}")
         write_file(row_hash, filepath)
     else:
@@ -304,7 +304,7 @@ resp_csv_filepath = r"D:\pre_test\validate_csv\input\resp_sample_raster2.csv"
 
 # 3. please provide result directory path:
 #   attention: Please do not use the original batch directory path or projected directory path
-output_directory = r"D:\pre_test\validate_csv\result"
+result_directory_path = r"D:\pre_test\validate_csv\result"
 
 
 ################################################################################################
@@ -313,7 +313,7 @@ output_directory = r"D:\pre_test\validate_csv\result"
 # input:
 #       main_csv_filepath = r"D:\results\main_sample_raster_arkids8.csv"
 #       resp_csv_filepath = r"D:\results\main_sample_raster1.csv"
-#       output_directory = r"D:\results"
+#       result_directory_path = r"D:\results"
 # any invalid field values found from above csv files will be written to:
 #      D:\results\main_sample_raster_arkids8.txt
 #      D:\results\main_sample_raster1.txt
@@ -341,7 +341,7 @@ main_csv_headers = []
 
 output(f"*** starting 'checking csv files'")
 
-if verify_setup([main_csv_filepath, resp_csv_filepath], [output_directory]):
+if verify_setup([main_csv_filepath, resp_csv_filepath], [result_directory_path]):
     main_csv_headers = csv_headers(main_csv_filepath)
     validate_csv_files()
     output(f"*** end 'checking csv files'")

@@ -170,10 +170,10 @@ logging.basicConfig(
 )
 
 # 2. Please provide source data directory path
-source_batch_path = r"D:\pre_test\prepare_batch\test_vector_workspace_2023-08"
+source_batch_directory_path = r"D:\pre_test\prepare_batch\test_vector_workspace_2023-08"
 
 # 3. Please provide projected data directory path
-projected_directory_path = (
+projected_batch_directory_path = (
     r"D:\pre_test\prepare_batch\test_vector_workspace_2023-08_projected"
 )
 
@@ -202,13 +202,15 @@ def verify_setup(file_paths, directory_paths):
 
 output(f"***starting 'batch_preparing'")
 
-if verify_setup([logfile], [source_batch_path, projected_directory_path]):
-    source_batch = SourceBatch(source_batch_path, logging)
+if verify_setup(
+    [logfile], [source_batch_directory_path, projected_batch_directory_path]
+):
+    source_batch = SourceBatch(source_batch_directory_path, logging)
     # options
     # 1. Check Source Batch
     source_batch.checkup()
     # 2. Vector projection
-    source_batch.shp_projection(projected_directory_path)
+    source_batch.shp_projection(projected_batch_directory_path)
     # 3. Raster grid
     source_batch.tif_pyramid()
 
