@@ -9,44 +9,52 @@ import json
 ################################################################################################
 #                             1. functions                                                      #
 ################################################################################################
+
+
 def mint_ark(config):
     auth = (config["username"], config["password"])
-    response = requests.post(config["url"], auth=auth)
+    url = config["url"]
 
-    if response.status_code == 201:
-        return response.text.split("/")[-1]
-    else:
-        log_raise_error(
-            f"Mint arkid request failed. Status code: {response.status_code}"
-        )
+    try:
+        response = requests.post(url, auth=auth)
+
+        if response.status_code == 201:
+            return response.text.split("/")[-1]
+        else:
+            log_raise_error(
+                f"Mint arkid request failed. Status code: {response.status_code}"
+            )
+    except requests.RequestException as e:
+        log_raise_error(f"Failed to make a mint arkid request: {e}")
 
 
-# if column arkid has value, no arkid added
-# if has existing arkid hash, adding arkid from the hash
 def add_arkids_rows(csv_path, hash=None):
     rows = []
+    need_new_arkid = hash is None
     config = ez_config()
-    need_new_arkid = False if hash else True
+
     try:
         with open(csv_path, "r", encoding="utf-8") as csvfile:
             csv_reader = csv.DictReader(csvfile)
             for row in csv_reader:
                 if not row["arkid"]:
-                    id = mint_ark(config) if need_new_arkid else hash[row["geofile"]]
+                    geofile = row["geofile"]
+                    id = mint_ark(config) if need_new_arkid else hash.get(geofile)
+
                     if id:
                         row["arkid"] = id
                     elif not need_new_arkid:
-                        logging.info(
-                            f"no arkid in main_csv file for geofile {row['geofile']}"
-                        )
+                        logging.info(f"No arkid in main_csv file for geofile {geofile}")
+
                 rows.append(row)
+
         return rows
-    except FileNotFoundError:
-        log_raise_error(f"File not found: {csv_path}")
+    except FileNotFoundError as e:
+        log_raise_error(f"File not found: {csv_path} {e}")
     except csv.Error as e:
-        log_raise_error(f"CSV Error while reading file: {csv_path} {e.args}")
+        log_raise_error(f"CSV Error while reading file: {csv_path} {e}")
     except Exception as e:
-        log_raise_error(f"Unexpected error while reading file: {csv_path} {e.args}")
+        log_raise_error(f"Unexpected error while reading file: {csv_path} {e}")
 
 
 def log_raise_error(msg):
