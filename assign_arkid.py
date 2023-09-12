@@ -62,7 +62,7 @@ def log_raise_error(msg):
     raise ValueError(msg)
 
 
-def has_arkid_added(file):
+def arkid_assigned(file):
     with open(file, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
@@ -72,13 +72,13 @@ def has_arkid_added(file):
     return True
 
 
-def update_main_csv(main_csv_path, new_main_csv_path):
+def assign_main_csv(main_csv_path, new_main_csv_path):
     rows = add_arkids_rows(main_csv_path)
     write_csv(main_csv_path, rows)
     write_csv(new_main_csv_path, rows)
 
 
-def update_resp_csv(main_csv_path, resp_csv_path, new_resp_csv_path):
+def assign_resp_csv(main_csv_path, resp_csv_path, new_resp_csv_path):
     hash = arkid_hash(main_csv_path)
     if hash:
         rows = add_arkids_rows(resp_csv_path, hash)
@@ -192,18 +192,18 @@ if verify_setup(
     # it will only add arkids to rows which have no existing arkids
     new_main_csv_path = new_filepath(main_csv_filepath)
     new_resp_csv_path = new_filepath(resp_csv_filepath)
-    update_main_csv(main_csv_filepath, new_main_csv_path)
+    assign_main_csv(main_csv_filepath, new_main_csv_path)
 
     # 2. add arkids to resp_csv file based on main_csv file
-    if has_arkid_added(new_main_csv_path):
-        update_resp_csv(new_main_csv_path, resp_csv_filepath, new_resp_csv_path)
+    if arkid_assigned(new_main_csv_path):
+        assign_resp_csv(new_main_csv_path, resp_csv_filepath, new_resp_csv_path)
     else:
         log_raise_error(
             f"failed in updating arkids to {resp_csv_filepath}, since {new_main_csv_path} missing arkids"
         )
 
     # 3. check arkid exists in resp_csv file
-    if not has_arkid_added(new_resp_csv_path):
+    if not arkid_assigned(new_resp_csv_path):
         log_raise_error(
             f" {resp_csv_filepath} has missing arkids, please check log file for details"
         )

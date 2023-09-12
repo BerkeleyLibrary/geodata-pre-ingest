@@ -11,61 +11,46 @@ from shutil import copyfile, rmtree
 ################################################################################################
 
 
-def create_ingestion_files(
-    result_directory_path,
-    source_batch_path,
-    projected_batch_directory_path,
-    main_csv_filepath,
-):
+def new_directory_path():
     name = Path(source_batch_path).stem
-    to_directory_path = os.path.join(result_directory_path, f"{name}_ingestion_files")
-    ensure_dir_exists(to_directory_path)
+    directory_path = os.path.join(result_directory_path, f"{name}_ingestion_files")
+    ensure_dir_exists(directory_path)
+    return directory_path
+
+
+def create_files():
+    dest_directory_path = new_directory_path()
 
     with open(main_csv_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
-            create_ingestion_files_on_row(
-                row,
-                source_batch_path,
-                projected_batch_directory_path,
-                to_directory_path,
-            )
+            create_files_on_row(row, dest_directory_path)
 
 
-def create_ingestion_files_on_row(
-    row,
-    source_batch_path,
-    projected_batch_directory_path,
-    to_directory_path,
-):
-    arkid = row["arkid"]
-    arkid_directory_path = os.path.join(to_directory_path, arkid)
-    ensure_new_content(arkid_directory_path)
+def create_files_on_row(row, directory_path):
+    geofile_path = row.get("geofile")
+    projected_geofile_path = correlated_filepath(geofile_path)
 
-    save_ingestion_files(
-        arkid_directory_path, row, source_batch_path, projected_batch_directory_path
-    )
+    arkid = row.get("arkid")
+    dest_arkid_directory_path = arkid_directory_path(arkid, directory_path)
 
+    cp_iso19139(projected_geofile_path, dest_arkid_directory_path)
+    create_map_zip(projected_geofile_path, arkid, dest_arkid_directory_path)
+    create_data_zip(geofile_path, dest_arkid_directory_path)
 
-def save_ingestion_files(
-    arkid_directory_path, row, source_batch_path, projected_batch_directory_path
-):
-    geofile_path = row["geofile"]
-    projected_geofile_path = correlated_filepath(
-        source_batch_path, projected_batch_directory_path, geofile_path
-    )
-
-    cp_iso19139(projected_geofile_path, arkid_directory_path)
-    create_map_zip(projected_geofile_path, row["arkid"], arkid_directory_path)
-    create_data_zip(geofile_path, arkid_directory_path)
-
-    doc_filepath = row["doc_zipfile_path"]
+    doc_filepath = row.get("doc_zipfile_path")
     if doc_filepath:
-        cp_document_file(doc_filepath, arkid_directory_path)
+        cp_document_file(doc_filepath, dest_arkid_directory_path)
 
 
-def correlated_filepath(origin_batch_path, dest_batch_path, geofile_path):
-    filepath = geofile_path.replace(origin_batch_path, dest_batch_path)
+def arkid_directory_path(arkid, directory_path):
+    arkid_directory_path = os.path.join(directory_path, arkid)
+    ensure_new_content(arkid_directory_path)
+    return arkid_directory_path
+
+
+def correlated_filepath(geofile_path):
+    filepath = geofile_path.replace(source_batch_path, projected_batch_directory_path)
     if Path(filepath).is_file():
         return filepath
     else:
@@ -73,8 +58,8 @@ def correlated_filepath(origin_batch_path, dest_batch_path, geofile_path):
         log_raise_error(text)
 
 
-# cannot use rmtree to remove directory,
-# it will get writting permission errors after using rmtree to remove a directory
+# cannot use rmtree to remove directories,
+# it will get writting permission errors after using rmtree
 def rm_contents(directory_path):
     for item in os.listdir(directory_path):
         item_path = os.path.join(directory_path, item)
@@ -260,11 +245,6 @@ if verify_setup(
     [main_csv_filepath, logfile],
     [source_batch_path, projected_batch_directory_path, result_directory_path],
 ):
-    create_ingestion_files(
-        result_directory_path,
-        source_batch_path,
-        projected_batch_directory_path,
-        main_csv_filepath,
-    )
+    create_files()
 
     output(f"*** end 'creating ingestion files'")
