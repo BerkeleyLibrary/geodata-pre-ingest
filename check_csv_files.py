@@ -34,9 +34,13 @@ def validate_csv(csv_filepath, output_dir, func):
         print(f"{csv_filepath} is valid.")
 
 
-# resp csv file does not have *_O field
+# resp csv file has no *_O field
 def validate_resp_row(row):
-    return get_empty_cols(row, ["arkid", "geofile"])
+    cols = get_empty_cols(row, ["arkid", "geofile"])
+    invalid_cols = check_resp(row)
+    if invalid_cols:
+        cols.extend(invalid_cols)
+    return cols
 
 
 def validate_main_row(row):
@@ -171,6 +175,50 @@ def write_file(hash, filepath):
             file.write(f"\n {k}:\n")
             for l in ls:
                 file.write(f"{l[0]}: {l[1]} \n")
+
+
+# resp_csv -
+# 1. When role is 006 (originator), a row should have either an individual or organization value
+# 2. When role is not 006, a row should not allow to have an individual value
+# 3. When role is 010 (publisher), it should have an organization value
+def check_resp(row):
+    str = row["role"]
+    if not str:
+        return [["role", "role should not be empty."]]
+
+    num = int(str.strip())
+    if not num in range(1, 12):
+        return [["role", f"role value {str} not between 1 and 11"]]
+
+    individual = row["individual"]
+    organization = row["organization"]
+    role = str.strip().zfill(3)
+    if role == "006":
+        if not organization and not individual:
+            return [
+                [
+                    "individual or organization ",
+                    f"when role = 006, either organization or individual should have a value",
+                ]
+            ]
+    else:
+        cols = []
+        if individual:
+            cols.append(
+                [
+                    "individual",
+                    f"when role != 006, individual should not have value: {individual}",
+                ]
+            )
+
+        if role == "010" and not organization:
+            cols.append(
+                ["organization ", f" when role = 010, organization should have a value"]
+            )
+        if cols:
+            return cols
+
+    return None
 
 
 ################################################################################################
