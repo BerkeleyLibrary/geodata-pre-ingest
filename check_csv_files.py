@@ -9,12 +9,12 @@ from datetime import datetime
 ################################################################################################
 #                             1. functions                                                     #
 ################################################################################################
-def validate_csv_files(main_csv_filepath, resp_csv_filepath, output_dir):
-    validate_csv(main_csv_filepath, output_dir, validate_main_row)
-    validate_csv(resp_csv_filepath, output_dir, validate_resp_row)
+def validate_csv_files():
+    validate_csv(main_csv_filepath, func_invalid_cols_from_main_row)
+    validate_csv(resp_csv_filepath, func_invalid_cols_from_resp_row)
 
 
-def validate_csv(csv_filepath, output_dir, func):
+def validate_csv(csv_filepath, func):
     row_hash = {}
     num = 1
     with open(csv_filepath, "r", encoding="utf-8") as csvfile:
@@ -24,34 +24,32 @@ def validate_csv(csv_filepath, output_dir, func):
             invalid_cols = func(row)
             if len(invalid_cols):
                 arkid = row.get("arkid")
-                key = f"line{num}, arkid - {arkid}"
+                key = f"line->{num}, arkid->{arkid}:"
                 row_hash[key] = invalid_cols
     if row_hash:
-        filepath = file_name(csv_filepath, output_dir)
+        filepath = file_name(csv_filepath, output_directory)
         print(f"{csv_filepath} is not valid. Please check details in {filepath}")
         write_file(row_hash, filepath)
     else:
         print(f"{csv_filepath} is valid.")
 
 
-# resp csv file has no *_O field
-def validate_resp_row(row):
-    cols = get_empty_cols(row, ["arkid", "geofile"])
-    invalid_cols = check_resp(row)
-    if invalid_cols:
-        cols.extend(invalid_cols)
+# resp csv file has no *_O column names
+def func_invalid_cols_from_resp_row(row):
+    cols = get_empty_cols(row, resp_required_fields)
+    cols.extend(invalid_resp_cols(row))
     return cols
 
 
-def validate_main_row(row):
-    cols = get_empty_cols(row, required_fields)
-    cols.extend(invalid_value_cols(row))
-    cols.extend(invalid_date_cols(row))
-    cols.extend(invalid_range_cols(row))
+def func_invalid_cols_from_main_row(row):
+    cols = get_empty_cols(row, main_required_fields)
+    cols.extend(invalid_main_value_cols(row))
+    cols.extend(invalid_main_date_cols(row))
+    cols.extend(invalid_main_range_cols(row))
     return cols
 
 
-def invalid_value_cols(row):
+def invalid_main_value_cols(row):
     value_hash = {
         "gbl_resourceClass_sm": ls_gbl_resourceClass_sm,
         "dct_accessRights_s": ls_dct_accessRights_s,
@@ -60,7 +58,7 @@ def invalid_value_cols(row):
     return get_invalid_cols(row, value_hash, get_unexpected_f_v)
 
 
-def invalid_date_cols(row):
+def invalid_main_date_cols(row):
     date_hash = {
         "gbl_mdModified_dt": ls_gbl_mdModified_dt,
         "gbl_indexYear_im": ls_gbl_indexYear_im,
@@ -69,7 +67,7 @@ def invalid_date_cols(row):
     return get_invalid_cols(row, date_hash, get_invalid_date_f_v)
 
 
-def invalid_range_cols(row):
+def invalid_main_range_cols(row):
     range_hash = {"dcat_theme_sm": rg_dcat_theme_sm}
     return get_invalid_cols(row, range_hash, get_invalid_range_f_v)
 
@@ -137,9 +135,13 @@ def get_invalid_range_f_v(row, fieldname, expected_range):
     if value:
         vals = value.split("$") if fieldname.endswith("m") else [value]
         for val in vals:
-            r = int(val.strip())
-            if not r in expected_range:
-                return f_v(fieldname, value)
+            try:
+                r = int(val.strip())
+                if not r in expected_range:
+                    return f_v(fieldname, value)
+            except ValueError:
+                return [fieldname, f"{fieldname} value '{val}' is not a valid integer"]
+
     return None
 
 
@@ -181,24 +183,28 @@ def write_file(hash, filepath):
 # 1. When role is 006 (originator), a row should have either an individual or organization value
 # 2. When role is not 006, a row should not allow to have an individual value
 # 3. When role is 010 (publisher), it should have an organization value
-def check_resp(row):
-    str = row["role"]
-    if not str:
-        return [["role", "role should not be empty."]]
-
-    num = int(str.strip())
-    if not num in range(1, 12):
-        return [["role", f"role value {str} not between 1 and 11"]]
-
+def invalid_resp_cols(row):
+    str = row["role"].strip()
     individual = row["individual"]
     organization = row["organization"]
-    role = str.strip().zfill(3)
+
+    if not str:
+        return [["role", "Role should not be empty."]]
+
+    try:
+        num = int(str)
+        if not num in resp_role:
+            return [["role", f"Role value {str} is not between 1 and 11"]]
+    except ValueError:
+        return [["role", f"Role value '{str}' is not a valid integer"]]
+
+    role = str.zfill(3)
     if role == "006":
         if not organization and not individual:
             return [
                 [
-                    "individual or organization ",
-                    f"when role = 006, either organization or individual should have a value",
+                    "individual or organization",
+                    "When role = 006, either organization or individual should have a value",
                 ]
             ]
     else:
@@ -207,24 +213,24 @@ def check_resp(row):
             cols.append(
                 [
                     "individual",
-                    f"when role != 006, individual should not have value: {individual}",
+                    f"When role != 006, individual should not have a value: {individual}",
                 ]
             )
 
         if role == "010" and not organization:
             cols.append(
-                ["organization ", f" when role = 010, organization should have a value"]
+                ["organization", "When role = 010, organization should have a value"]
             )
-        if cols:
-            return cols
 
-    return None
+        return cols
+
+    return []
 
 
 ################################################################################################
 #                                 2. variables                                                 #
 ################################################################################################
-required_fields = [
+main_required_fields = [
     "arkid",
     "geofile",
     "dct_title_s",
@@ -277,6 +283,9 @@ ls_dct_format_s = [
     "Tabular Data",
     "TIFF",
 ]
+
+resp_required_fields = ["arkid", "geofile"]
+resp_role = range(1, 12)
 ################################################################################################
 #                                 3. setup                                                    #
 ################################################################################################
@@ -290,7 +299,7 @@ logging.basicConfig(
 
 # 2. Please provide csv files path which have been assigned with arkids
 main_csv_filepath = r"D:\pre_test\validate_csv\input\main_sample_raster_arkids8.csv"
-resp_csv_filepath = r"D:\pre_test\validate_csv\input\resp_sample_raster.csv"
+resp_csv_filepath = r"D:\pre_test\validate_csv\input\resp_sample_raster2.csv"
 
 
 # 3. please provide result directory path:
@@ -334,5 +343,5 @@ output(f"*** starting 'checking csv files'")
 
 if verify_setup([main_csv_filepath, resp_csv_filepath], [output_directory]):
     main_csv_headers = csv_headers(main_csv_filepath)
-    validate_csv_files(main_csv_filepath, resp_csv_filepath, output_directory)
+    validate_csv_files()
     output(f"*** end 'checking csv files'")
