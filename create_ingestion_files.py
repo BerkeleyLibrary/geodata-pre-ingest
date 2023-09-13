@@ -45,7 +45,7 @@ def create_files_on_row(row, directory_path):
 
 def arkid_directory_path(arkid, directory_path):
     arkid_directory_path = os.path.join(directory_path, arkid)
-    ensure_new_content(arkid_directory_path)
+    ensure_empty_directory(arkid_directory_path)
     return arkid_directory_path
 
 
@@ -96,7 +96,7 @@ def map_sourcefiles(geofile_path, arkid):
     base = os.path.splitext(geofile_path)[0]
     dic = {}
 
-    map_extestions = extenstions(geofile_path)
+    map_extestions = get_extensions(geofile_path)
     for ext in map_extestions:
         source_file = f"{base}{ext}"
         if Path(source_file).is_file():
@@ -143,13 +143,13 @@ def create_zipfile(dic, zip_filepath):
 
 
 #  "tif": [".tif", ".aux", ".tfw", ".prj", ".tif.ovr"],
-def extenstions(geofile_path):
-    ext = geofile_path.split(".")[-1].lower()
+def get_extensions(geofile_path):
+    ext = Path(geofile_path).suffix[1:].lower()
     dic = {
-        "shp": [".cpg", ".dbf", ".prj", ".sbn", ".sbx", ".shp", ".shx"],
-        "tif": [".tif", ".tfw", ".prj", ".tif.ovr"],
+        "shp": shp_exts,
+        "tif": tif_exts,
     }
-    return dic[ext]
+    return dic.get(ext)
 
 
 def log_raise_error(text):
@@ -162,7 +162,7 @@ def ensure_dir_exists(pathname):
         os.mkdir(pathname)
 
 
-def ensure_new_content(pathname):
+def ensure_empty_directory(pathname):
     if Path(pathname).is_dir():
         rm_contents(pathname)
     else:
@@ -172,6 +172,11 @@ def ensure_new_content(pathname):
 ################################################################################################
 #                                 2. setup                                                    #
 ################################################################################################
+# attention: needs to finalize extesions here
+shp_exts = [".cpg", ".dbf", ".prj", ".sbn", ".sbx", ".shp", ".shx"]
+tif_exts = [".tif", ".tfw", ".prj", ".tif.ovr"]
+# [".tif", ".aux", ".tfw", ".prj", ".tif.ovr"]
+
 # 1. setup log file path
 logfile = r"D:\Log\shpfile_projection.log"
 logging.basicConfig(
