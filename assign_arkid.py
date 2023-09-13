@@ -18,9 +18,7 @@ def mint_ark():
     auth = (config["username"], config["password"])
 
     try:
-        a_url = f"{url}{namespace}"
-        response = requests.post(a_url, auth=auth)
-
+        response = requests.post(f"{url}{namespace}", auth=auth)
         if response.status_code == 201:
             # eg. "ark:/99999/fk4m34f494"
             return response.text.split("/")[-1]
@@ -32,7 +30,7 @@ def mint_ark():
         log_raise_error(f"Failed to make a mint arkid request: {e}")
 
 
-def add_arkids_rows(csv_path, hash=None):
+def rows_with_arkid(csv_path, hash=None):
     rows = []
     try:
         with open(csv_path, "r", encoding="utf-8") as csvfile:
@@ -73,7 +71,7 @@ def log_raise_error(msg):
     raise ValueError(msg)
 
 
-def arkid_assigned(file):
+def is_assigned(file):
     with open(file, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
@@ -83,28 +81,28 @@ def arkid_assigned(file):
     return True
 
 
-def assign_main_csv(main_csv_path, new_main_csv_path):
-    rows = add_arkids_rows(main_csv_path)
-    write_csv(main_csv_path, rows)
-    write_csv(new_main_csv_path, rows)
+def assign_main_csv(new_main_csv_filepath):
+    rows = rows_with_arkid(main_csv_filepath)
+    write_csv(main_csv_filepath, rows)
+    write_csv(new_main_csv_filepath, rows)
 
 
-def assign_resp_csv(main_csv_path, resp_csv_path, new_resp_csv_path):
-    hash = arkid_hash(main_csv_path)
+def assign_resp_csv(new_main_csv_filepath, new_resp_csv_filepath):
+    hash = arkid_hash(new_main_csv_filepath)
     if hash:
-        rows = add_arkids_rows(resp_csv_path, hash)
-        write_csv(resp_csv_path, rows)
-        write_csv(new_resp_csv_path, rows)
+        rows = rows_with_arkid(resp_csv_filepath, hash)
+        write_csv(resp_csv_filepath, rows)
+        write_csv(new_resp_csv_filepath, rows)
     else:
-        log_raise_error(f"no arkid or geofile ?, please check {main_csv_path}")
+        log_raise_error(f"no arkid or geofile ?, please check {new_main_csv_filepath}")
 
 
-def arkid_hash(main_csv):
+def arkid_hash(csv_filepath):
     hash = {}
-    with open(main_csv, "r", encoding="utf-8") as csvfile:
+    with open(csv_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
-            hash[row["geofile"]] = row["arkid"]
+            hash[row.get("geofile")] = row.get("arkid")
     return hash
 
 
@@ -158,17 +156,18 @@ result_directory_path = r"D:\pre_test\assign_arkid\results"
 #                                3. instructions
 #  a. mian_csv file:
 #                a new arkid will be minted and added to the 'arkid' column for each row,
-#                unless the 'arkid' column has an existing value.
+#                unless a row has arkid value.
 #  b. resp_csv file:
-#               - 'arkid' column will be updated by using 'arkid' column from main_csv file
+#               - 'arkid' column will be updated with 'arkid' value from main_csv file
 #                based on the column 'geofile' value(geofile name path) from both files .
 #               -  One row in main_csv file may be related to multiple rows in resp_csv file
 #  c: after running this script two output files will be generated with arkids assigned
-#  d: new files will be named as "*_arkids.csv"
+#  d: original csv files will have arkid assigned
+#  C: new files will be named as "*_arkids.csv"
 #  example:
 #         input two files:
-#                       main_csv_path = r"D:\results\main_test_vector_workspace_2023-08.csv"
-#                       resp_csv_path = r"D:\results\resp_test_vector_workspace_2023-08.csv"
+#                       main_csv_filepath = r"D:\results\main_test_vector_workspace_2023-08.csv"
+#                       resp_csv_filepath = r"D:\results\resp_test_vector_workspace_2023-08.csv"
 #         output path:
 #                       output = r"D:\pre_test\assign_arkid\results"
 #         two new file paths (*_arkids.csv) are:
@@ -199,22 +198,23 @@ output(f"***starting 'assign_arkid'")
 if verify_setup(
     [logfile, main_csv_filepath, resp_csv_filepath], [result_directory_path]
 ):
-    # 1. add arkids to main_csv file:
-    # it will only add arkids to rows which have no existing arkids
-    new_main_csv_path = new_filepath(main_csv_filepath)
-    new_resp_csv_path = new_filepath(resp_csv_filepath)
-    assign_main_csv(main_csv_filepath, new_main_csv_path)
+    new_main_csv_filepath = new_filepath(main_csv_filepath)
+    new_resp_csv_filepath = new_filepath(resp_csv_filepath)
 
-    # 2. add arkids to resp_csv file based on main_csv file
-    if arkid_assigned(new_main_csv_path):
-        assign_resp_csv(new_main_csv_path, resp_csv_filepath, new_resp_csv_path)
+    # 1. add arkids to main_csv file:
+    #    add arkids to rows with no arkids
+    assign_main_csv(new_main_csv_filepath)
+
+    # 2. add arkids to resp_csv file based on arkids from new_resp_csv_filepath file
+    if is_assigned(new_main_csv_filepath):
+        assign_resp_csv(new_main_csv_filepath, new_resp_csv_filepath)
     else:
         log_raise_error(
-            f"failed in updating arkids to {resp_csv_filepath}, since {new_main_csv_path} missing arkids"
+            f"failed in updating arkids to {new_resp_csv_filepath}, since {new_main_csv_filepath} missing arkids"
         )
 
-    # 3. check arkid exists in resp_csv file
-    if not arkid_assigned(new_resp_csv_path):
+    # 3. give warning if ew_resp_csv_filepath has no arkids
+    if not is_assigned(new_resp_csv_filepath):
         log_raise_error(
             f" {resp_csv_filepath} has missing arkids, please check log file for details"
         )
