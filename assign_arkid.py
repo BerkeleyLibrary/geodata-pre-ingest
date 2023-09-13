@@ -11,14 +11,18 @@ import json
 ################################################################################################
 
 
-def mint_ark(config):
-    auth = (config["username"], config["password"])
+def mint_ark():
+    config = ez_config()
     url = config["url"]
+    namespace = config["namespace"]
+    auth = (config["username"], config["password"])
 
     try:
-        response = requests.post(url, auth=auth)
+        a_url = f"{url}{namespace}"
+        response = requests.post(a_url, auth=auth)
 
         if response.status_code == 201:
+            # eg. "ark:/99999/fk4m34f494"
             return response.text.split("/")[-1]
         else:
             log_raise_error(
@@ -30,8 +34,7 @@ def mint_ark(config):
 
 def add_arkids_rows(csv_path, hash=None):
     rows = []
-    need_new_arkid = hash is None
-    config = ez_config()
+    need_mint_ark = hash is None
 
     try:
         with open(csv_path, "r", encoding="utf-8") as csvfile:
@@ -39,11 +42,11 @@ def add_arkids_rows(csv_path, hash=None):
             for row in csv_reader:
                 if not row["arkid"]:
                     geofile = row["geofile"]
-                    id = mint_ark(config) if need_new_arkid else hash.get(geofile)
+                    id = mint_ark() if need_mint_ark else hash.get(geofile)
 
                     if id:
                         row["arkid"] = id
-                    elif not need_new_arkid:
+                    elif not need_mint_ark:
                         logging.info(f"No arkid in main_csv file for geofile {geofile}")
 
                 rows.append(row)
