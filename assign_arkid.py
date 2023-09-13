@@ -34,21 +34,14 @@ def mint_ark():
 
 def add_arkids_rows(csv_path, hash=None):
     rows = []
-    need_mint_ark = hash is None
-
     try:
         with open(csv_path, "r", encoding="utf-8") as csvfile:
             csv_reader = csv.DictReader(csvfile)
+            need_mint_ark = hash is None
             for row in csv_reader:
-                if not row["arkid"]:
-                    geofile = row["geofile"]
-                    id = mint_ark() if need_mint_ark else hash.get(geofile)
-
-                    if id:
-                        row["arkid"] = id
-                    elif not need_mint_ark:
-                        logging.info(f"No arkid in main_csv file for geofile {geofile}")
-
+                row_arkid = row.get("arkid")
+                if not row_arkid:
+                    add_mint_arkid(row) if need_mint_ark else add_hash_arkid(row, hash)
                 rows.append(row)
 
         return rows
@@ -58,6 +51,21 @@ def add_arkids_rows(csv_path, hash=None):
         log_raise_error(f"CSV Error while reading file: {csv_path} {e}")
     except Exception as e:
         log_raise_error(f"Unexpected error while reading file: {csv_path} {e}")
+
+
+def add_mint_arkid(row):
+    arkid = mint_ark()
+    row["arkid"] = arkid
+
+
+def add_hash_arkid(row, hash):
+    geofile = row.get("geofile")
+    arkid = hash.get(geofile)
+    if arkid:
+        row["arkid"] = arkid
+    else:
+        logging.info(f"No arkid in main_csv file for geofile {geofile}")
+        raise ValueError
 
 
 def log_raise_error(msg):
