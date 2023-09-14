@@ -234,15 +234,14 @@ main_required_fields = [
     "arkid",
     "geofile",
     "dct_title_s",
-    "ls_gbl_resourceClass_sm",
+    "gbl_resourceClass_sm",
     "dct_accessRights_s",
     "gbl_mdModified_dt",
-    "ls_dct_format_s",
+    "dct_format_s",
 ]
 ls_gbl_mdModified_dt = ["%Y%m%d"]
 ls_gbl_indexYear_im = ["%Y"]
 ls_dct_issued_s = ["%Y", "%Y-%m", "%Y-%m-%d"]
-ls_gbl_indexYear_im = "%Y"
 ls_gbl_resourceClass_sm = [
     "Collections",
     "Datasets",
