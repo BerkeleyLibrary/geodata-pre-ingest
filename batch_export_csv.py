@@ -91,7 +91,6 @@ class GeoFile(object):
     main_elements = {}
     resp_headers = []
     resp_elements = {}
-    defalut_role_codes = []
 
     def __init__(self, geofile, logging):
         self.geofile = geofile
@@ -118,7 +117,7 @@ class GeoFile(object):
         idpoc_rows = self._resp_rows_from_path("./dataIdInfo/idPoC")
         rows.extend(idpoc_rows)
 
-        self._add_rows_with_defalut_roles(self.defalut_role_codes, rows)
+        self._add_rows_with_defalut_roles(rows)
 
         return rows
 
@@ -271,6 +270,7 @@ class GeoFile(object):
                 for name in self.resp_headers
             ]
             self._update_resp_col(row, "geofile", self.geofile)
+            self._update_resp_col(row, "role", role)
             return row
 
         return None
@@ -293,9 +293,10 @@ class GeoFile(object):
 
     #### responsible party csv data ######
     # To ensure a geofile has at least one "006" and one "010" roles in repsponsible parties
-    def _add_rows_with_defalut_roles(self, codes, rows):
+    def _add_rows_with_defalut_roles(self, rows):
+        defalut_role_codes = ["010", "006"]
         identical_row_codes = self._codes(rows, "role")
-        for code in codes:
+        for code in defalut_role_codes:
             if code not in identical_row_codes:
                 rows.append(self._add_role(code))
 
@@ -318,7 +319,6 @@ class GeoFile(object):
 ################################################################################################
 #                             2. constant variables                                                        #
 ################################################################################################
-defalut_role_codes = ["010", "006"]
 # Main CSV File headers: the order of this array define the order the main CSV file
 main_headers = [
     "arkid",
@@ -420,7 +420,6 @@ main_elements = {
 resp_headers = [
     "arkid",
     "geofile",
-    "from",
     "individual",
     "role",
     "contact_name",
@@ -483,7 +482,6 @@ GeoFile.resp_headers = resp_headers
 GeoFile.resp_elements = resp_elements
 GeoFile.main_headers = main_headers
 GeoFile.main_elements = main_elements
-GeoFile.defalut_role_codes = defalut_role_codes
 
 # 1. Please provide your local log file path
 logfile = r"D:\Log\shpfile_projection.log"
