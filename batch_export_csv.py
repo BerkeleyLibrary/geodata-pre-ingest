@@ -20,10 +20,10 @@ class BatchExportCsv(object):
         self.logging = logging
         self.workspace_dir = workspace_dir
         self.geofile_paths = self._geofile_paths()
-        self.dir = results_dir
+        self.results_dir = results_dir
 
     def main_csv(self):
-        file = self._filename(self.dir, "main")
+        file = self._filename("main")
         rows = [
             GeoFile(geofile_path, self.logging).main_row()
             for geofile_path in self.geofile_paths
@@ -31,7 +31,7 @@ class BatchExportCsv(object):
         self._write_csv(file, GeoFile.main_headers, rows)
 
     def resp_csv(self):
-        file = self._filename(self.dir, "resp")
+        file = self._filename("resp")
         rows = []
         for geofile_path in self.geofile_paths:
             resp_rows = GeoFile(geofile_path, self.logging).resp_rows()
@@ -69,10 +69,10 @@ class BatchExportCsv(object):
                 new_row.extend([col if col else "" for col in row])
                 csvWriter.writerow(new_row)
 
-    def _filename(self, dir, prefix):
+    def _filename(self, prefix):
         basename = os.path.basename(self.workspace_dir)
         name = f"{prefix}_{basename}.csv"
-        return os.path.join(dir, name)
+        return os.path.join(self.results_dir, name)
 
     ## common methods to be moved
     def _file_paths(self, ext) -> List:
@@ -91,6 +91,7 @@ class GeoFile(object):
     main_elements = {}
     resp_headers = []
     resp_elements = {}
+    defalut_role_codes  = []
 
     def __init__(self, geofile, logging):
         self.geofile = geofile
@@ -102,7 +103,9 @@ class GeoFile(object):
             self.column_from_main_elements(header) if header.endswith("_o") else ""
             for header in self.main_headers
         ]
-        self._update_main_row(row)
+        self._update_main_row(row, "geofile", self.geofile)
+        self._update_main_row(row, "gbl_resourceType_sm_o", self._resource_type())
+        self._update_main_row(row, "dct_format_s_o", self._format())
         return row
 
     def resp_rows(self):
@@ -115,8 +118,10 @@ class GeoFile(object):
         idpoc_rows = self._resp_rows_from_path("./dataIdInfo/idPoC")
         rows.extend(idpoc_rows)
 
-        self._add_defalut_role("010", rows)
-        self._add_defalut_role("006", rows)
+        # self._add_defalut_role("010", rows)
+        # self._add_defalut_role("006", rows)
+        # defalut_role_codes = ["010", "006" ]
+        self._add_defalut_roles(self.defalut_role_codes, rows)
 
         return rows
 
@@ -274,16 +279,32 @@ class GeoFile(object):
 
         return None
 
-    def _update_main_row(self, row):
-        self._update_row(row, self.main_headers, "geofile", self.geofile)
-        self._update_row(
-            row, self.main_headers, "gbl_resourceType_sm_o", self._resource_type()
-        )
-        self._update_row(row, self.main_headers, "dct_format_s_o", self._format())
+    # def _update_main_row(self, row):
+    #     self._update_row(row, self.main_headers, "geofile", self.geofile)
+    #     self._update_row(
+    #         row, self.main_headers, "gbl_resourceType_sm_o", self._resource_type()
+    #     )
+    #     self._update_row(row, self.main_headers, "dct_format_s_o", self._format())
 
-    def _update_row(self, row, headers, header_name, value):
-        index = headers.index(header_name)
+    # def _update_main_row(self, row):
+    #     index = self.main_headers.index(row
+    # self._update_row(row, self.main_headers, "geofile", self.geofile)
+    # self._update_row(
+    #     row, self.main_headers, "gbl_resourceType_sm_o", self._resource_type()
+    # )
+    # self._update_row(row, self.main_headers, "dct_format_s_o", self._format())
+
+    def _update_main_row(self, row, header_name, value):
+        index = self.main_headers.index(header_name)
         row[index] = value
+
+    def _update_resp_row(self, row, header_name, value):
+        index = self.resp_headers.index(header_name)
+        row[index] = value
+
+    # def _update_row(self, row, headers, header_name, value):
+    #     index = headers.index(header_name)
+    #     row[index] = value
 
     def _resp_rows_from_path(self, path):
         nodes = self.root.findall(path)
@@ -295,14 +316,32 @@ class GeoFile(object):
 
     #### responsible party csv data ######
     # To ensure a geofile has at least one "006" and one "010" roles in repsponsible parties
-    def _add_defalut_role(self, role_code, rows):
-        index = self.resp_headers.index("role")
-        role_codes = [row[index] for row in rows]
-        if role_code not in role_codes:
-            new_row = [""] * 18
-            self._update_row(new_row, self.resp_headers, "role", role_code)
-            self._update_row(new_row, self.resp_headers, "geofile", self.geofile)
-            rows.append(new_row)
+    # def _add_defalut_role(self, role_code, rows):
+    #     index = self.resp_headers.index("role")
+    #     role_codes = [row[index] for row in rows]
+    #     if role_code not in role_codes:
+    #         new_row = [""] * 18
+    #         self._update_resp_row(new_row, "role", role_code)
+    #         self._update_resp_row(new_row, "geofile", self.geofile)
+    #         rows.append(new_row)
+
+    def _add_defalut_roles(self, codes, rows):
+        role_codes = self._codes(rows, "role")
+        for code in codes:
+            if code not in codes:
+                rows.append(self._add_role(code)
+
+    def _add_role(self, code):
+        new_row = ["" for header in self.resp_headers]
+        self._update_resp_row(new_row, "role", code)
+        self._update_resp_row(new_row, "geofile", self.geofile)
+        return new_row
+
+    def _codes(self, rows, name):
+        index = self.resp_headers.index(name)
+        codes = [row[index] for row in rows]
+        code_set = set(codes)
+        return list(code_set)
 
     def rm_dollar_sign(self, str):
         return str.replace("$", "_")
@@ -311,6 +350,7 @@ class GeoFile(object):
 ################################################################################################
 #                             2. constant variables                                                        #
 ################################################################################################
+defalut_role_codes = ["010", "006" ]
 # Main CSV File headers: the order of this array define the order the main CSV file
 main_headers = [
     "arkid",
@@ -475,6 +515,7 @@ GeoFile.resp_headers = resp_headers
 GeoFile.resp_elements = resp_elements
 GeoFile.main_headers = main_headers
 GeoFile.main_elements = main_elements
+GeoFile.defalut_role_codes = defalut_role_codes
 
 # 1. Please provide your local log file path
 logfile = r"D:\Log\shpfile_projection.log"
