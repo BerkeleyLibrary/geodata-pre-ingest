@@ -91,7 +91,7 @@ class GeoFile(object):
     main_elements = {}
     resp_headers = []
     resp_elements = {}
-    defalut_role_codes  = []
+    defalut_role_codes = []
 
     def __init__(self, geofile, logging):
         self.geofile = geofile
@@ -103,9 +103,9 @@ class GeoFile(object):
             self.column_from_main_elements(header) if header.endswith("_o") else ""
             for header in self.main_headers
         ]
-        self._update_main_row(row, "geofile", self.geofile)
-        self._update_main_row(row, "gbl_resourceType_sm_o", self._resource_type())
-        self._update_main_row(row, "dct_format_s_o", self._format())
+        self._update_main_col(row, "geofile", self.geofile)
+        self._update_main_col(row, "gbl_resourceType_sm_o", self._resource_type())
+        self._update_main_col(row, "dct_format_s_o", self._format())
         return row
 
     def resp_rows(self):
@@ -118,10 +118,7 @@ class GeoFile(object):
         idpoc_rows = self._resp_rows_from_path("./dataIdInfo/idPoC")
         rows.extend(idpoc_rows)
 
-        # self._add_defalut_role("010", rows)
-        # self._add_defalut_role("006", rows)
-        # defalut_role_codes = ["010", "006" ]
-        self._add_defalut_roles(self.defalut_role_codes, rows)
+        self._add_rows_with_defalut_roles(self.defalut_role_codes, rows)
 
         return rows
 
@@ -158,7 +155,7 @@ class GeoFile(object):
             return fun()
         else:
             val = self._tag_value(tag).strip()
-            if tag == "dcat_theme_sm":  # check import later
+            if tag == "dcat_theme_sm":
                 val = val.strip("0")
             return val
 
@@ -273,38 +270,18 @@ class GeoFile(object):
                 self._resp_tag_value(name, node) if name in keys else ""
                 for name in self.resp_headers
             ]
-            self._update_row(row, self.resp_headers, "role", role)
-            self._update_row(row, self.resp_headers, "geofile", self.geofile)
+            self._update_resp_col(row, "geofile", self.geofile)
             return row
 
         return None
 
-    # def _update_main_row(self, row):
-    #     self._update_row(row, self.main_headers, "geofile", self.geofile)
-    #     self._update_row(
-    #         row, self.main_headers, "gbl_resourceType_sm_o", self._resource_type()
-    #     )
-    #     self._update_row(row, self.main_headers, "dct_format_s_o", self._format())
-
-    # def _update_main_row(self, row):
-    #     index = self.main_headers.index(row
-    # self._update_row(row, self.main_headers, "geofile", self.geofile)
-    # self._update_row(
-    #     row, self.main_headers, "gbl_resourceType_sm_o", self._resource_type()
-    # )
-    # self._update_row(row, self.main_headers, "dct_format_s_o", self._format())
-
-    def _update_main_row(self, row, header_name, value):
+    def _update_main_col(self, row, header_name, value):
         index = self.main_headers.index(header_name)
         row[index] = value
 
-    def _update_resp_row(self, row, header_name, value):
+    def _update_resp_col(self, row, header_name, value):
         index = self.resp_headers.index(header_name)
         row[index] = value
-
-    # def _update_row(self, row, headers, header_name, value):
-    #     index = headers.index(header_name)
-    #     row[index] = value
 
     def _resp_rows_from_path(self, path):
         nodes = self.root.findall(path)
@@ -316,25 +293,16 @@ class GeoFile(object):
 
     #### responsible party csv data ######
     # To ensure a geofile has at least one "006" and one "010" roles in repsponsible parties
-    # def _add_defalut_role(self, role_code, rows):
-    #     index = self.resp_headers.index("role")
-    #     role_codes = [row[index] for row in rows]
-    #     if role_code not in role_codes:
-    #         new_row = [""] * 18
-    #         self._update_resp_row(new_row, "role", role_code)
-    #         self._update_resp_row(new_row, "geofile", self.geofile)
-    #         rows.append(new_row)
-
-    def _add_defalut_roles(self, codes, rows):
-        role_codes = self._codes(rows, "role")
+    def _add_rows_with_defalut_roles(self, codes, rows):
+        identical_row_codes = self._codes(rows, "role")
         for code in codes:
-            if code not in codes:
-                rows.append(self._add_role(code)
+            if code not in identical_row_codes:
+                rows.append(self._add_role(code))
 
     def _add_role(self, code):
         new_row = ["" for header in self.resp_headers]
-        self._update_resp_row(new_row, "role", code)
-        self._update_resp_row(new_row, "geofile", self.geofile)
+        self._update_resp_col(new_row, "role", code)
+        self._update_resp_col(new_row, "geofile", self.geofile)
         return new_row
 
     def _codes(self, rows, name):
@@ -350,7 +318,7 @@ class GeoFile(object):
 ################################################################################################
 #                             2. constant variables                                                        #
 ################################################################################################
-defalut_role_codes = ["010", "006" ]
+defalut_role_codes = ["010", "006"]
 # Main CSV File headers: the order of this array define the order the main CSV file
 main_headers = [
     "arkid",
