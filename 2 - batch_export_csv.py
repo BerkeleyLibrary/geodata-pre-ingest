@@ -6,7 +6,7 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 import csv
 import re
-from datetime import date
+from datetime import date, datetime
 from typing import List
 
 
@@ -168,7 +168,24 @@ class GeoFile(object):
             "from_attribute": from_attribute,
             "removal_dollar_sign": removal_dollar_sign,
         }
-        return self._field_value(path, hash)
+        value = self._field_value(path, hash)
+        if tag == "dcat_theme_sm":
+            return value.strip("0")
+        if tag == "dct_issued_s":
+            return value
+            # return self._issued_date(value)
+
+        return value
+
+    def _issued_date(self, val):
+        try:
+            if val:
+                datetime_obj = datetime.strptime(val, "%Y-%m-%dT%H:%M:%S")
+                return datetime_obj.strftime("%Y-%m-%d")
+            else:
+                return ""
+        except ValueError:
+            return ""
 
     def _node_value(self, node, from_attribute):
         tags = re.compile("<.*?>")
@@ -228,7 +245,7 @@ class GeoFile(object):
         return ""
 
     def _modified_date_dt(self):
-        return date.today().strftime("%Y%m%d")
+        return date.today().strftime("%Y-%m-%dT%H:%M:%SZ")
 
     def _resource_type(self):
         desc = arcpy.Describe(self.geofile)
@@ -252,7 +269,7 @@ class GeoFile(object):
         if data_type == "RasterDataset":
             return "GeoTIFF"
         if data_type == "ShapeFile":
-            return "ShapeFile"
+            return "Shapefile"
         return ""
 
     def _resp_tag_value(self, name, node):
@@ -492,9 +509,7 @@ logging.basicConfig(
 )
 
 # 2. Please provide source data directory path here
-source_batch_directory_path = (
-    r"D:\pre_test\export_csv\input\test_vector_workspace_2023-08"
-)
+source_batch_directory_path = r"D:\pre_test\export_csv\input\test_vector_source"
 
 # 3. please provide result directory path:
 #   attention: Please do not use the original batch directory path or projected directory path
