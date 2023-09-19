@@ -124,6 +124,8 @@ def get_invalid_date_f_v(row, fieldname, expected_date_formats):
     if value:
         vals = value.split("$") if fieldname.endswith("m") else [value]
         for val in vals:
+            if fieldname == "dct_issued_s":
+                val = val.replace('"', "")
             expected = expected_date(val, expected_date_formats)
             if not expected:
                 return f_v(fieldname, value)

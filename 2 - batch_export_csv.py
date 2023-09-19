@@ -172,8 +172,7 @@ class GeoFile(object):
         if tag == "dcat_theme_sm":
             return value.strip("0")
         if tag == "dct_issued_s":
-            return value
-            # return self._issued_date(value)
+            return self._issued_date(value)
 
         return value
 
@@ -181,7 +180,7 @@ class GeoFile(object):
         try:
             if val:
                 datetime_obj = datetime.strptime(val, "%Y-%m-%dT%H:%M:%S")
-                return datetime_obj.strftime("%Y-%m-%d")
+                return f'"{datetime_obj.strftime("%Y-%m-%d")}"'
             else:
                 return ""
         except ValueError:
@@ -336,6 +335,16 @@ class GeoFile(object):
 ################################################################################################
 #                             2. constant variables                                                        #
 ################################################################################################
+ls_gbl_resourceClass_sm = {
+    "Collections",
+    "Datasets",
+    "Imagery",
+    "Maps",
+    "Web services",
+    "Websites",
+    "Other",
+}
+
 # Main CSV File headers: the order of this array define the order the main CSV file
 main_headers = [
     "arkid",
@@ -494,11 +503,23 @@ resp_elements = {
 ################################################################################################
 #                                 3. set up                                                    #
 ################################################################################################
+# ls_gbl_resourceClass_sm = [
+#     "Collections",
+#     "Datasets",
+#     "Imagery",
+#     "Maps",
+#     "Web services",
+#     "Websites",
+#     "Other",
+# ]
+
+
 # initial csv infomation to class variables
 GeoFile.resp_headers = resp_headers
 GeoFile.resp_elements = resp_elements
 GeoFile.main_headers = main_headers
 GeoFile.main_elements = main_elements
+# GeoFile.resouce_class = ""
 
 # 1. Please provide your local log file path
 logfile = r"D:\Log\shpfile_projection.log"

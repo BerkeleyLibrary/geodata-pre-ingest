@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 from typing import List
 import logging
 import csv
-from datetime import date
+from datetime import datetime
 from pathlib import Path
 from arcpy import metadata as md
 import arcpy
@@ -25,17 +25,17 @@ class Batch_Iso19139s(object):
         with open(main_csv_filepath, "r", encoding="utf-8") as csvfile:
             csv_reader = csv.DictReader(csvfile)
             for row in csv_reader:
-                geofile_path_from_csv = row["geofile"]
+                geofile_path_from_csv = row.get("geofile")
                 geofile_path = self._working_geofile_path(geofile_path_from_csv)
 
                 # no arkid: the main_csv file may not been assigned arkids
-                arkid = row["arkid"]
+                arkid = row.get("arkid")
                 if not arkid:
                     msg = f"Please check the main csv file: missing arkid in {geofile_path_from_csv}"
                     self.logging.info(msg)
                     raise ValueError(msg)
                 resp_rows = [
-                    resp_row for resp_row in resp_dic if arkid == resp_row["arkid"]
+                    resp_row for resp_row in resp_dic if arkid == resp_row.get("arkid")
                 ]
                 geofile = GeoFile(geofile_path, self.logging)
                 geofile.create_iso19139_file(row, resp_rows)
@@ -156,7 +156,7 @@ class RowTransformer(object):
         self.root = self.tree.getroot()
         self.main_row = main_row
         self.resp_rows = resp_rows
-        self.main_fieldnames = self._main_col_names(main_row)
+        # self.main_fieldnames = self._main_col_names(main_row)
 
     def __call__(self):
         self._transform_main()
@@ -164,9 +164,9 @@ class RowTransformer(object):
         self._add_ucb_distributor()
         self.tree.write(self.tempfile)
 
-    def _main_col_names(self, main_row):
-        dic = dict(main_row)
-        return list(dic.keys())
+    # def _main_col_names(self, main_row):
+    #     dic = dict(main_row)
+    #     return list(dic.keys())
 
     def _transform_main(self) -> None:
         def remove_nodes(parent, child_name):
@@ -248,16 +248,26 @@ class RowTransformer(object):
                 print("Please check main_csv file, it may have no metadata content")
 
         # not every header has a related header_o
-        def col_val(header):
-            if not (header.endswith("_o")) and not (header in self.main_fieldnames):
-                msg = f"{header} is not a column name in main CSV file"
-                print(msg)
-                raise ValueError(msg)
-            return self.main_row[header] if header in self.main_fieldnames else ""
+        def main_col_val(header):
+            val = self.main_row.get(header)
+
+            def issued_date():
+                clr_val = val.replace('"', "")
+                ls = clr_val.split("-")
+                date_str = clr_val
+                if len(ls) == 2:
+                    date_str = f"ls[0]-ls[1]-01"
+                if len(ls) == 1:
+                    date_str = f"ls[0]-01-01"
+                return f"{date_str}T00:00:00"
+
+            if val and header.startswith("dct_issued_s"):
+                return issued_date()
+            return val
 
         def element_val(header):
-            val = col_val(header)
-            val_o = col_val(f"{header}_o")
+            val = main_col_val(header)
+            val_o = main_col_val(f"{header}_o")
             return val_o if val_o and (not val) else val
 
         def transform_main_headers():
@@ -539,7 +549,7 @@ projected_directory_path = r"D:\pre_test\create_iso19139\sample_raster"
 # 3. please provide main csv and resp csv files here, before running this script:
 #   a) make sure arkids have been assigned to both csv files
 #   b) make sure csv files are validated: script to be created after discussing Monday - ignore it for now
-main_csv_filepath = r"D:\pre_test\create_iso19139\input\main_sample_raster_arkids.csv"
+main_csv_filepath = r"D:\pre_test\create_iso19139\input\main_sample_raster_arkids4.csv"
 resp_csv_filepath = r"D:\pre_test\create_iso19139\input\resp_sample_raster_arkids.csv"
 
 
