@@ -30,18 +30,18 @@ class SourceBatch(object):
         else:
             self.prepare_tif_file(workspace_path, referenced_filepath)
 
-    def prepare_shapefile(self, workspace_path):
+    def prepare_shapefile(self, workspace):
         for file in self.geofile_paths:
-            name = os.path.basename(file)
-            prj_file = os.path.join(workspace_path, name)
-            self.vector_projection(file, prj_file)
+            geofile = GeoFile(file, self.logging)
+            geofile.projection(workspace)
 
     def prepare_tif_file(self, workspace_path, referenced_filepath):
         for file in self.geofile_paths:
-            name = os.path.basename(file)
-            prj_file = os.path.join(workspace_path, name)
-            self.raster_projection(file, prj_file, referenced_filepath)
-            self.pyramid(prj_file)
+            geofile = GeoFile(file, self.logging)
+            prj_filepath = geofile.raster_projection(
+                workspace_path, referenced_filepath
+            )
+            geofile.pyramid(prj_filepath, self.logging)
 
     def _geo_init(self):
         shapefile_paths = self._file_paths("shp")
@@ -117,23 +117,23 @@ class SourceBatch(object):
             if filename.endswith(ext)
         ]
 
-    def vector_projection(self, from_filepath, to_filepath):
+
+class GeoFile(object):
+    def __init__(self, geofile):
+        self.geofile = geofile
+
+    def projection(self, workspace, logging):
+        name = os.path.basename(self.geofile)
+        prj_file = os.path.join(workspace, name)
         try:
             wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]'
             sr = arcpy.SpatialReference()
             sr.loadFromString(wkt)
-            arcpy.Project_management(from_filepath, to_filepath, sr)
+            arcpy.Project_management(self.geofile, prj_file, sr)
         except Exception as ex:
-            self.logging.info(f"{from_filepath} - {ex}")
+            logging.info(f"{self.geofile} - {ex}")
 
-    def raster_projection(self, from_filepath, to_filepath, referenced_filepath):
-        try:
-            sr = arcpy.Describe(referenced_filepath).spatialReference
-            arcpy.ProjectRaster_management(from_filepath, to_filepath, sr)
-        except Exception as ex:
-            self.logging.info(f"{self.geofile} - {ex}")
-
-    def pyramid(self, filepath):
+    def pyramid(self, filepath, logging):
         pylevel = "7"
         skipfirst = "NONE"
         resample = "NEAREST"
@@ -145,7 +145,17 @@ class SourceBatch(object):
                 filepath, pylevel, skipfirst, resample, compress, quality, skipexist
             )
         except Exception as ex:
-            self.logging.info(f"{filepath} - {ex}")
+            logging.info(f"{self.geofile} - {ex}")
+
+    def raster_projection(self, workspace_path, referenced_filepath):
+        name = os.path.basename(self.geofile)
+        prj_filepath = os.path.join(workspace_path, name)
+        try:
+            sr = arcpy.Describe(referenced_filepath).spatialReference
+            arcpy.ProjectRaster_management(self.geofile, prj_filepath, sr)
+            return prj_filepath
+        except Exception as ex:
+            logging.info(f"{self.geofile} - {ex}")
 
 
 # Default geofile extensions
@@ -174,8 +184,6 @@ logging.basicConfig(
     format="%(message)s - %(asctime)s - %(funcName)s - %(levelname)s",
 )
 
-### Shapefile input ###
-
 # # 2. Please provide source data directory path
 # source_batch_directory_path = r"D:\pre_test\prepare_batch\test_vector_workspace_2023-08"
 
@@ -184,17 +192,14 @@ logging.basicConfig(
 #     r"D:\pre_test\prepare_batch\test_vector_workspace_2023-08_projected"
 # )
 
-### GeoTIFF input ###
 # 2. Please provide source data directory path
-source_batch_directory_path = r"D:\pre_test\prepare_batch\sample_raster"
+source_batch_directory_path = r"D:\from_susan\sample_raster"
 
 # 3. Please provide projected data directory path
-projected_batch_directory_path = r"D:\pre_test\prepare_batch\sample_raster_projected"
+projected_batch_directory_path = r"D:\from_susan\raster_workspace"
 
 # 4. Please provide geotif referenced file
-geotif_referenced_filepath = (
-    r"D:\pre_test\prepare_batch\projected_raster\5048_1_reproject4326.tif"
-)
+geotif_referenced_filepath = r"D:\from_susan\projected_raster\5048_1_reproject4326.tif"
 
 
 ################################################################################################
@@ -222,8 +227,7 @@ def verify_setup(file_paths, directory_paths):
 output(f"***starting 'batch_preparing'")
 
 if verify_setup(
-    [logfile, geotif_referenced_filepath],
-    [source_batch_directory_path, projected_batch_directory_path],
+    [logfile], [source_batch_directory_path, projected_batch_directory_path]
 ):
     source_batch = SourceBatch(source_batch_directory_path, logging)
 
