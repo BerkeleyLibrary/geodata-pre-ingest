@@ -6,60 +6,74 @@ import csv
 from datetime import datetime
 from pathlib import Path
 from arcpy import metadata as md
+import arcpy
 from shutil import copyfile
-
-
-################################################################################################
-#                             1. functions                                                    #
-################################################################################################
-def create_iso19139_files():
-    resp_dic = csv_dic(resp_csv_filepath)
-    with open(main_csv_filepath, "r", encoding="utf-8") as csvfile:
-        csv_reader = csv.DictReader(csvfile)
-        for row in csv_reader:
-            arkid = row.get("arkid")
-            if not arkid:
-                text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
-                log_raise_error(text)
-            resp_rows = [
-                resp_row for resp_row in resp_dic if arkid == resp_row["arkid"]
-            ]
-
-            geofile_path = correlated_filepath(row.get("geofile"))
-            geofile = GeoFile(geofile_path, logging)
-            geofile.create_iso19139_file(row, resp_rows)
-
-
-def correlated_filepath(geofile_path):
-    if not source_batch_directory_path in geofile_path:
-        text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{source_batch_directory_path}'"
-        log_raise_error(text)
-
-    filepath = geofile_path.replace(
-        source_batch_directory_path, projected_batch_directory_path
-    )
-    if Path(filepath).is_file():
-        return filepath
-    else:
-        text = f"File {filepath} does not exist"
-        log_raise_error(text)
-
-
-def csv_dic(csv_filepath):
-    lines = (line for line in open(csv_filepath, "r", encoding="utf-8"))
-    rows = (line.strip().split(",") for line in lines)
-    header = next(rows)
-    return [dict(zip(header, row)) for row in rows]
-
-
-def log_raise_error(text):
-    logging.info(text)
-    raise ValueError(text)
 
 
 ################################################################################################
 #                             2. class  - initial metadata from *.tif.xml or *.shp.xml         #
 ################################################################################################
+class Batch_Iso19139s(object):
+    def __init__(self, logging, directory_path):
+        self.directory_path = directory_path
+        self.logging = logging
+
+    def __call__(self, main_csv_filepath, resp_csv_filepath):
+        # problem with encoding when getting from csv.DictReader
+        resp_dic = self._csv_dic(resp_csv_filepath)
+        with open(main_csv_filepath, "r", encoding="utf-8") as csvfile:
+            csv_reader = csv.DictReader(csvfile)
+            for row in csv_reader:
+                geofile_path_from_csv = row.get("geofile")
+                geofile_path = self._correlated_filepath(geofile_path_from_csv)
+
+                # no arkid: the main_csv file may not been assigned arkids
+                arkid = row.get("arkid")
+                if not arkid:
+                    msg = f"Please check the main csv file: missing arkid in {geofile_path_from_csv}"
+                    self.logging.info(msg)
+                    raise ValueError(msg)
+                resp_rows = [
+                    resp_row for resp_row in resp_dic if arkid == resp_row.get("arkid")
+                ]
+                geofile = GeoFile(geofile_path, self.logging)
+                geofile.create_iso19139_file(row, resp_rows)
+
+    ## common methods to be moved
+    # def _working_geofile_path(self, geofile_path):
+    #     if self.directory_path:
+    #         name = os.path.basename(geofile_path)
+    #         return f"{self.directory_path}\\{name}"
+    #     else:
+    #         return geofile_path
+
+    def _correlated_filepath(self, geofile_path):
+        if not source_batch_directory_path in geofile_path:
+            text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{source_batch_directory_path}'"
+            self.log_raise_error(text)
+
+        filepath = geofile_path.replace(
+            source_batch_directory_path, projected_batch_directory_path
+        )
+        if Path(filepath).is_file():
+            return filepath
+        else:
+            text = f"File {filepath} does not exist"
+            self.log_raise_error(text)
+
+    def _csv_dic(self, csv_filepath):
+        lines = (line for line in open(csv_filepath, "r", encoding="utf-8"))
+        rows = (line.strip().split(",") for line in lines)
+        header = next(rows)
+        return [dict(zip(header, row)) for row in rows]
+
+    def log_raise_error(self, text):
+        self.logging.info(text)
+        raise ValueError(text)
+
+    ## common functions end
+
+
 class GeoFile(object):
     def __init__(self, geofile_path, logging):
         self.logging = logging
@@ -578,6 +592,7 @@ if verify_setup(
     # 1. Get a geofile name from main csv file
     # 2. Find the geofile in projected directory
     # 3. Create an iso19139 xml file for each geofile found in 2
-    create_iso19139_files()
+    batch_iso19139s = Batch_Iso19139s(logging, projected_batch_directory_path)
+    batch_iso19139s(main_csv_filepath, resp_csv_filepath)
 
     output(f"*** end 'batch_iso19139s'")

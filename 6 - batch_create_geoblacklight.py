@@ -21,10 +21,8 @@ def create_geoblacklight_files():
         for row in csv_reader:
             arkid = row.get("arkid")
             if not arkid:
-                print(
-                    f"Please check the main csv file: missing arkid in {row.get('geofile')}"
-                )
-                raise ValueError
+                text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
+                log_raise_error(text)
             resp_rows = [
                 resp_row for resp_row in resp_dic if arkid == resp_row["arkid"]
             ]
@@ -63,7 +61,6 @@ def create_geoblacklight_file(row, resp_rows, field_names):
     add_default(json_data)
 
     file_path = geoblacklight_filepath(row)
-    print(file_path)
     with open(file_path, "w+") as geo_json:
         geo_json.write(
             json.dumps(
@@ -305,8 +302,9 @@ logging.basicConfig(
     format="%(message)s - %(asctime)s",
 )
 
-# source_batch_directory_path = r"D:\from_susan\sample_raster"
-source_batch_directory_path = r"D:\pre_test\create_geoblacklight\sample_raster"
+# same geofile path as in sample main csv file
+source_batch_directory_path = r"D:\from_susan\sample_raster"
+# source_batch_directory_path = r"D:\pre_test\create_geoblacklight\sample_raster"
 
 # 2. In order to get projected boundary information for Geoblacklight metadata later,
 #    please provide the projected batch directory path here
