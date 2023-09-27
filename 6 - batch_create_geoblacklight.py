@@ -10,8 +10,9 @@ from arcpy import metadata as md
 import arcpy
 
 
-# fields to be discussed:
-# 1)  gbl_mdModified_dt
+################################################################################################
+#                             1. functions                                                      #
+################################################################################################
 def create_geoblacklight_files():
     resp_dic = csv_dic(resp_csv_filepath)
     field_names = geoblacklight_field_names(main_csv_filepath)
@@ -59,6 +60,7 @@ def create_geoblacklight_file(row, resp_rows, field_names):
     add_default(json_data)
 
     file_path = geoblacklight_filepath(row)
+    print(file_path)
     with open(file_path, "w+") as geo_json:
         geo_json.write(
             json.dumps(
@@ -139,7 +141,7 @@ def add_default(json_data):
 def add_from_arkid(json_data, row):
     arkid = row.get("arkid")
     id = f"{PREFIX}{arkid}"
-    access = row.get("accessRights_s").strip().lower()
+    access = row.get("dct_accessRights_s").strip().lower()
 
     def dc_references():  # TODO: add multiple download from csv later
         hosts = HOSTS if access == "public" else HOSTS_SECURE
@@ -157,7 +159,7 @@ def add_from_arkid(json_data, row):
 
     json_data["id"] = id
     json_data["gbl_wxsIdentifier_s"] = arkid
-    json_data["dct_references_s"] = dc_references
+    json_data["dct_references_s"] = dc_references()
 
 
 def add_boundary(json_data, row):
@@ -295,7 +297,7 @@ logging.basicConfig(
     format="%(message)s - %(asctime)s",
 )
 
-source_batch_directory_path = r"D:\pre_test\create_geoblacklight\sample_raster"
+source_batch_directory_path = r"D:\from_susan\sample_raster"
 
 # 2. In order to get projected boundary information for Geoblacklight metadata later,
 #    please provide the projected batch directory path here
