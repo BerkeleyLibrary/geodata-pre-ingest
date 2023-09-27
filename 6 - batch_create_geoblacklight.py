@@ -319,7 +319,7 @@ resp_csv_filepath = (
 
 
 ################################################################################################
-#                    4. Create an ISO19139.xml for each  geofile                               #
+#                    4. Create a geoblacklight.json file for each  geofile                               #
 ################################################################################################
 def output(msg):
     logging.info(msg)

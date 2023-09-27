@@ -34,7 +34,8 @@ def create_files_on_row(row, directory_path):
     arkid = row.get("arkid")
     dest_arkid_directory_path = arkid_directory_path(arkid, directory_path)
 
-    cp_iso19139(projected_geofile_path, dest_arkid_directory_path)
+    cp_file(projected_geofile_path, dest_arkid_directory_path, "iso19139.xml")
+    cp_file(projected_geofile_path, dest_arkid_directory_path, "geoblacklight.json")
     create_map_zip(projected_geofile_path, arkid, dest_arkid_directory_path)
     create_data_zip(geofile_path, dest_arkid_directory_path)
 
@@ -49,6 +50,7 @@ def arkid_directory_path(arkid, directory_path):
     return arkid_directory_path
 
 
+# Check geofiles listed in main csv are from source batch dirctory
 def correlated_filepath(geofile_path):
     if not source_batch_directory_path in geofile_path:
         text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{source_batch_directory_path}'"
@@ -75,15 +77,15 @@ def rm_contents(directory_path):
             rmtree(item_path)
 
 
-def cp_iso19139(geofile_path, arkid_directory_path):
+def cp_file(geofile_path, arkid_directory_path, name):
     base = os.path.splitext(geofile_path)[0]
-    iso_19139_filepath = f"{base}_iso19139.xml"
-    if Path(iso_19139_filepath).is_file():
-        dest_filepath = os.path.join(arkid_directory_path, "iso_19139.xml")
-        copyfile(iso_19139_filepath, dest_filepath)
+    from_filepath = f"{base}_{name}"
+    if Path(from_filepath).is_file():
+        to_filepath = os.path.join(arkid_directory_path, name)
+        copyfile(from_filepath, to_filepath)
 
     else:
-        text = f"missing iso19139 file: {iso_19139_filepath}"
+        text = f"missing file: {from_filepath}"
         log_raise_error(text)
 
 

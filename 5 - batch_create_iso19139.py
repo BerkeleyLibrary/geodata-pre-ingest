@@ -146,17 +146,12 @@ class RowTransformer(object):
         self.root = self.tree.getroot()
         self.main_row = main_row
         self.resp_rows = resp_rows
-        # self.main_fieldnames = self._main_col_names(main_row)
 
     def __call__(self):
         self._transform_main()
         self._transform_resp()
         self._add_ucb_distributor()
         self.tree.write(self.tempfile)
-
-    # def _main_col_names(self, main_row):
-    #     dic = dict(main_row)
-    #     return list(dic.keys())
 
     def _transform_main(self) -> None:
         def remove_nodes(parent, child_name):
@@ -411,7 +406,7 @@ class RowTransformer(object):
 
 
 ################################################################################################
-#                    2. set constant variables and class methods                                  #
+#                    2.      constant variables                                                #
 ################################################################################################
 
 TRANSFORM_MAIN_HEADERS = [
@@ -545,7 +540,7 @@ resp_csv_filepath = r"D:\pre_test\create_iso19139\input\resp_sample_raster_arkid
 
 
 ################################################################################################
-#                    4. Create an ISO19139.xml for each  geofile                               #
+#                    4. Create an ISO19139.xml file for each  geofile                               #
 ################################################################################################
 def output(msg):
     logging.info(msg)
