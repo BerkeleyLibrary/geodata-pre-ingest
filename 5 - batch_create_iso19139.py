@@ -414,7 +414,7 @@ class RowTransformer(object):
 #                    2. set constant variables and class methods                                  #
 ################################################################################################
 
-transform_main_headers = [
+TRANSFORM_MAIN_HEADERS = [
     "dct_title_s",
     "dct_alternative_sm",
     "summary",
@@ -432,7 +432,7 @@ transform_main_headers = [
 
 # 1) Keys are headers of main CSV file
 # 2) If an attribute "path" value include "keys", the element has multiple occurrences in ISO19139
-main_elements = {
+MAIN_ELEMENTS = {
     "dct_title_s": {"path": "dataIdInfo/idCitation/resTitle", "type": "string"},
     "dct_alternative_sm": {
         "path": "dataIdInfo/idCitation/resAltTitle",
@@ -468,7 +468,7 @@ main_elements = {
     "pcdm_memberOf_sm": {"path": "dataIdInfo/idCitation/collTitle", "type": "string"},
 }
 
-resp_headers = [
+RESP_HEADERS = [
     "arkid",
     "geofile",
     "from",
@@ -491,7 +491,7 @@ resp_headers = [
     "instruction",
 ]
 
-resp_elements = {
+RESP_ELEMENTS = {
     "contact_name": {"path": "rpIndName", "type": "string"},
     "position": {"path": "rpPosName", "type": "string"},
     "organization": {"path": "rpOrgName", "type": "string"},
@@ -515,10 +515,10 @@ resp_elements = {
 }
 
 # initial csv infomation to class variables
-RowTransformer.resp_headers = resp_headers
-RowTransformer.resp_elements = resp_elements
-RowTransformer.transform_main_headers = transform_main_headers
-RowTransformer.main_elements = main_elements
+RowTransformer.resp_headers = RESP_HEADERS
+RowTransformer.resp_elements = RESP_ELEMENTS
+RowTransformer.transform_main_headers = TRANSFORM_MAIN_HEADERS
+RowTransformer.main_elements = MAIN_ELEMENTS
 
 ################################################################################################
 #                                 3. set up                                                    #
@@ -536,13 +536,10 @@ logging.basicConfig(
 source_batch_directory_path = r"D:\from_susan\sample_raster"
 # source_batch_directory_path = r"D:\pre_test\create_geoblacklight\sample_raster"
 
-# 3. In order to get projected boundary information for Geoblacklight metadata later,
-#    please provide the projected batch directory path here
+# 3. Projected batch directory path
 projected_batch_directory_path = r"D:\pre_test\create_iso19139\sample_raster"
 
-# 4. please provide main csv and resp csv files here, before running this script:
-#   a) make sure arkids have been assigned to both csv files
-#   b) make sure csv files are validated: script to be created after discussing Monday - ignore it for now
+# 4. please provide main csv and resp csv files here, check csv files in script "4 - check_csv_files.py", before running this script:
 main_csv_filepath = r"D:\pre_test\create_iso19139\input\main_sample_raster_arkids4.csv"
 resp_csv_filepath = r"D:\pre_test\create_iso19139\input\resp_sample_raster_arkids.csv"
 

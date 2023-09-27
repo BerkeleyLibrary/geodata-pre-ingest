@@ -1,15 +1,15 @@
 import os
-import xml.etree.ElementTree as ET
-from typing import List
 import logging
 import json
 import csv
 from datetime import date
 from pathlib import Path
-from arcpy import metadata as md
 import arcpy
 
 
+# TODO:
+# 1) add multiple download from csv later
+# 2) check time fields
 ################################################################################################
 #                             1. functions                                                      #
 ################################################################################################
@@ -29,13 +29,6 @@ def create_geoblacklight_files():
             create_geoblacklight_file(row, resp_rows, field_names)
 
 
-def geoblacklight_filepath(row):
-    geofile_path = row.get("geofile")
-    projected_geofile_path = correlated_filepath(geofile_path)
-    base = os.path.splitext(projected_geofile_path)[0]
-    return f"{base}_geoblacklight.json"
-
-
 def correlated_filepath(geofile_path):
     if not source_batch_directory_path in geofile_path:
         text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{source_batch_directory_path}'"
@@ -49,6 +42,13 @@ def correlated_filepath(geofile_path):
     else:
         text = f"File {filepath} does not exist"
         log_raise_error(text)
+
+
+def geoblacklight_filepath(row):
+    geofile_path = row.get("geofile")
+    projected_geofile_path = correlated_filepath(geofile_path)
+    base = os.path.splitext(projected_geofile_path)[0]
+    return f"{base}_geoblacklight.json"
 
 
 def create_geoblacklight_file(row, resp_rows, field_names):
@@ -143,7 +143,7 @@ def add_from_arkid(json_data, row):
     id = f"{PREFIX}{arkid}"
     access = row.get("dct_accessRights_s").strip().lower()
 
-    def dc_references():  # TODO: add multiple download from csv later
+    def dc_references():
         hosts = HOSTS if access == "public" else HOSTS_SECURE
         iso_139_xml = f"{hosts['ISO139']}{id}/iso19139.xml"
         ref = (
@@ -302,17 +302,14 @@ logging.basicConfig(
     format="%(message)s - %(asctime)s",
 )
 
-# same geofile path as in sample main csv file
+# 2. Source batch directory path
 source_batch_directory_path = r"D:\from_susan\sample_raster"
 # source_batch_directory_path = r"D:\pre_test\create_geoblacklight\sample_raster"
 
-# 2. In order to get projected boundary information for Geoblacklight metadata later,
-#    please provide the projected batch directory path here
+# 3. Projected batch directory path
 projected_batch_directory_path = r"D:\pre_test\create_geoblacklight\sample_raster"
 
-# 3. please provide main csv and resp csv files here, before running this script:
-#   a) make sure arkids have been assigned to both csv files
-#   b) make sure csv files are validated: script to be created after discussing Monday - ignore it for now
+# 4. please provide main csv and resp csv files here, check csv files in script "4 - check_csv_files.py", before running this script:
 main_csv_filepath = (
     r"D:\pre_test\create_geoblacklight\input\main_sample_raster_arkids2.csv"
 )
