@@ -10,6 +10,8 @@ from arcpy import metadata as md
 import arcpy
 
 
+# fields to be discussed:
+# 1)  gbl_mdModified_dt
 def create_geoblacklight_files():
     resp_dic = csv_dic(resp_csv_filepath)
     field_names = geoblacklight_field_names(main_csv_filepath)
@@ -29,8 +31,8 @@ def create_geoblacklight_files():
 
 
 def geoblacklight_filepath(row):
-    geofile_path_from_csv = row.get("geofile")
-    projected_geofile_path = correlated_filepath(geofile_path_from_csv)
+    geofile_path = row.get("geofile")
+    projected_geofile_path = correlated_filepath(geofile_path)
     base = os.path.splitext(projected_geofile_path)[0]
     return f"{base}_geoblacklight.json"
 
@@ -49,6 +51,7 @@ def correlated_filepath(geofile_path):
 
 def create_geoblacklight_file(row, resp_rows, field_names):
     json_data = {}
+
     add_from_main_row(json_data, row, field_names)
     add_from_main_row_rights(json_data, row)
     add_from_resp_rows(json_data, resp_rows)
@@ -73,7 +76,7 @@ def add_from_main_row(json_data, row, field_names):
     def multiple_values(name, val):
         values = val.split("$")
         if name == "dcat_theme_sm":
-            return [isoTopic[value] for value in values]
+            return [ISOTOPIC[value.strip().zfill(3)] for value in values]
         if name in CAPITALIZED_FIELDS:
             return [value.title() for value in values]
         return values
@@ -81,13 +84,17 @@ def add_from_main_row(json_data, row, field_names):
     def single_value(name, val):
         if name == "dct_accessRights_s":
             return val.lower().capitalize()
+        if name == "dct_issued_s":
+            return val.replace('"', "").strip()
         return val
 
     def add(name, value):
-        if name.endswith("m"):
-            json_data[name] = multiple_values(name, val)
-        else:
-            json_data[name] = single_value(name, val)
+        final_value = (
+            multiple_values(name, value)
+            if name.endswith("m")
+            else single_value(name, value)
+        )
+        json_data[name] = final_value
 
     for name in field_names:
         value = current_val(name, row)
@@ -117,9 +124,7 @@ def add_from_resp_rows(json_data, rows):
     owners = resp_names(rows, "003")
 
     if originators:
-        json_data[
-            "dct_creator_sm"
-        ] = originators  # originator, publisher cannot be empty
+        json_data["dct_creator_sm"] = originators
     if publishers:
         json_data["dct_publisher_sm"] = publishers
     if owners:
@@ -136,13 +141,9 @@ def add_from_arkid(json_data, row):
     id = f"{PREFIX}{arkid}"
     access = row.get("accessRights_s").strip().lower()
 
-    def ref_hosts():
-        return HOSTS if access == "public" else HOSTS_SECURE
-
     def dc_references():  # TODO: add multiple download from csv later
-        hosts = ref_hosts()
-        iso_139_ext = '/iso19139.xml",'
-        iso_139_xml = hosts["ISO139"] + id + iso_139_ext
+        hosts = HOSTS if access == "public" else HOSTS_SECURE
+        iso_139_xml = f"{hosts['ISO139']}{id}/iso19139.xml"
         ref = (
             "{"
             + hosts["wfs"]
@@ -160,9 +161,9 @@ def add_from_arkid(json_data, row):
 
 
 def add_boundary(json_data, row):
-    geofile = row.get("geofile").strip
+    geofile = row.get("geofile").strip()
 
-    def geotif_boundary():
+    def geotiff_boundary():
         try:
             raster = arcpy.Raster(geofile)
             W = raster.extent.XMin
@@ -189,7 +190,7 @@ def add_boundary(json_data, row):
     if geofile.endswith(".shp"):
         json_data["locn_geometry"] = shapefile_boundary()
     if geofile.endswith(".tif"):
-        json_data["locn_geometry"] = geotif_boundary()
+        json_data["locn_geometry"] = geotiff_boundary()
 
 
 def csv_dic(csv_filepath):
@@ -205,13 +206,14 @@ def geoblacklight_field_names(csv_filepath):
         csv_reader = csv.reader(file)
         headers = next(csv_reader)[3:]
         names = [h for h in headers if not h.endswith("_o")]
-    return [n for n in names if not n in COMBINED_RIGHTS]
+    return [n for n in names if not n in EXCLUDING_FIELDS]
 
 
 def resp_names(rows, code):
     names = []
     for row in rows:
-        if row.get("role").strip() == code:
+        role_code = row.get("role").strip().zfill(3)
+        if role_code == code:
             o_name = row.get("organization")
             i_name = row.get("individual")
             if i_name:
@@ -221,14 +223,11 @@ def resp_names(rows, code):
     return [name.strip() for name in names if name]
 
 
-#################
-
-
 ################################################################################################
 #                    2. set constant variables to class methods                                #
 ################################################################################################
 
-isoTopic = {
+ISOTOPIC = {
     "001": "Farming",
     "002": "Biota",
     "003": "Boundaries",
@@ -276,6 +275,13 @@ CAPITALIZED_FIELDS = ["dct_spatial_sm", "dct_subject_sm"]
 # Combine three rights to "dct_rights_sm" in Geoblacklight
 COMBINED_RIGHTS = ["rights_general", "rights_legal", "rights_security"]
 
+EXCLUDING_FIELDS = [
+    "rights_general",
+    "rights_legal",
+    "rights_security",
+    "doc_zipfile_path",
+]
+
 
 ################################################################################################
 #                                 3. set up                                                    #
@@ -289,17 +295,21 @@ logging.basicConfig(
     format="%(message)s - %(asctime)s",
 )
 
-source_batch_directory_path = r""
+source_batch_directory_path = r"D:\pre_test\create_geoblacklight\sample_raster"
 
 # 2. In order to get projected boundary information for Geoblacklight metadata later,
 #    please provide the projected batch directory path here
-projected_batch_directory_path = r"D:\pre_test\create_iso19139\sample_raster"
+projected_batch_directory_path = r"D:\pre_test\create_geoblacklight\sample_raster"
 
 # 3. please provide main csv and resp csv files here, before running this script:
 #   a) make sure arkids have been assigned to both csv files
 #   b) make sure csv files are validated: script to be created after discussing Monday - ignore it for now
-main_csv_filepath = r"D:\pre_test\create_iso19139\input\main_sample_raster_arkids2.csv"
-resp_csv_filepath = r"D:\pre_test\create_iso19139\input\resp_sample_raster_arkids2.csv"
+main_csv_filepath = (
+    r"D:\pre_test\create_geoblacklight\input\main_sample_raster_arkids2.csv"
+)
+resp_csv_filepath = (
+    r"D:\pre_test\create_geoblacklight\input\resp_sample_raster_arkids2.csv"
+)
 
 
 ################################################################################################
@@ -327,7 +337,8 @@ def verify_setup(file_paths, directory_paths):
 output(f"*** starting 'batch_iso19139s'")
 
 if verify_setup(
-    [logfile, main_csv_filepath, resp_csv_filepath], [projected_directory_path]
+    [logfile, main_csv_filepath, resp_csv_filepath],
+    [projected_batch_directory_path, source_batch_directory_path],
 ):
     create_geoblacklight_files()
     output(f"*** end 'batch_iso19139s'")
