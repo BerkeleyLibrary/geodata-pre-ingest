@@ -12,7 +12,7 @@ from shutil import copyfile, rmtree
 
 
 def new_directory_path():
-    name = Path(source_batch_path).stem
+    name = Path(source_batch_directory_path).stem
     directory_path = os.path.join(result_directory_path, f"{name}_ingestion_files")
     ensure_dir_exists(directory_path)
     return directory_path
@@ -50,7 +50,13 @@ def arkid_directory_path(arkid, directory_path):
 
 
 def correlated_filepath(geofile_path):
-    filepath = geofile_path.replace(source_batch_path, projected_batch_directory_path)
+    if not source_batch_directory_path in geofile_path:
+        text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{source_batch_directory_path}'"
+        log_raise_error(text)
+
+    filepath = geofile_path.replace(
+        source_batch_directory_path, projected_batch_directory_path
+    )
     if Path(filepath).is_file():
         return filepath
     else:
@@ -187,7 +193,7 @@ logging.basicConfig(
 
 # 2. Please provide source data directory path,
 #    make sure this is the source directory path from which main.csv file was generated.
-source_batch_path = r"D:\pre_test\create_ingestion_files\source_sample_raster"
+source_batch_directory_path = r"D:\pre_test\create_ingestion_files\source_sample_raster"
 
 # 3. Please provide projected data directory path
 projected_batch_directory_path = (
@@ -206,7 +212,7 @@ result_directory_path = r"D:\pre_test\create_ingestion_files\results"
 ################################################################################################
 #                             3. Create ingestion files
 #  Based on input:
-#  source_batch_path = r"D:\from_susan\sample_raster"
+#  source_batch_directory_path = r"D:\from_susan\sample_raster"
 #  projected_batch_directory_path = r"D:\from_susan\sample_raster"
 #  result_directory_path = r"D:\results"
 #
@@ -248,7 +254,11 @@ output(f"*** starting 'creating ingestion files'")
 
 if verify_setup(
     [main_csv_filepath, logfile],
-    [source_batch_path, projected_batch_directory_path, result_directory_path],
+    [
+        source_batch_directory_path,
+        projected_batch_directory_path,
+        result_directory_path,
+    ],
 ):
     create_files()
 

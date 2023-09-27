@@ -39,6 +39,10 @@ def geoblacklight_filepath(row):
 
 
 def correlated_filepath(geofile_path):
+    if not source_batch_directory_path in geofile_path:
+        text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{source_batch_directory_path}'"
+        log_raise_error(text)
+
     filepath = geofile_path.replace(
         source_batch_directory_path, projected_batch_directory_path
     )
@@ -46,8 +50,7 @@ def correlated_filepath(geofile_path):
         return filepath
     else:
         text = f"File {filepath} does not exist"
-        print(text)
-        raise ValueError
+        log_raise_error(text)
 
 
 def create_geoblacklight_file(row, resp_rows, field_names):
@@ -225,6 +228,11 @@ def resp_names(rows, code):
     return [name.strip() for name in names if name]
 
 
+def log_raise_error(text):
+    logging.info(text)
+    raise ValueError(text)
+
+
 ################################################################################################
 #                    2. set constant variables to class methods                                #
 ################################################################################################
@@ -297,7 +305,8 @@ logging.basicConfig(
     format="%(message)s - %(asctime)s",
 )
 
-source_batch_directory_path = r"D:\from_susan\sample_raster"
+# source_batch_directory_path = r"D:\from_susan\sample_raster"
+source_batch_directory_path = r"D:\pre_test\create_geoblacklight\sample_raster"
 
 # 2. In order to get projected boundary information for Geoblacklight metadata later,
 #    please provide the projected batch directory path here
