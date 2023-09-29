@@ -24,7 +24,8 @@ def create_files():
     with open(main_csv_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
-            create_files_on_row(row, dest_directory_path)
+            if row.get("gbl_resourceClass_sm").lower() != "collections":
+                create_files_on_row(row, dest_directory_path)
 
 
 def create_files_on_row(row, directory_path):

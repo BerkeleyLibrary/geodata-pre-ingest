@@ -29,8 +29,9 @@ def menifest_content():
     with open(main_csv_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
-            item = menifest_item(row, resp_rows)
-            content += item
+            if row.get("gbl_resourceClass_sm").lower() != "collections":
+                item = menifest_item(row, resp_rows)
+                content += item
     return content
 
 

@@ -17,17 +17,18 @@ def create_iso19139_files():
     with open(main_csv_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
-            arkid = row.get("arkid")
-            if not arkid:
-                text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
-                log_raise_error(text)
-            resp_rows = [
-                resp_row for resp_row in resp_dic if arkid == resp_row["arkid"]
-            ]
+            if row.get("gbl_resourceClass_sm").lower() != "collections":
+                arkid = row.get("arkid")
+                if not arkid:
+                    text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
+                    log_raise_error(text)
+                resp_rows = [
+                    resp_row for resp_row in resp_dic if arkid == resp_row["arkid"]
+                ]
 
-            geofile_path = correlated_filepath(row.get("geofile"))
-            geofile = GeoFile(geofile_path, logging)
-            geofile.create_iso19139_file(row, resp_rows)
+                geofile_path = correlated_filepath(row.get("geofile"))
+                geofile = GeoFile(geofile_path, logging)
+                geofile.create_iso19139_file(row, resp_rows)
 
 
 def correlated_filepath(geofile_path):

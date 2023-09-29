@@ -328,6 +328,11 @@ resp_csv_filepath = (
     r"D:\pre_test\create_geoblacklight\input\resp_sample_raster_arkids2.csv"
 )
 
+# 5. Collection batch directory path (should this be in a defined location?)
+collection_geoblacklight_json_file_directory_path = (
+    r"D:\pre_test\create_geoblacklight\collection"
+)
+
 
 ################################################################################################
 #                    4. Create a geoblacklight.json file for each  geofile                               #
@@ -355,7 +360,11 @@ output(f"*** starting 'batch_iso19139s'")
 
 if verify_setup(
     [logfile, main_csv_filepath, resp_csv_filepath],
-    [projected_batch_directory_path, source_batch_directory_path],
+    [
+        projected_batch_directory_path,
+        source_batch_directory_path,
+        collection_geoblacklight_json_file_directory_path,
+    ],
 ):
     create_geoblacklight_files()
     output(f"*** end 'batch_iso19139s'")
