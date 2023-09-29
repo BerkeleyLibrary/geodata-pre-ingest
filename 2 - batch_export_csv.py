@@ -147,7 +147,7 @@ class GeoFile(object):
         tag_functions = {
             "pcdm_memberOf_sm": self._collection_title,
             "dct_temporal_sm": self._temporalCoverage,
-            # "gbl_mdModified_dt": self._modified_date_dt,
+            "gbl_mdModified_dt": self._modified_date_dt,
         }
         fun = tag_functions.get(tag, None)
         if fun:

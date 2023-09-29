@@ -156,21 +156,28 @@ def add_from_arkid(json_data, row, is_geofile_type=True):
         access = row.get("dct_accessRights_s").strip().lower()
         hosts = HOSTS if access == "public" else HOSTS_SECURE
         iso_139_xml = f"{hosts['ISO139']}{id}/iso19139.xml"
-        ref = (
-            "{"
-            + hosts["wfs"]
-            + hosts["wms"]
-            + iso_139_xml
-            + hosts["download"]
-            + id
-            + '/data.zip"}'
-        )
+        download = f"{hosts['download']}{id}/data.zip]"
+        doc = doc_ref(row, hosts)
+        content = f"{hosts['wfs']}{hosts['wms']}{iso_139_xml}{download}{doc}"
+        ref = "{" + content + "}"
         return ref.strip()
 
     json_data["id"] = id
     json_data["gbl_wxsIdentifier_s"] = arkid
     if is_geofile_type:
         json_data["dct_references_s"] = dc_references()
+
+
+def doc_ref(row, hosts):
+    val = row.get("doc_zipfile_path")
+    if val:
+        if os.path.isfile(val):
+            basename = os.path.basename(val)
+            f"{hosts['doc']}{id}/{basename}"
+        else:
+            txt = f"geofile: '{row.get('geofile')}': file path in 'doc_zipfile_path' column is not a valid file: {val}"
+            raise ValueError(txt)
+    return ""
 
 
 def add_boundary(json_data, row):
@@ -277,6 +284,7 @@ HOSTS = {
     "download": '"http://schema.org/downloadUrl":"https://spatial.lib.berkeley.edu/public/',
     "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices.lib.berkeley.edu/geoserver/wfs",',
     "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices.lib.berkeley.edu/geoserver/wms",',
+    "doc": '"http://lccn.loc.gov/sh85035852":"https://spatial.lib.berkeley.edu/public/',
 }
 
 HOSTS_SECURE = {
@@ -285,6 +293,7 @@ HOSTS_SECURE = {
     "download": '"http://schema.org/downloadUrl":"https://spatial.lib.berkeley.edu/UCB/',
     "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices-secure.lib.berkeley.edu/geoserver/wfs",',
     "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices-secure.lib.berkeley.edu/geoserver/wms",',
+    "doc": '"http://lccn.loc.gov/sh85035852":"https://spatial.lib.berkeley.edu/UCB/',
 }
 
 
