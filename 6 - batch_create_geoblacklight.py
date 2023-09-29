@@ -44,23 +44,33 @@ def correlated_filepath(geofile_path):
         log_raise_error(text)
 
 
-def geoblacklight_filepath(row):
-    geofile_path = row.get("geofile")
-    projected_geofile_path = correlated_filepath(geofile_path)
-    base = os.path.splitext(projected_geofile_path)[0]
-    return f"{base}_geoblacklight.json"
+def geoblacklight_filepath(row, is_geofile_type):
+    if is_geofile_type:
+        geofile_path = row.get("geofile")
+        projected_geofile_path = correlated_filepath(geofile_path)
+        base = os.path.splitext(projected_geofile_path)[0]
+        return f"{base}_geoblacklight.json"
+    else:
+        # mkdir collection
+        return ""
 
 
 def create_geoblacklight_file(row, resp_rows, field_names):
+    is_geofile_type = (
+        False if row.get("gbl_resourceClass_sm").lower() == "collections" else True
+    )
     json_data = {}
-
     add_from_main_row(json_data, row, field_names)
     add_from_main_row_rights(json_data, row)
     add_from_resp_rows(json_data, resp_rows)
-    add_from_arkid(json_data, row)
+    add_from_arkid(json_data, row, is_geofile_type)
     add_default(json_data)
 
-    file_path = geoblacklight_filepath(row)
+    file_path = geoblacklight_filepath(row, is_geofile_type)
+    save_pretty_json_file(file_path, json_data)
+
+
+def save_pretty_json_file(file_path, json_data):
     with open(file_path, "w+") as geo_json:
         geo_json.write(
             json.dumps(
@@ -138,12 +148,12 @@ def add_default(json_data):
     json_data["gbl_mdVersion_s"] = GEOBLACKLGITH_VERSION
 
 
-def add_from_arkid(json_data, row):
+def add_from_arkid(json_data, row, is_geofile_type=True):
     arkid = row.get("arkid")
     id = f"{PREFIX}{arkid}"
-    access = row.get("dct_accessRights_s").strip().lower()
 
     def dc_references():
+        access = row.get("dct_accessRights_s").strip().lower()
         hosts = HOSTS if access == "public" else HOSTS_SECURE
         iso_139_xml = f"{hosts['ISO139']}{id}/iso19139.xml"
         ref = (
@@ -159,7 +169,8 @@ def add_from_arkid(json_data, row):
 
     json_data["id"] = id
     json_data["gbl_wxsIdentifier_s"] = arkid
-    json_data["dct_references_s"] = dc_references()
+    if is_geofile_type:
+        json_data["dct_references_s"] = dc_references()
 
 
 def add_boundary(json_data, row):
@@ -277,7 +288,7 @@ HOSTS_SECURE = {
 }
 
 
-CAPITALIZED_FIELDS = ["dct_spatial_sm", "dct_subject_sm"]
+CAPITALIZED_FIELDS = ["dct_spatial_sm", "dct_subject_sm", "gbl_resourceClass_sm"]
 
 # Combine three rights to "dct_rights_sm" in Geoblacklight
 COMBINED_RIGHTS = ["rights_general", "rights_legal", "rights_security"]
