@@ -36,13 +36,17 @@ def validate_csv(csv_filepath, func):
 
 # resp csv file has no *_O column names
 def func_invalid_cols_from_resp_row(row):
-    cols = get_empty_cols(row, resp_required_fields)
+    cols = get_empty_cols(row, RESP_REQUIRED_FIELDS)
     cols.extend(invalid_resp_cols(row))
     return cols
 
 
 def func_invalid_cols_from_main_row(row):
-    cols = get_empty_cols(row, main_required_fields)
+    fieldnames = MAIN_REQUIRED_FIELDS
+    if row.get("gbl_resourceClass_sm").lower() == "collections":
+        fieldnames = [name for name in fieldnames if name != "geofile"]
+
+    cols = get_empty_cols(row, fieldnames)
     cols.extend(invalid_main_value_cols(row))
     cols.extend(invalid_main_date_cols(row))
     cols.extend(invalid_main_range_cols(row))
@@ -51,24 +55,24 @@ def func_invalid_cols_from_main_row(row):
 
 def invalid_main_value_cols(row):
     value_hash = {
-        "gbl_resourceClass_sm": ls_gbl_resourceClass_sm,
-        "dct_accessRights_s": ls_dct_accessRights_s,
-        "dct_format_s": ls_dct_format_s,
+        "gbl_resourceClass_sm": LS_gbl_resourceClass_sm,
+        "dct_accessRights_s": LS_dct_accessRights_s,
+        "dct_format_s": LS_dct_format_s,
     }
     return get_invalid_cols(row, value_hash, get_unexpected_f_v)
 
 
 def invalid_main_date_cols(row):
     date_hash = {
-        "gbl_mdModified_dt": ls_gbl_mdModified_dt,
-        "gbl_indexYear_im": ls_gbl_indexYear_im,
-        "dct_issued_s": ls_dct_issued_s,
+        "gbl_mdModified_dt": LS_gbl_mdModified_dt,
+        "gbl_indexYear_im": LS_gbl_indexYear_im,
+        "dct_issued_s": LS_dct_issued_s,
     }
     return get_invalid_cols(row, date_hash, get_invalid_date_f_v)
 
 
 def invalid_main_range_cols(row):
-    range_hash = {"dcat_theme_sm": rg_dcat_theme_sm}
+    range_hash = {"dcat_theme_sm": RG_dcat_theme_sm}
     return get_invalid_cols(row, range_hash, get_invalid_range_f_v)
 
 
@@ -195,7 +199,7 @@ def invalid_resp_cols(row):
 
     try:
         num = int(str)
-        if not num in resp_role:
+        if not num in RESP_ROLE:
             return [["role", f"Role value {str} is not between 1 and 11"]]
     except ValueError:
         return [["role", f"Role value '{str}' is not a valid integer"]]
@@ -232,7 +236,7 @@ def invalid_resp_cols(row):
 ################################################################################################
 #                                 2. variables                                                 #
 ################################################################################################
-main_required_fields = [
+MAIN_REQUIRED_FIELDS = [
     "arkid",
     "geofile",
     "dct_title_s",
@@ -241,10 +245,10 @@ main_required_fields = [
     "gbl_mdModified_dt",
     "dct_format_s",
 ]
-ls_gbl_mdModified_dt = ["%Y%m%d"]
-ls_gbl_indexYear_im = ["%Y"]
-ls_dct_issued_s = ["%Y", "%Y-%m", "%Y-%m-%d"]
-ls_gbl_resourceClass_sm = [
+LS_gbl_mdModified_dt = ["%Y%m%d"]
+LS_gbl_indexYear_im = ["%Y"]
+LS_dct_issued_s = ["%Y", "%Y-%m", "%Y-%m-%d"]
+LS_gbl_resourceClass_sm = [
     "Collections",
     "Datasets",
     "Imagery",
@@ -253,9 +257,9 @@ ls_gbl_resourceClass_sm = [
     "Websites",
     "Other",
 ]
-rg_dcat_theme_sm = range(1, 20)
-ls_dct_accessRights_s = ["Public", "Restricted"]
-ls_dct_format_s = [
+RG_dcat_theme_sm = range(1, 20)
+LS_dct_accessRights_s = ["Public", "Restricted"]
+LS_dct_format_s = [
     "ArcGRID",
     "CD-ROM",
     "DEM",
@@ -285,8 +289,8 @@ ls_dct_format_s = [
     "TIFF",
 ]
 
-resp_required_fields = ["arkid", "geofile"]
-resp_role = range(1, 12)
+RESP_REQUIRED_FIELDS = ["arkid", "geofile"]
+RESP_ROLE = range(1, 12)
 ################################################################################################
 #                                 3. setup                                                    #
 ################################################################################################

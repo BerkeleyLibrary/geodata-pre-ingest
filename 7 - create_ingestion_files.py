@@ -210,6 +210,11 @@ main_csv_filepath = r"D:\pre_test\create_ingestion_files\main_sample_raster_arki
 #              Suggest to provide a specific directory path for result files
 result_directory_path = r"D:\pre_test\create_ingestion_files\results"
 
+# 6. Collection batch directory path
+collection_geoblacklight_json_file_directory_path = (
+    r"D:\pre_test\create_geoblacklight\collection"
+)
+
 
 ################################################################################################
 #                             3. Create ingestion files
