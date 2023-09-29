@@ -174,26 +174,15 @@ logging.basicConfig(
     format="%(message)s - %(asctime)s - %(funcName)s - %(levelname)s",
 )
 
-### Shapefile input ###
-
-# # 2. Please provide source data directory path
-# source_batch_directory_path = r"D:\pre_test\prepare_batch\test_vector_workspace_2023-08"
-
-# # 3. Please provide projected data directory path
-# projected_batch_directory_path = (
-#     r"D:\pre_test\prepare_batch\test_vector_workspace_2023-08_projected"
-# )
-
-### GeoTIFF input ###
 # 2. Please provide source data directory path
 source_batch_directory_path = r"D:\pre_test\prepare_batch\sample_raster"
 
 # 3. Please provide projected data directory path
 projected_batch_directory_path = r"D:\pre_test\prepare_batch\sample_raster_projected"
 
-# 4. Please provide geotif referenced file
+# 4. A GeoTIFF projected file
 geotif_referenced_filepath = (
-    r"D:\pre_test\prepare_batch\projected_raster\5048_1_reproject4326.tif"
+    r"C:\pre-ingestion-config\projected_raster\5048_1_reproject4326.tif"
 )
 
 
