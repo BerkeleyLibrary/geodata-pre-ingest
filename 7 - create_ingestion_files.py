@@ -11,38 +11,49 @@ from shutil import copyfile, rmtree
 ################################################################################################
 
 
-def new_directory_path():
+def final_directory_path(prefix):
     name = Path(source_batch_directory_path).stem
-    directory_path = os.path.join(result_directory_path, f"{name}_ingestion_files")
+    directory_path = os.path.join(result_directory_path, f"{name}_{prefix}_files")
     ensure_dir_exists(directory_path)
     return directory_path
 
 
 def create_files():
-    dest_directory_path = new_directory_path()
-
+    ingestion_dir_path = final_directory_path("ingestion")
+    ogp_dir_path = final_directory_path("ogp")
     with open(main_csv_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
             if row.get("gbl_resourceClass_sm").lower() != "collections":
-                create_files_on_row(row, dest_directory_path)
+                create_files_on_row(row, ingestion_dir_path, ogp_dir_path)
 
 
-def create_files_on_row(row, directory_path):
+def create_files_on_row(row, ingestion_dir_path, ogp_dir_path):
     geofile_path = row.get("geofile")
     projected_geofile_path = correlated_filepath(geofile_path)
 
     arkid = row.get("arkid")
-    dest_arkid_directory_path = arkid_directory_path(arkid, directory_path)
 
-    cp_file(projected_geofile_path, dest_arkid_directory_path, "iso19139.xml")
-    cp_file(projected_geofile_path, dest_arkid_directory_path, "geoblacklight.json")
-    create_map_zip(projected_geofile_path, arkid, dest_arkid_directory_path)
-    create_data_zip(geofile_path, dest_arkid_directory_path)
+    def create_ingestion_file():
+        ingestion_path = arkid_directory_path(arkid, ingestion_dir_path)
+        cp_file(projected_geofile_path, ingestion_path, "iso19139.xml")
+        cp_file(
+            projected_geofile_path,
+            ingestion_path,
+            "geoblacklight.json",
+        )
+        create_map_zip(projected_geofile_path, arkid, ingestion_path)
+        create_data_zip(geofile_path, ingestion_path)
+        doc_filepath = row.get("doc_zipfile_path")
+        if doc_filepath:
+            cp_document_file(doc_filepath, ingestion_path)
 
-    doc_filepath = row.get("doc_zipfile_path")
-    if doc_filepath:
-        cp_document_file(doc_filepath, dest_arkid_directory_path)
+    def create_ogp_file():
+        ogp_path = arkid_directory_path(arkid, ogp_dir_path)
+        cp_file(projected_geofile_path, ogp_path, "geoblacklight.json")
+
+    create_ingestion_file()
+    create_ogp_file()
 
 
 def arkid_directory_path(arkid, directory_path):
