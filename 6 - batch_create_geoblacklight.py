@@ -2,7 +2,9 @@ import os
 import logging
 import json
 import csv
-from datetime import date
+from shutil import rmtree
+
+# from datetime import date
 from pathlib import Path
 import arcpy
 
@@ -29,6 +31,14 @@ def create_geoblacklight_files():
             create_geoblacklight_file(row, resp_rows, field_names)
 
 
+def final_directory_path(prefix):
+    name = Path(source_batch_directory_path).stem
+    directory_path = os.path.join(result_directory_path, f"{name}_{prefix}_files")
+    if not Path(directory_path).exists():
+        os.mkdir(directory_path)
+    return directory_path
+
+
 def correlated_filepath(geofile_path):
     if not source_batch_directory_path in geofile_path:
         text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{source_batch_directory_path}'"
@@ -44,29 +54,48 @@ def correlated_filepath(geofile_path):
         log_raise_error(text)
 
 
-def geoblacklight_filepath(row, is_geofile_type):
-    if is_geofile_type:
+def ensure_empty_directory(pathname):
+    def rm_contents():
+        for item in os.listdir(pathname):
+            item_path = os.path.join(pathname, item)
+            if os.path.isfile(item_path):
+                os.remove(item_path)
+            elif os.path.isdir(item_path):
+                rmtree(item_path)
+
+    if Path(pathname).is_dir():
+        rm_contents()
+    else:
+        os.makedirs(pathname)
+
+
+def arkid_directory_path(arkid):
+    arkid_directory_path = os.path.join(collection_dir_path, arkid)
+    ensure_empty_directory(arkid_directory_path)
+    return arkid_directory_path
+
+
+def geoblacklight_filepath(row):
+    if row.get("gbl_resourceClass_sm").lower() == "collections":
+        arkid = row.get("arkid")
+        ark_dir_path = arkid_directory_path(arkid)
+        return f"{ark_dir_path}/geoblacklight.json"
+    else:
         geofile_path = row.get("geofile")
         projected_geofile_path = correlated_filepath(geofile_path)
         base = os.path.splitext(projected_geofile_path)[0]
         return f"{base}_geoblacklight.json"
-    else:
-        # mkdir collection
-        return ""
 
 
 def create_geoblacklight_file(row, resp_rows, field_names):
-    is_geofile_type = (
-        False if row.get("gbl_resourceClass_sm").lower() == "collections" else True
-    )
     json_data = {}
     add_from_main_row(json_data, row, field_names)
     add_from_main_row_rights(json_data, row)
     add_from_resp_rows(json_data, resp_rows)
-    add_from_arkid(json_data, row, is_geofile_type)
+    add_from_arkid(json_data, row)
     add_default(json_data)
 
-    file_path = geoblacklight_filepath(row, is_geofile_type)
+    file_path = geoblacklight_filepath(row)
     save_pretty_json_file(file_path, json_data)
 
 
@@ -148,24 +177,30 @@ def add_default(json_data):
     json_data["gbl_mdVersion_s"] = GEOBLACKLGITH_VERSION
 
 
-def add_from_arkid(json_data, row, is_geofile_type=True):
+def add_from_arkid(json_data, row):
     arkid = row.get("arkid")
     id = f"{PREFIX}{arkid}"
 
     def dc_references():
-        access = row.get("dct_accessRights_s").strip().lower()
-        hosts = HOSTS if access == "public" else HOSTS_SECURE
-        iso_139_xml = f"{hosts['ISO139']}{id}/iso19139.xml"
-        download = f"{hosts['download']}{id}/data.zip]"
+        type = row.get("gbl_resourceClass_sm").lower()
         doc = doc_ref(row, hosts)
-        content = f"{hosts['wfs']}{hosts['wms']}{iso_139_xml}{download}{doc}"
-        ref = "{" + content + "}"
+        if type == "collections":
+            return "{" + doc + "}" if doc else ""
+        else:
+            access = row.get("dct_accessRights_s").strip().lower()
+            hosts = HOSTS if access == "public" else HOSTS_SECURE
+            iso_139_xml = f"{hosts['ISO139']}{id}/iso19139.xml"
+            download = f"{hosts['download']}{id}/data.zip]"
+            doc = doc_ref(row, hosts)
+            content = f"{hosts['wfs']}{hosts['wms']}{iso_139_xml}{download}{doc}"
+            ref = "{" + content + "}"
         return ref.strip()
 
     json_data["id"] = id
     json_data["gbl_wxsIdentifier_s"] = arkid
-    if is_geofile_type:
-        json_data["dct_references_s"] = dc_references()
+    references = dc_references()
+    if references:
+        json_data["dct_references_s"] = references
 
 
 def doc_ref(row, hosts):
@@ -337,10 +372,8 @@ resp_csv_filepath = (
     r"D:\pre_test\create_geoblacklight\input\resp_sample_raster_arkids2.csv"
 )
 
-# 5. Collection batch directory path (should this be in a defined location?)
-collection_geoblacklight_json_file_directory_path = (
-    r"D:\pre_test\create_geoblacklight\collection"
-)
+# 5. please provide result directory path (the same as in "7 - create_ingestion_files.py")
+result_directory_path = r"D:\pre_test\create_ingestion_files\results"
 
 
 ################################################################################################
@@ -372,8 +405,9 @@ if verify_setup(
     [
         projected_batch_directory_path,
         source_batch_directory_path,
-        collection_geoblacklight_json_file_directory_path,
+        result_directory_path,
     ],
 ):
+    collection_dir_path = final_directory_path("collection_geoblacklight")
     create_geoblacklight_files()
     output(f"*** end 'batch_iso19139s'")

@@ -14,7 +14,8 @@ from shutil import copyfile, rmtree
 def final_directory_path(prefix):
     name = Path(source_batch_directory_path).stem
     directory_path = os.path.join(result_directory_path, f"{name}_{prefix}_files")
-    ensure_dir_exists(directory_path)
+    if not Path(directory_path).exists():
+        os.mkdir(directory_path)
     return directory_path
 
 
@@ -177,11 +178,6 @@ def log_raise_error(text):
     raise ValueError(text)
 
 
-def ensure_dir_exists(pathname):
-    if not Path(pathname).exists():
-        os.mkdir(pathname)
-
-
 def ensure_empty_directory(pathname):
     if Path(pathname).is_dir():
         rm_contents(pathname)
@@ -221,11 +217,6 @@ main_csv_filepath = r"D:\pre_test\create_ingestion_files\main_sample_raster_arki
 #   attention: Please do not use the original batch directory path or projected directory path
 #              Suggest to provide a specific directory path for result files
 result_directory_path = r"D:\pre_test\create_ingestion_files\results"
-
-# 6. Collection batch directory path
-collection_geoblacklight_json_file_directory_path = (
-    r"D:\pre_test\create_geoblacklight\collection"
-)
 
 
 ################################################################################################
