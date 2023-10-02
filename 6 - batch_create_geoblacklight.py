@@ -3,8 +3,6 @@ import logging
 import json
 import csv
 from shutil import rmtree
-
-# from datetime import date
 from pathlib import Path
 import arcpy
 
@@ -373,6 +371,7 @@ resp_csv_filepath = (
 )
 
 # 5. please provide result directory path (the same as in "7 - create_ingestion_files.py")
+#    this script will save collection's geoblacklight json files to ruesult_driectory_path
 result_directory_path = r"D:\pre_test\create_ingestion_files\results"
 
 

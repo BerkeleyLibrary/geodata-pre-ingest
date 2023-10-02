@@ -175,10 +175,12 @@ logging.basicConfig(
 )
 
 # 2. Please provide source data directory path
-source_batch_directory_path = r"D:\pre_test\prepare_batch\sample_raster"
+source_batch_directory_path = r"D:\pre_test\prepare_batch\test_vector_workspace_2023-08"
 
 # 3. Please provide projected data directory path
-projected_batch_directory_path = r"D:\pre_test\prepare_batch\sample_raster_projected"
+projected_batch_directory_path = (
+    r"D:\pre_test\prepare_batch\test_vector_workspace_2023-08_projected"
+)
 
 # 4. A GeoTIFF projected file
 geotif_referenced_filepath = (

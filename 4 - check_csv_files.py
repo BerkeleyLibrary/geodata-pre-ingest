@@ -245,7 +245,7 @@ MAIN_REQUIRED_FIELDS = [
     "gbl_mdModified_dt",
     "dct_format_s",
 ]
-LS_gbl_mdModified_dt = ["%Y%m%d"]
+LS_gbl_mdModified_dt = ["%Y-%m-%dT%H:%M:%SZ"]
 LS_gbl_indexYear_im = ["%Y"]
 LS_dct_issued_s = ["%Y", "%Y-%m", "%Y-%m-%d"]
 LS_gbl_resourceClass_sm = [
@@ -303,8 +303,8 @@ logging.basicConfig(
 )
 
 # 2. Please provide csv files path which have been assigned with arkids
-main_csv_filepath = r"D:\pre_test\validate_csv\input\main_sample_raster_arkids8.csv"
-resp_csv_filepath = r"D:\pre_test\validate_csv\input\resp_sample_raster2.csv"
+main_csv_filepath = r"D:\pre_test\validate_csv\input\main_test_vector_source_arkid.csv"
+resp_csv_filepath = r"D:\pre_test\validate_csv\input\resp_test_vector_source_arkid.csv"
 
 
 # 3. please provide result directory path:
