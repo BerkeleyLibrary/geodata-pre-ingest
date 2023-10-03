@@ -529,15 +529,17 @@ logging.basicConfig(
 )
 
 # 2. source batch directory
-source_batch_directory_path = r"D:\from_susan\sample_raster"
+source_batch_directory_path = r"D:\pre_test\create_iso19139\test_vector_source"
 # source_batch_directory_path = r"D:\pre_test\create_geoblacklight\sample_raster"
 
 # 3. Projected batch directory path
-projected_batch_directory_path = r"D:\pre_test\create_iso19139\sample_raster"
+projected_batch_directory_path = (
+    r"D:\pre_test\create_iso19139\test_vector_source_projected"
+)
 
 # 4. please provide main csv and resp csv files here, check csv files in script "4 - check_csv_files.py", before running this script:
-main_csv_filepath = r"D:\pre_test\create_iso19139\input\main_sample_raster_arkids4.csv"
-resp_csv_filepath = r"D:\pre_test\create_iso19139\input\resp_sample_raster_arkids.csv"
+main_csv_filepath = r"D:\pre_test\create_iso19139\main_test_vector_source_arkid.csv"
+resp_csv_filepath = r"D:\pre_test\create_iso19139\resp_test_vector_source_arkid.csv"
 
 
 ################################################################################################
