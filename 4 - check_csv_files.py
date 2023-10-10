@@ -10,8 +10,8 @@ from datetime import datetime
 #                             1. functions                                                     #
 ################################################################################################
 def validate_csv_files():
-    validate_csv(main_csv_filepath, func_invalid_cols_from_main_row)
-    validate_csv(resp_csv_filepath, func_invalid_cols_from_resp_row)
+    validate_csv(main_csv_arkid_filepath, func_invalid_cols_from_main_row)
+    validate_csv(resp_csv_arkid_filepath, func_invalid_cols_from_resp_row)
 
 
 def validate_csv(csv_filepath, func):
@@ -45,6 +45,7 @@ def func_invalid_cols_from_main_row(row):
     fieldnames = MAIN_REQUIRED_FIELDS
     if row.get("gbl_resourceClass_sm").lower() == "collections":
         fieldnames = [name for name in fieldnames if name != "geofile"]
+        fieldnames.append("doc_zipfile_path")
 
     cols = get_empty_cols(row, fieldnames)
     cols.extend(invalid_main_value_cols(row))
@@ -295,7 +296,7 @@ RESP_ROLE = range(1, 12)
 #                                 3. setup                                                    #
 ################################################################################################
 # 1. setup log file path
-logfile = r"D:\Log\shpfile_projection.log"
+logfile = r"C:\process_data\log\process.log"
 logging.basicConfig(
     filename=logfile,
     level=logging.INFO,
@@ -303,21 +304,21 @@ logging.basicConfig(
 )
 
 # 2. Please provide csv files path which have been assigned with arkids
-main_csv_filepath = r"D:\pre_test\validate_csv\input\main_test_vector_source_arkid.csv"
-resp_csv_filepath = r"D:\pre_test\validate_csv\input\resp_test_vector_source_arkid.csv"
+main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
+
+resp_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\resp_arkid.csv"
 
 
 # 3. please provide result directory path:
-#   attention: Please do not use the original batch directory path or projected directory path
-result_directory_path = r"D:\pre_test\validate_csv\result"
+result_directory_path = r"C:\process_data\csv_files_arkid"
 
 
 ################################################################################################
 #                             4. Run
 # Example:
 # input:
-#       main_csv_filepath = r"D:\results\main_sample_raster_arkids8.csv"
-#       resp_csv_filepath = r"D:\results\main_sample_raster1.csv"
+#       main_csv_arkid_filepath = r"D:\results\main_sample_raster_arkids8.csv"
+#       resp_csv_arkid_filepath = r"D:\results\main_sample_raster1.csv"
 #       result_directory_path = r"D:\results"
 # any invalid field values found from above csv files will be written to:
 #      D:\results\main_sample_raster_arkids8.txt
@@ -344,9 +345,13 @@ def verify_setup(file_paths, directory_paths):
 
 main_csv_headers = []
 
-output(f"*** starting 'checking csv files'")
 
-if verify_setup([main_csv_filepath, resp_csv_filepath], [result_directory_path]):
-    main_csv_headers = csv_headers(main_csv_filepath)
+script_name = "4 - check_csv_files.py"
+output(f"***starting  {script_name}")
+
+if verify_setup(
+    [main_csv_arkid_filepath, resp_csv_arkid_filepath], [result_directory_path]
+):
+    main_csv_headers = csv_headers(main_csv_arkid_filepath)
     validate_csv_files()
-    output(f"*** end 'checking csv files'")
+    output(f"***completed {script_name}")

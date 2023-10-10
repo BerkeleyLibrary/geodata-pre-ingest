@@ -70,8 +70,8 @@ class BatchExportCsv(object):
                 csvWriter.writerow(new_row)
 
     def _filename(self, prefix):
-        basename = os.path.basename(self.workspace_dir)
-        name = f"{prefix}_{basename}.csv"
+        # basename = os.path.basename(self.workspace_dir)
+        name = f"{prefix}.csv"
         return os.path.join(self.results_dir, name)
 
     ## common methods to be moved
@@ -503,49 +503,37 @@ resp_elements = {
 ################################################################################################
 #                                 3. set up                                                    #
 ################################################################################################
-# ls_gbl_resourceClass_sm = [
-#     "Collections",
-#     "Datasets",
-#     "Imagery",
-#     "Maps",
-#     "Web services",
-#     "Websites",
-#     "Other",
-# ]
-
 
 # initial csv infomation to class variables
 GeoFile.resp_headers = resp_headers
 GeoFile.resp_elements = resp_elements
 GeoFile.main_headers = main_headers
 GeoFile.main_elements = main_elements
-# GeoFile.resouce_class = ""
 
 # 1. Please provide your local log file path
-logfile = r"D:\Log\shpfile_projection.log"
+logfile = r"C:\process_data\log\process.log"
 logging.basicConfig(
     filename=logfile,
     level=logging.INFO,
     format="%(message)s - %(asctime)s",
 )
 
-# 2. Please provide source data directory path here
-source_batch_directory_path = r"D:\pre_test\export_csv\input\test_vector_source"
+# 2. Please provide source data directory path
+source_batch_directory_path = r"C:\process_data\source_batch"
 
 # 3. please provide result directory path:
-#   attention: Please do not use the original batch directory path or projected directory path
-result_directory_path = r"D:\pre_test\export_csv\output"
+csv_files_directory_path = r"C:\process_data\csv_files"
 
 
 ################################################################################################
 #                                4. Run                                                       #
 # Example:
 # input directory paths:
-#      source_batch_directory_path = r"D:\pre_test\export_csv\input\test_vector_workspace_2023-08"
-#      result_directory_path = r"D:\pre_test\export_csv\output"
+#      source_batch_directory_path = r"C:\process_data\source_batch"
+#      csv_files_directory_path = r"C:\process_data\csv_files"
 # output csv files:
-#     D:\pre_test\export_csv\output\main_test_vector_workspace_2023-08.csv
-#     D:\pre_test\export_csv\output\resp_test_vector_workspace_2023-08.csv
+#     C:\process_data\csv_files\main.csv
+#     C:\process_data\csv_files\resp.csv
 ################################################################################################
 def output(msg):
     logging.info(msg)
@@ -566,11 +554,13 @@ def verify_setup(file_paths, directory_paths):
     return verified
 
 
-output(f"*** starting 'batch_export_csv'")
+script_name = "2 - batch_export_csv.py"
+output(f"***starting  {script_name}")
 
-if verify_setup([logfile], [source_batch_directory_path, result_directory_path]):
-    batch = BatchExportCsv(source_batch_directory_path, result_directory_path, logging)
+if verify_setup([], [source_batch_directory_path, csv_files_directory_path]):
+    batch = BatchExportCsv(
+        source_batch_directory_path, csv_files_directory_path, logging
+    )
     batch.main_csv()
     batch.resp_csv()
-
-    output(f"*** end 'batch_export_csv'")
+    output(f"***completed {script_name}")

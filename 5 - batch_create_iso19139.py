@@ -13,8 +13,8 @@ from shutil import copyfile
 #                             1. functions                                                    #
 ################################################################################################
 def create_iso19139_files():
-    resp_dic = csv_dic(resp_csv_filepath)
-    with open(main_csv_filepath, "r", encoding="utf-8") as csvfile:
+    resp_dic = csv_dic(resp_csv_arkid_filepath)
+    with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
             if row.get("gbl_resourceClass_sm").lower() != "collections":
@@ -521,7 +521,7 @@ RowTransformer.main_elements = MAIN_ELEMENTS
 ################################################################################################
 
 # 1. setup log file path
-logfile = r"D:\Log\shpfile_projection.log"
+logfile = r"C:\process_data\log\process.log"
 logging.basicConfig(
     filename=logfile,
     level=logging.INFO,
@@ -529,17 +529,15 @@ logging.basicConfig(
 )
 
 # 2. source batch directory
-source_batch_directory_path = r"D:\pre_test\create_iso19139\test_vector_source"
-# source_batch_directory_path = r"D:\pre_test\create_geoblacklight\sample_raster"
+source_batch_directory_path = r"C:\process_data\source_batch"
+
 
 # 3. Projected batch directory path
-projected_batch_directory_path = (
-    r"D:\pre_test\create_iso19139\test_vector_source_projected"
-)
+projected_batch_directory_path = r"C:\process_data\source_batch_projected"
 
 # 4. please provide main csv and resp csv files here, check csv files in script "4 - check_csv_files.py", before running this script:
-main_csv_filepath = r"D:\pre_test\create_iso19139\main_test_vector_source_arkid.csv"
-resp_csv_filepath = r"D:\pre_test\create_iso19139\resp_test_vector_source_arkid.csv"
+main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
+resp_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\resp_arkid.csv"
 
 
 ################################################################################################
@@ -564,15 +562,15 @@ def verify_setup(file_paths, directory_paths):
     return verified
 
 
-output(f"*** starting 'batch_iso19139s'")
+script_name = "5 - batch_create_iso19139.py"
+output(f"***starting  {script_name}")
 
 if verify_setup(
-    [logfile, main_csv_filepath, resp_csv_filepath],
+    [main_csv_arkid_filepath, resp_csv_arkid_filepath],
     [source_batch_directory_path, projected_batch_directory_path],
 ):
     # 1. Get a geofile name from main csv file
     # 2. Find the geofile in projected directory
     # 3. Create an iso19139 xml file for each geofile found in 2
     create_iso19139_files()
-
-    output(f"*** end 'batch_iso19139s'")
+    output(f"***completed {script_name}")

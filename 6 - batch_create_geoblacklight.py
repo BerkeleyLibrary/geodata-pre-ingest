@@ -14,9 +14,9 @@ import arcpy
 #                             1. functions                                                      #
 ################################################################################################
 def create_geoblacklight_files():
-    resp_dic = csv_dic(resp_csv_filepath)
-    field_names = geoblacklight_field_names(main_csv_filepath)
-    with open(main_csv_filepath, "r", encoding="utf-8") as csvfile:
+    resp_dic = csv_dic(resp_csv_arkid_filepath)
+    field_names = geoblacklight_field_names(main_csv_arkid_filepath)
+    with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
             arkid = row.get("arkid")
@@ -30,8 +30,9 @@ def create_geoblacklight_files():
 
 
 def final_directory_path(prefix):
-    name = Path(source_batch_directory_path).stem
-    directory_path = os.path.join(result_directory_path, f"{name}_{prefix}_files")
+    # name = Path(source_batch_directory_path).stem
+    # directory_path = os.path.join(result_directory_path, f"{name}_{prefix}_files")
+    directory_path = os.path.join(result_directory_path, f"{prefix}_files")
     if not Path(directory_path).exists():
         os.mkdir(directory_path)
     return directory_path
@@ -67,22 +68,22 @@ def ensure_empty_directory(pathname):
         os.makedirs(pathname)
 
 
-def arkid_directory_path(arkid):
+def collection_geoblacklight_file_path(row):
+    arkid = row.get("arkid")
+    collection_dir_path = final_directory_path("ingestion_collection")
     arkid_directory_path = os.path.join(collection_dir_path, arkid)
     ensure_empty_directory(arkid_directory_path)
-    return arkid_directory_path
+    return f"{arkid_directory_path}/geoblacklight.json"
 
 
 def geoblacklight_filepath(row):
     if row.get("gbl_resourceClass_sm").lower() == "collections":
-        arkid = row.get("arkid")
-        ark_dir_path = arkid_directory_path(arkid)
-        return f"{ark_dir_path}/geoblacklight.json"
-    else:
-        geofile_path = row.get("geofile")
-        projected_geofile_path = correlated_filepath(geofile_path)
-        base = os.path.splitext(projected_geofile_path)[0]
-        return f"{base}_geoblacklight.json"
+        return collection_geoblacklight_file_path(row)
+
+    geofile_path = row.get("geofile")
+    projected_geofile_path = correlated_filepath(geofile_path)
+    base = os.path.splitext(projected_geofile_path)[0]
+    return f"{base}_geoblacklight.json"
 
 
 def create_geoblacklight_file(row, resp_rows, field_names):
@@ -179,14 +180,17 @@ def add_from_arkid(json_data, row):
     arkid = row.get("arkid")
     id = f"{PREFIX}{arkid}"
 
+    access = row.get("dct_accessRights_s").strip().lower()
+    hosts = HOSTS if access == "public" else HOSTS_SECURE
+
     def dc_references():
         type = row.get("gbl_resourceClass_sm").lower()
         doc = doc_ref(row, hosts)
         if type == "collections":
             return "{" + doc + "}" if doc else ""
         else:
-            access = row.get("dct_accessRights_s").strip().lower()
-            hosts = HOSTS if access == "public" else HOSTS_SECURE
+            # access = row.get("dct_accessRights_s").strip().lower()
+            # hosts= HOSTS if access == "public" else HOSTS_SECURE
             iso_139_xml = f"{hosts['ISO139']}{id}/iso19139.xml"
             download = f"{hosts['download']}{id}/data.zip]"
             doc = doc_ref(row, hosts)
@@ -330,7 +334,13 @@ HOSTS_SECURE = {
 }
 
 
-CAPITALIZED_FIELDS = ["dct_spatial_sm", "dct_subject_sm", "gbl_resourceClass_sm"]
+CAPITALIZED_FIELDS = [
+    "dct_spatial_sm",
+    "dct_subject_sm",
+    "gbl_resourceClass_sm",
+    "gbl_resourceClass_sm",
+    "dct_accessRights_s",
+]
 
 # Combine three rights to "dct_rights_sm" in Geoblacklight
 COMBINED_RIGHTS = ["rights_general", "rights_legal", "rights_security"]
@@ -348,7 +358,7 @@ EXCLUDING_FIELDS = [
 ################################################################################################
 
 # 1. setup log file path
-logfile = r"D:\Log\shpfile_projection.log"
+logfile = r"C:\process_data\log\process.log"
 logging.basicConfig(
     filename=logfile,
     level=logging.INFO,
@@ -356,23 +366,18 @@ logging.basicConfig(
 )
 
 # 2. Source batch directory path
-source_batch_directory_path = r"D:\from_susan\sample_raster"
-# source_batch_directory_path = r"D:\pre_test\create_geoblacklight\sample_raster"
+source_batch_directory_path = r"C:\process_data\source_batch"
 
 # 3. Projected batch directory path
-projected_batch_directory_path = r"D:\pre_test\create_geoblacklight\sample_raster"
+projected_batch_directory_path = r"C:\process_data\source_batch_projected"
 
 # 4. please provide main csv and resp csv files here, check csv files in script "4 - check_csv_files.py", before running this script:
-main_csv_filepath = (
-    r"D:\pre_test\create_geoblacklight\input\main_sample_raster_arkids2.csv"
-)
-resp_csv_filepath = (
-    r"D:\pre_test\create_geoblacklight\input\resp_sample_raster_arkids2.csv"
-)
+main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
+resp_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\resp_arkid.csv"
 
 # 5. please provide result directory path (the same as in "7 - create_ingestion_files.py")
 #    this script will save collection's geoblacklight json files to ruesult_driectory_path
-result_directory_path = r"D:\pre_test\create_ingestion_files\results"
+result_directory_path = r"C:\process_data\results"
 
 
 ################################################################################################
@@ -397,16 +402,16 @@ def verify_setup(file_paths, directory_paths):
     return verified
 
 
-output(f"*** starting 'batch_iso19139s'")
+script_name = "6 - batch_create_geoblacklight.py"
+output(f"***starting  {script_name}")
 
 if verify_setup(
-    [logfile, main_csv_filepath, resp_csv_filepath],
+    [logfile, main_csv_arkid_filepath, resp_csv_arkid_filepath],
     [
         projected_batch_directory_path,
         source_batch_directory_path,
         result_directory_path,
     ],
 ):
-    collection_dir_path = final_directory_path("collection_geoblacklight")
     create_geoblacklight_files()
-    output(f"*** end 'batch_iso19139s'")
+    output(f"***completed {script_name}")

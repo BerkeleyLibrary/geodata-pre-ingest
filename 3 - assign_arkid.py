@@ -124,7 +124,7 @@ def ez_config():
 
 def new_filepath(filepath):
     filename = Path(filepath).stem
-    return os.path.join(result_directory_path, f"{filename}_arkid.csv")
+    return os.path.join(csv_files_arkid_directory_path, f"{filename}_arkid.csv")
 
 
 ################################################################################################
@@ -132,7 +132,7 @@ def new_filepath(filepath):
 ################################################################################################
 
 # 1. Please provide your local log file path
-logfile = r"D:\Log\shpfile_projection.log"
+logfile = r"C:\process_data\log\process.log"
 logging.basicConfig(
     filename=logfile,
     level=logging.INFO,
@@ -143,20 +143,20 @@ logging.basicConfig(
 config_file = r"C:\pre-ingestion-config/config.json"
 
 # 3. please provide main_csv file path:
-main_csv_filepath = r"D:\pre_test\assign_arkid\main_test_vector_workspace_2023-08.csv"
+main_csv_filepath = r"C:\process_data\csv_files\main.csv"
 
 # 4. please provide resp_csv file path:
-resp_csv_filepath = r"D:\pre_test\assign_arkid\resp_test_vector_workspace_2023-08.csv"
+resp_csv_filepath = r"C:\process_data\csv_files\resp.csv"
 
 # 5. Place to save the new main csv file and resp csv file with arkid assigned
-result_directory_path = r"D:\pre_test\assign_arkid\results"
+csv_files_arkid_directory_path = r"C:\process_data\csv_files_arkid"
 
 
 ################################################################################################
 #                                3. instructions
 #  a. mian_csv file:
 #                a new arkid will be minted and added to the 'arkid' column for each row,
-#                unless a row has arkid value.
+#                unless a row has an existing arkid.
 #  b. resp_csv file:
 #               - 'arkid' column will be updated with 'arkid' value from main_csv file
 #                based on the column 'geofile' value(geofile name path) from both files .
@@ -166,13 +166,13 @@ result_directory_path = r"D:\pre_test\assign_arkid\results"
 #  C: new files will be named as "*_arkids.csv"
 #  example:
 #         input two files:
-#                       main_csv_filepath = r"D:\results\main_test_vector_workspace_2023-08.csv"
-#                       resp_csv_filepath = r"D:\results\resp_test_vector_workspace_2023-08.csv"
+#                       main_csv_filepath = r"C:\process_data\csv_files\main.csv"
+#                       resp_csv_filepath = r"C:\process_data\csv_files\resp.csv"
 #         output path:
-#                       output = r"D:\pre_test\assign_arkid\results"
+#                       csv_files_arkid_directory_path = r"C:\process_data\csv_files_arkid"
 #         two new file paths (*_arkids.csv) are:
-#                                        "D:\results\results\main_test_vector_workspace_2023-08_arkids.csv"
-#                                        "D:\results\results\resp_test_vector_workspace_2023-08_arkids.csv"
+#                                        "C:\process_data\csv_files_arkid\main_arkid.csv"
+#                                        "C:\process_data\csv_files_arkid\resp_arkid.csv"
 ################################################################################################
 def output(msg):
     logging.info(msg)
@@ -193,19 +193,19 @@ def verify_setup(file_paths, directory_paths):
     return verified
 
 
-output(f"***starting 'assign_arkid'")
+script_name = "3 - assign_arkid.py"
+output(f"***starting  {script_name}")
 
 if verify_setup(
-    [logfile, main_csv_filepath, resp_csv_filepath], [result_directory_path]
+    [main_csv_filepath, resp_csv_filepath], [csv_files_arkid_directory_path]
 ):
     new_main_csv_filepath = new_filepath(main_csv_filepath)
     new_resp_csv_filepath = new_filepath(resp_csv_filepath)
 
-    # 1. add arkids to main_csv file:
-    #    add arkids to rows with no arkids
+    # 1. add arkids to rows without existed arkids in main.csv file
     assign_main_csv(new_main_csv_filepath)
 
-    # 2. add arkids to resp_csv file based on arkids from new_resp_csv_filepath file
+    # 2. add arkids to resp.csv file based on arkids from new_resp_csv_filepath file
     if is_assigned(new_main_csv_filepath):
         assign_resp_csv(new_main_csv_filepath, new_resp_csv_filepath)
     else:
@@ -213,10 +213,9 @@ if verify_setup(
             f"failed in updating arkids to {new_resp_csv_filepath}, since {new_main_csv_filepath} missing arkids"
         )
 
-    # 3. give warning if ew_resp_csv_filepath has no arkids
+    # 3. give warning if new_resp_csv_filepath has no arkids
     if not is_assigned(new_resp_csv_filepath):
         log_raise_error(
             f" {resp_csv_filepath} has missing arkids, please check log file for details"
         )
-
-    output(f"***completed 'assign_arkid'")
+    output(f"***completed {script_name}")

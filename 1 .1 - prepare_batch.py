@@ -4,6 +4,7 @@ import logging
 from typing import List
 from pathlib import Path
 from datetime import datetime
+from shutil import copyfile, rmtree
 
 
 ################################################################################################
@@ -25,23 +26,26 @@ class SourceBatch(object):
         self._logger("Unclaimed files:", paths)
 
     def prepare(self, workspace_path, referenced_filepath):
-        if self.geo_type == "shp":
-            self.prepare_shapefile(workspace_path)
-        else:
-            self.prepare_tif_file(workspace_path, referenced_filepath)
+        def is_projected(file_path):
+            if Path(file_path).is_file():
+                sr_name = arcpy.Describe(file_path).spatialReference.name
+                return sr_name == "GCS_WGS_1984"
+            return False
 
-    def prepare_shapefile(self, workspace_path):
-        for file in self.geofile_paths:
-            name = os.path.basename(file)
-            prj_file = os.path.join(workspace_path, name)
-            self.vector_projection(file, prj_file)
+        def projection(geofile_path, prj_geofile_path):
+            if self.geo_type == "shp":
+                self.vector_projection(geofile_path, prj_geofile_path)
+            else:
+                self.raster_projection(
+                    geofile_path, prj_geofile_path, referenced_filepath
+                )
 
-    def prepare_tif_file(self, workspace_path, referenced_filepath):
-        for file in self.geofile_paths:
-            name = os.path.basename(file)
-            prj_file = os.path.join(workspace_path, name)
-            self.raster_projection(file, prj_file, referenced_filepath)
-            self.pyramid(prj_file)
+        for geofile_path in self.geofile_paths:
+            name = os.path.basename(geofile_path)
+            prj_geofile_path = os.path.join(workspace_path, name)
+            if is_projected(prj_geofile_path):
+                continue
+            projection(geofile_path, prj_geofile_path)
 
     def _geo_init(self):
         shapefile_paths = self._file_paths("shp")
@@ -84,11 +88,17 @@ class SourceBatch(object):
         return paths
 
     def _unclaimed_file_paths(self):
+        def stem_and_basename():
+            stems = [Path(geofile_path).stem for geofile_path in self.geofile_paths]
+            basenames = [
+                os.path.basename(geofile_path) for geofile_path in self.geofile_paths
+            ]
+            return stems + basenames
+
         paths = []
-        geo_stems = [
-            Path(geofile_path).stem for geofile_path in self.geofile_paths
-        ]  # abc.shp => abc
+        geo_stems = stem_and_basename()
         for file_path in self.file_paths:
+            # abc.shp.xml
             stem = Path(file_path).stem
             if stem not in geo_stems:
                 paths.append(file_path)
@@ -133,20 +143,6 @@ class SourceBatch(object):
         except Exception as ex:
             self.logging.info(f"{self.geofile} - {ex}")
 
-    def pyramid(self, filepath):
-        pylevel = "7"
-        skipfirst = "NONE"
-        resample = "NEAREST"
-        compress = "Default"
-        quality = "70"
-        skipexist = "SKIP_EXISTING"
-        try:
-            arcpy.BuildPyramids_management(
-                filepath, pylevel, skipfirst, resample, compress, quality, skipexist
-            )
-        except Exception as ex:
-            self.logging.info(f"{filepath} - {ex}")
-
 
 # Default geofile extensions
 # Add or remove extenstions in below lists based on requirements
@@ -167,7 +163,7 @@ DEFAULT_VECTOR_EXTS = [
 ################################################################################################
 
 # 1. Please provide your local log file path
-logfile = r"D:\Log\shpfile_projection.log"
+logfile = r"C:\process_data\log\process.log"
 logging.basicConfig(
     filename=logfile,
     level=logging.INFO,
@@ -175,12 +171,10 @@ logging.basicConfig(
 )
 
 # 2. Please provide source data directory path
-source_batch_directory_path = r"D:\pre_test\prepare_batch\test_vector_workspace_2023-08"
+source_batch_directory_path = r"C:\process_data\source_batch"
 
 # 3. Please provide projected data directory path
-projected_batch_directory_path = (
-    r"D:\pre_test\prepare_batch\test_vector_workspace_2023-08_projected"
-)
+projected_batch_directory_path = r"C:\process_data\source_batch_projected"
 
 # 4. A GeoTIFF projected file
 geotif_referenced_filepath = (
@@ -190,6 +184,7 @@ geotif_referenced_filepath = (
 
 ################################################################################################
 #                                3. Run options                                                #
+# note: No re-projection if a geofile has been projected
 ################################################################################################
 def output(msg):
     logging.info(msg)
@@ -210,10 +205,11 @@ def verify_setup(file_paths, directory_paths):
     return verified
 
 
-output(f"***starting 'batch_preparing'")
+script_name = "1 .1 - prepare_batch.py"
+output(f"***starting  {script_name}")
 
 if verify_setup(
-    [logfile, geotif_referenced_filepath],
+    [geotif_referenced_filepath],
     [source_batch_directory_path, projected_batch_directory_path],
 ):
     source_batch = SourceBatch(source_batch_directory_path, logging)
@@ -223,4 +219,4 @@ if verify_setup(
     # 2. Prepare Source Batch
     source_batch.prepare(projected_batch_directory_path, geotif_referenced_filepath)
 
-    output(f"***'batch_preparing' finished.")
+    output(f"***completed {script_name}")

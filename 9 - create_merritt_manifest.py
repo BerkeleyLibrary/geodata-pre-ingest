@@ -11,8 +11,8 @@ import hashlib
 
 
 def create_merritt_menifest_file():
-    name = Path(ingestion_files_directory_path).stem
-    menifest_filename = os.path.join(result_directory_path, f"{name}_merritt.txt")
+    # name = Path(ingestion_files_directory_path).stem
+    menifest_filename = os.path.join(result_directory_path, f"merritt.txt")
     content = menifest_content()
     header = (
         "fileUrl | hashAlgorithm | hashValue | fileSize | fileName | primaryIdentifier | creator | title | date"
@@ -26,7 +26,7 @@ def create_merritt_menifest_file():
 def menifest_content():
     resp_rows = resp_csv_dict_list()
     content = ""
-    with open(main_csv_filepath, "r", encoding="utf-8") as csvfile:
+    with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
             if row.get("gbl_resourceClass_sm").lower() != "collections":
@@ -133,7 +133,7 @@ def log_raise_error(text):
 # having an encoding problem when using csv.DictReader to get a dictionary
 # Get lines from CSV can avoid this problem
 def resp_csv_dict_list():
-    lines = (line for line in open(resp_csv_filepath, "r", encoding="utf-8"))
+    lines = (line for line in open(resp_csv_arkid_filepath, "r", encoding="utf-8"))
     rows = (line.strip().split(",") for line in lines)
     header = next(rows)
     return [dict(zip(header, row)) for row in rows]
@@ -147,7 +147,7 @@ host_public = "https://spatial.lib.berkeley.edu/public"
 host_restricted = "https://spatial.lib.berkeley.edu/UCB"
 
 # 1. setup log file path
-logfile = r"D:\Log\shpfile_projection.log"
+logfile = r"C:\process_data\log\process.log"
 logging.basicConfig(
     filename=logfile,
     level=logging.INFO,
@@ -155,17 +155,16 @@ logging.basicConfig(
 )
 
 # 1. Please provide final ingestion files' directory path here
-ingestion_files_directory_path = (
-    r"D:\pre_test\create_merritt\input\sample_raster_ingestion_files"
-)
+ingestion_files_directory_path = r"C:\process_data\results\ingestion_files"
+
 
 # 2. Please provide csv file path which have been assigned with arkids
-main_csv_filepath = r"D:\pre_test\create_merritt\input\main_sample_raster_arkids1.csv"
-resp_csv_filepath = r"D:\pre_test\create_merritt\input\resp_sample_raster_arkids.csv"
+main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
+resp_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\resp_arkid.csv"
 
 # 3. please provide output directory to save merritt menifest file
 #   attention: Please do not use the original batch directory path or projected directory path
-result_directory_path = r"D:\pre_test\create_merritt\result"
+result_directory_path = r"C:\process_data\results"
 
 
 ################################################################################################
@@ -190,11 +189,12 @@ def verify_setup(file_paths, directory_paths):
     return verified
 
 
-output(f"*** starting 'creating merritt menifest file'")
+script_name = "9 - create_merritt_manifest.py"
+output(f"***starting  {script_name}")
 
 if verify_setup(
-    [main_csv_filepath, resp_csv_filepath],
+    [main_csv_arkid_filepath, resp_csv_arkid_filepath],
     [ingestion_files_directory_path, result_directory_path],
 ):
     create_merritt_menifest_file()
-    output(f"*** completed: 'creating merritt menifest file'")
+    output(f"***completed {script_name}")

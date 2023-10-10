@@ -12,8 +12,8 @@ from shutil import copyfile, rmtree
 
 
 def final_directory_path(prefix):
-    name = Path(source_batch_directory_path).stem
-    directory_path = os.path.join(result_directory_path, f"{name}_{prefix}_files")
+    # name = Path(source_batch_directory_path).stem
+    directory_path = os.path.join(result_directory_path, f"{prefix}_files")
     if not Path(directory_path).exists():
         os.mkdir(directory_path)
     return directory_path
@@ -22,7 +22,7 @@ def final_directory_path(prefix):
 def create_files():
     ingestion_dir_path = final_directory_path("ingestion")
     ogp_dir_path = final_directory_path("ogp")
-    with open(main_csv_filepath, "r", encoding="utf-8") as csvfile:
+    with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
             if row.get("gbl_resourceClass_sm").lower() != "collections":
@@ -194,7 +194,7 @@ tif_exts = [".tif", ".tfw", ".prj", ".tif.ovr"]
 # [".tif", ".aux", ".tfw", ".prj", ".tif.ovr"]
 
 # 1. setup log file path
-logfile = r"D:\Log\shpfile_projection.log"
+logfile = r"C:\process_data\log\process.log"
 logging.basicConfig(
     filename=logfile,
     level=logging.INFO,
@@ -203,41 +203,35 @@ logging.basicConfig(
 
 # 2. Please provide source data directory path,
 #    make sure this is the source directory path from which main.csv file was generated.
-source_batch_directory_path = r"D:\pre_test\create_ingestion_files\source_sample_raster"
+source_batch_directory_path = r"C:\process_data\source_batch"
 
 # 3. Please provide projected data directory path
-projected_batch_directory_path = (
-    r"D:\pre_test\create_ingestion_files\projected_sample_raster"
-)
+projected_batch_directory_path = r"C:\process_data\source_batch_projected"
+
 
 # 4. Please provide main csv file path which have been assigned with arkids
-main_csv_filepath = r"D:\pre_test\create_ingestion_files\main_sample_raster_arkids.csv"
+main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
 
 # 5. please provide result directory path
-#   attention: Please do not use the original batch directory path or projected directory path
-#              Suggest to provide a specific directory path for result files
-result_directory_path = r"D:\pre_test\create_ingestion_files\results"
+result_directory_path = r"C:\process_data\results"
 
 
 ################################################################################################
 #                             3. Create ingestion files
 #  Based on input:
-#  source_batch_directory_path = r"D:\from_susan\sample_raster"
-#  projected_batch_directory_path = r"D:\from_susan\sample_raster"
-#  result_directory_path = r"D:\results"
+#  source_batch_directory_path = r"C:\process_data\source_batch"
+#  projected_batch_directory_path = r"C:\process_data\source_batch_projected"
+#  main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
+#  result_directory_path = r"C:\process_data\results"
 #
 #  Ingestion files will be created under below directory
-#      "D:\results\sample_raster_ingestion_files"
-#  Then in Windows explore, you can make a zip file from above directory for ingestion tool
-#
-#  Under above directory, each Geofile(shapefile or GeoTIFF) will have a subdirectory
+#      "C:\process_data\results\ingestion_files"
+#  From above directory, each Geofile(shapefile or GeoTIFF) will have a subdirectory
 #  with all related ingestion files. Below is an example of a subdirectory.
 #  The geofile was assinged an arkid "a7gt36" in the main_csv_file.
 # |---- a7gt36
 # |------ data.zip
-# |------ docs:
-# |-------- fake1.pdf
-# |-------- fake2.pdf
+# |------ doc.zip
 # |------ iso19139.xml
 # |------ map.zip
 ################################################################################################
@@ -260,10 +254,11 @@ def verify_setup(file_paths, directory_paths):
     return verified
 
 
-output(f"*** starting 'creating ingestion files'")
+script_name = "7 - create_ingestion_files.py"
+output(f"***starting  {script_name}")
 
 if verify_setup(
-    [main_csv_filepath, logfile],
+    [main_csv_arkid_filepath],
     [
         source_batch_directory_path,
         projected_batch_directory_path,
@@ -271,5 +266,4 @@ if verify_setup(
     ],
 ):
     create_files()
-
-    output(f"*** end 'creating ingestion files'")
+    output(f"***completed {script_name}")
