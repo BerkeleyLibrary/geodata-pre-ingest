@@ -16,14 +16,12 @@ class SourceBatch(object):
     def __init__(self, source_dir, logging):
         self.logging = logging
         self.source_dir = source_dir
-        self.file_paths = self._file_paths("")
+        self.all_file_paths = self._file_paths("")
         self._geo_init()
 
-    def checkup(self):
-        paths = self._missed_file_paths()
-        self._logger("Missing files:", paths)
-        paths = self._unclaimed_file_paths()
-        self._logger("Unclaimed files:", paths)
+    def check_files(self):
+        self._check_missed_files()
+        self._check_exceptional_files()
 
     def prepare(self, workspace_path, referenced_filepath):
         def is_projected(file_path):
@@ -78,16 +76,16 @@ class SourceBatch(object):
             raise NotImplementedError
         return DEFAULT_VECTOR_EXTS if self.geo_type == "shp" else DEFAULT_RASTER_EXTS
 
-    def _missed_file_paths(self):
+    def _check_missed_files(self):
         paths = []
         expected_exts = self._expected_exts()
         for geofile_path in self.geofile_paths:
             paths.extend(
                 self._missed_file_paths_from_geofile(geofile_path, expected_exts)
             )
-        return paths
+        self._logger("Missing files:", paths)
 
-    def _unclaimed_file_paths(self):
+    def _check_exceptional_files(self):
         def stem_and_basename():
             stems = [Path(geofile_path).stem for geofile_path in self.geofile_paths]
             basenames = [
@@ -97,12 +95,12 @@ class SourceBatch(object):
 
         paths = []
         geo_stems = stem_and_basename()
-        for file_path in self.file_paths:
+        for file_path in self.all_file_paths:
             # abc.shp.xml
             stem = Path(file_path).stem
             if stem not in geo_stems:
                 paths.append(file_path)
-        return paths
+        self._logger("Exceptional files:", paths)
 
     def _logger(self, summary, list):
         if len(list) > 0:
@@ -115,7 +113,7 @@ class SourceBatch(object):
         base = os.path.splitext(geofile)[0]
         for ext in expected_exts:
             expected_file_path = f"{base}{ext}"
-            if expected_file_path not in self.file_paths:
+            if expected_file_path not in self.all_file_paths:
                 paths.append(expected_file_path)
         return paths
 
@@ -213,10 +211,6 @@ if verify_setup(
     [source_batch_directory_path, projected_batch_directory_path],
 ):
     source_batch = SourceBatch(source_batch_directory_path, logging)
-
-    # 1. Check Source Batch
-    source_batch.checkup()
-    # 2. Prepare Source Batch
+    source_batch.check_files()
     source_batch.prepare(projected_batch_directory_path, geotif_referenced_filepath)
-
     output(f"***completed {script_name}")

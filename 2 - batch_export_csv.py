@@ -70,11 +70,9 @@ class BatchExportCsv(object):
                 csvWriter.writerow(new_row)
 
     def _filename(self, prefix):
-        # basename = os.path.basename(self.workspace_dir)
         name = f"{prefix}.csv"
         return os.path.join(self.results_dir, name)
 
-    ## common methods to be moved
     def _file_paths(self, ext) -> List:
         return [
             os.path.join(dirpath, filename)
@@ -82,8 +80,6 @@ class BatchExportCsv(object):
             for filename in filenames
             if filename.endswith(ext)
         ]
-
-    ## common functions end
 
 
 class GeoFile(object):

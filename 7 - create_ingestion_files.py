@@ -12,7 +12,6 @@ from shutil import copyfile, rmtree
 
 
 def final_directory_path(prefix):
-    # name = Path(source_batch_directory_path).stem
     directory_path = os.path.join(result_directory_path, f"{prefix}_files")
     if not Path(directory_path).exists():
         os.mkdir(directory_path)

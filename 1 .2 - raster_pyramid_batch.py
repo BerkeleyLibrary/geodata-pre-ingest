@@ -19,8 +19,8 @@ def add_pyramid_to_geotif_files():
         if filename.endswith("tif")
     ]
 
-    for file in geofiles:
-        pyramid(file)
+    for geofile in geofiles:
+        pyramid(geofile)
 
 
 def pyramid(filepath):

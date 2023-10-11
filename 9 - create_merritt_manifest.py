@@ -11,7 +11,6 @@ import hashlib
 
 
 def create_merritt_menifest_file():
-    # name = Path(ingestion_files_directory_path).stem
     menifest_filename = os.path.join(result_directory_path, f"merritt.txt")
     content = menifest_content()
     header = (

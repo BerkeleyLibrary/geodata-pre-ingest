@@ -22,8 +22,8 @@ def validate_files(dir_path):
                     missing_filepaths.append(file_path)
     if missing_filepaths:
         print("Below ingestion files not found: ")
-        for m in missing_filepaths:
-            print(m)
+        for filepath in missing_filepaths:
+            print(filepath)
 
 
 def validate_geoblacklight_schema(dir_path):

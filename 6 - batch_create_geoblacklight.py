@@ -7,9 +7,6 @@ from pathlib import Path
 import arcpy
 
 
-# TODO:
-# 1) add multiple download from csv later
-# 2) check time fields
 ################################################################################################
 #                             1. functions                                                      #
 ################################################################################################
@@ -30,8 +27,6 @@ def create_geoblacklight_files():
 
 
 def final_directory_path(prefix):
-    # name = Path(source_batch_directory_path).stem
-    # directory_path = os.path.join(result_directory_path, f"{name}_{prefix}_files")
     directory_path = os.path.join(result_directory_path, f"{prefix}_files")
     if not Path(directory_path).exists():
         os.mkdir(directory_path)
@@ -111,7 +106,6 @@ def save_pretty_json_file(file_path, json_data):
         )
 
 
-# todo: check time fields later
 def add_from_main_row(json_data, row, field_names):
     def multiple_values(name, val):
         values = val.split("$")
@@ -189,8 +183,6 @@ def add_from_arkid(json_data, row):
         if type == "collections":
             return "{" + doc + "}" if doc else ""
         else:
-            # access = row.get("dct_accessRights_s").strip().lower()
-            # hosts= HOSTS if access == "public" else HOSTS_SECURE
             iso_139_xml = f"{hosts['ISO139']}{id}/iso19139.xml"
             download = f"{hosts['download']}{id}/data.zip]"
             doc = doc_ref(row, hosts)
@@ -381,7 +373,7 @@ result_directory_path = r"C:\process_data\results"
 
 
 ################################################################################################
-#                    4. Create a geoblacklight.json file for each  geofile                               #
+#                    4. Create a geoblacklight.json file for each  geofile                     #
 ################################################################################################
 def output(msg):
     logging.info(msg)
