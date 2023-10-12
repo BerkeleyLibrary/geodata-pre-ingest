@@ -7,79 +7,58 @@ import xml.etree.ElementTree as ET
 import csv
 import re
 from datetime import date, datetime
-from typing import List
 
 
 ################################################################################################
-#                             1. class                                                         #
+#                             1. class and function                                             #
 ################################################################################################
 
 
-class BatchExportCsv(object):
-    def __init__(self, workspace_dir, results_dir, logging):
-        self.logging = logging
-        self.workspace_dir = workspace_dir
-        self.geofile_paths = self._geofile_paths()
-        self.results_dir = results_dir
+def export_main_csv(geofile_paths):
+    rows = [GeoFile(geofile_path, logging).main_row() for geofile_path in geofile_paths]
+    file = os.path.join(csv_files_directory_path, "main.csv")
+    write_csv(file, GeoFile.main_headers, rows)
 
-    def main_csv(self):
-        file = self._filename("main")
-        rows = [
-            GeoFile(geofile_path, self.logging).main_row()
-            for geofile_path in self.geofile_paths
-        ]
-        self._write_csv(file, GeoFile.main_headers, rows)
 
-    def resp_csv(self):
-        file = self._filename("resp")
-        rows = []
-        for geofile_path in self.geofile_paths:
-            resp_rows = GeoFile(geofile_path, self.logging).resp_rows()
-            rows.extend(resp_rows)
-        self._write_csv(file, GeoFile.resp_headers, rows)
+def export_resp_csv(geofile_paths):
+    rows = []
+    for geofile_path in geofile_paths:
+        resp_rows = GeoFile(geofile_path, logging).resp_rows()
+        rows.extend(resp_rows)
 
-    def _geofile_paths(self):
-        shapefile_paths = self._file_paths("shp")
-        tiffile_paths = self._file_paths("tif")
+    file = os.path.join(csv_files_directory_path, "resp.csv")
+    write_csv(file, GeoFile.resp_headers, rows)
 
-        if not shapefile_paths and not tiffile_paths:
-            self.logging.info(
-                f"No shapefiles or raster files found in {self.workspace_dir}!"
-            )
-            return []
 
-        if shapefile_paths and tiffile_paths:
-            self.logging.info(
-                f"Mixing shapefiles and raster files found in {self.workspace_dir}."
-            )
-            raise ValueError(
-                "Both shapefiles and raster files found. Directory should include either shapefiles or raster files."
-            )
+def geofile_paths():
+    shapefile_paths = file_paths("shp")
+    tiffile_paths = file_paths("tif")
+    if shapefile_paths and tiffile_paths:
+        raise ValueError(
+            f"shapefiles and raster files found in the same sourece directory {source_batch_directory_path}"
+        )
+    return shapefile_paths if shapefile_paths else tiffile_paths
 
-        return shapefile_paths if shapefile_paths else tiffile_paths
 
-    def _write_csv(self, file, header, rows):
-        new_headers = ["\uFEFF他们 (für)"]
-        new_headers.extend(header)
-        with open(file, "w", newline="", encoding="utf-8") as csvfile:
-            csvWriter = csv.writer(csvfile)
-            csvWriter.writerow([h for h in new_headers])
-            for row in rows:
-                new_row = [""]
-                new_row.extend([col if col else "" for col in row])
-                csvWriter.writerow(new_row)
+def file_paths(ext):
+    return [
+        os.path.join(dirpath, filename)
+        for dirpath, dirs, filenames in os.walk(source_batch_directory_path)
+        for filename in filenames
+        if filename.endswith(ext)
+    ]
 
-    def _filename(self, prefix):
-        name = f"{prefix}.csv"
-        return os.path.join(self.results_dir, name)
 
-    def _file_paths(self, ext) -> List:
-        return [
-            os.path.join(dirpath, filename)
-            for dirpath, dirs, filenames in os.walk(self.workspace_dir)
-            for filename in filenames
-            if filename.endswith(ext)
-        ]
+def write_csv(file, header, rows):
+    new_headers = ["\uFEFF他们 (für)"]
+    new_headers.extend(header)
+    with open(file, "w", newline="", encoding="utf-8") as csvfile:
+        csvWriter = csv.writer(csvfile)
+        csvWriter.writerow([h for h in new_headers])
+        for row in rows:
+            new_row = [""]
+            new_row.extend([col if col else "" for col in row])
+            csvWriter.writerow(new_row)
 
 
 class GeoFile(object):
@@ -554,9 +533,7 @@ script_name = "2 - batch_export_csv.py"
 output(f"***starting  {script_name}")
 
 if verify_setup([], [source_batch_directory_path, csv_files_directory_path]):
-    batch = BatchExportCsv(
-        source_batch_directory_path, csv_files_directory_path, logging
-    )
-    batch.main_csv()
-    batch.resp_csv()
+    all_geofile_paths = geofile_paths()
+    export_main_csv(all_geofile_paths)
+    export_resp_csv(all_geofile_paths)
     output(f"***completed {script_name}")
