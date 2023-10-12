@@ -61,8 +61,8 @@ def validate_output(data, schema, json_file):
             print(f"Invalid fields in {json_file}:")
             for m in messages:
                 print(m)
-        else:
-            print(f"valid: {json_file}")
+        # else:
+        #     print(f"valid: {json_file}")
 
         print("\n")
 
