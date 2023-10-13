@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 import csv
 import zipfile
-from shutil import copyfile, rmtree
+from shutil import copyfile, rmtree, copytree
 
 
 ################################################################################################
@@ -16,6 +16,27 @@ def final_directory_path(prefix):
     if not Path(directory_path).exists():
         os.mkdir(directory_path)
     return directory_path
+
+
+def move_collection_geoblacklight_to_ogp():
+    collection_path = os.path.join(result_directory_path, "ingestion_collection_files")
+    ogp_path = os.path.join(result_directory_path, "ogp_files")
+    if os.path.exists(collection_path):
+        if not os.path.exists(ogp_path):
+            raise ValueError(f"{ogp_path} does not exists")
+
+        ark_dir_names = [
+            dir_name
+            for dir_name in os.listdir(collection_path)
+            if os.path.isdir(os.path.join(collection_path, dir_name))
+        ]
+        for name in ark_dir_names:
+            fr = os.path.join(collection_path, name)
+            to = os.path.join(ogp_path, name)
+            if os.path.exists(to):
+                rmtree(to)
+
+            copytree(fr, to)
 
 
 def create_files():
@@ -265,4 +286,5 @@ if verify_setup(
     ],
 ):
     create_files()
+    move_collection_geoblacklight_to_ogp()
     output(f"***completed {script_name}")
