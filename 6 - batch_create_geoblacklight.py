@@ -172,21 +172,31 @@ def add_default(json_data):
 
 def add_from_arkid(json_data, row):
     arkid = row.get("arkid")
-    id = f"{PREFIX}{arkid}"
-
+    id = f"{PREFIX}-{arkid}"
     access = row.get("dct_accessRights_s").strip().lower()
-    hosts = HOSTS if access == "public" else HOSTS_SECURE
+
+    def hosts():
+        if access == "public":
+            return HOSTS
+        elif access == "restricted":
+            return HOSTS_SECURE
+        else:
+            txt = f"geofile: '{row.get('geofile')}':  incorrect value in  'dct_accessRights_s' column is not a valid file: {access}"
+            raise ValueError(txt)
+
+    hosts = hosts()
 
     def dc_references():
         type = row.get("gbl_resourceClass_sm").lower()
-        doc = doc_ref(row, hosts)
+        doc = doc_ref(row, hosts, id)
         if type == "collections":
             return "{" + doc + "}" if doc else ""
         else:
-            iso_139_xml = f"{hosts['ISO139']}{id}/iso19139.xml"
-            download = f"{hosts['download']}{id}/data.zip]"
-            doc = doc_ref(row, hosts)
-            content = f"{hosts['wfs']}{hosts['wms']}{iso_139_xml}{download}{doc}"
+            iso139 = f"{hosts['ISO139']}{id}/iso19139.xml"
+            download = f"{hosts['download']}{id}/data.zip"
+            content = f"{hosts['wfs']},{hosts['wms']},{iso139},{download}"
+            if doc:
+                content = f"{content},{doc}"
             ref = "{" + content + "}"
         return ref.strip()
 
@@ -197,14 +207,14 @@ def add_from_arkid(json_data, row):
         json_data["dct_references_s"] = references
 
 
-def doc_ref(row, hosts):
-    val = row.get("doc_zipfile_path")
-    if val:
-        if os.path.isfile(val):
-            basename = os.path.basename(val)
+def doc_ref(row, hosts, id):
+    file_path = row.get("doc_zipfile_path")
+    if file_path:
+        if os.path.isfile(file_path):
+            basename = os.path.basename(file_path)
             f"{hosts['doc']}{id}/{basename}"
         else:
-            txt = f"geofile: '{row.get('geofile')}': file path in 'doc_zipfile_path' column is not a valid file: {val}"
+            txt = f"geofile: '{row.get('geofile')}': file path in 'doc_zipfile_path' column is not a valid file: {file_path}"
             raise ValueError(txt)
     return ""
 
@@ -303,25 +313,23 @@ ISOTOPIC = {
     "019": "Utilities and Communication",
 }
 
-PREFIX = "berkeley-"
+PREFIX = "berkeley"
 INSTITUTION = "Berkeley"
 GEOBLACKLGITH_VERSION = "Aardvark"
 
 HOSTS = {
-    "geoserver_host": "geoservices.lib.berkeley.edu",
-    "ISO139": '"http://www.isotc211.org/schemas/2005/gmd/":"https://spatial.lib.berkeley.edu/metadata/',
+    "ISO139": '"http://www.isotc211.org/schemas/2005/gmd/":"https://spatial.lib.berkeley.edu/public/',
     "download": '"http://schema.org/downloadUrl":"https://spatial.lib.berkeley.edu/public/',
-    "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices.lib.berkeley.edu/geoserver/wfs",',
-    "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices.lib.berkeley.edu/geoserver/wms",',
+    "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices.lib.berkeley.edu/geoserver/wfs"',
+    "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices.lib.berkeley.edu/geoserver/wms"',
     "doc": '"http://lccn.loc.gov/sh85035852":"https://spatial.lib.berkeley.edu/public/',
 }
 
 HOSTS_SECURE = {
-    "geoserver_host": "geoservices-secure.lib.berkeley.edu",
-    "ISO139": '"http://www.isotc211.org/schemas/2005/gmd/":"https://spatial.lib.berkeley.edu/metadata/',
+    "ISO139": '"http://www.isotc211.org/schemas/2005/gmd/":"https://spatial.lib.berkeley.edu/UCB/',
     "download": '"http://schema.org/downloadUrl":"https://spatial.lib.berkeley.edu/UCB/',
-    "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices-secure.lib.berkeley.edu/geoserver/wfs",',
-    "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices-secure.lib.berkeley.edu/geoserver/wms",',
+    "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices-secure.lib.berkeley.edu/geoserver/wfs"',
+    "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices-secure.lib.berkeley.edu/geoserver/wms"',
     "doc": '"http://lccn.loc.gov/sh85035852":"https://spatial.lib.berkeley.edu/UCB/',
 }
 
