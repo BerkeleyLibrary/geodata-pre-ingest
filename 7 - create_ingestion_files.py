@@ -144,7 +144,7 @@ def map_sourcefiles(geofile_path, arkid):
             dic[source_file] = f"{arkid}{ext}"
         else:
             text = f"missing projected file: {source_file}"
-            log_raise_error(text)
+            print(text) if ext == ".prj" else log_raise_error(text)
     return dic
 
 
