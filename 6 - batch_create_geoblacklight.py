@@ -113,6 +113,12 @@ def add_from_main_row(json_data, row, field_names):
             return [ISOTOPIC[value.strip().zfill(3)] for value in values]
         if name in CAPITALIZED_FIELDS:
             return [value.title() for value in values]
+        if name.endswith("im"):
+            try:
+                return [int(value) for value in values]
+            except ValueError:
+                txt = f"{name} value is not a valid integer."
+                raise ValueError(txt)
         return values
 
     def single_value(name, val):
@@ -120,6 +126,13 @@ def add_from_main_row(json_data, row, field_names):
             return val.lower().capitalize()
         if name == "dct_issued_s":
             return val.replace('"', "").strip()
+        if name.endswith("b"):
+            if val.lower() == "true":
+                return True
+            elif val.lower() == "false":
+                return False
+            else:
+                raise ValueError(f"{name} is neither 'true' nor 'false'")
         return val
 
     def add(name, value):
