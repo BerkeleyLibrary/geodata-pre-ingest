@@ -350,6 +350,7 @@ EXCLUDING_FIELDS = [
     "rights_legal",
     "rights_security",
     "doc_zipfile_path",
+    "summary",
 ]
 
 
