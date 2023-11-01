@@ -63,8 +63,9 @@ def create_files_on_row(row, ingestion_dir_path, ogp_dir_path):
             ingestion_path,
             "geoblacklight.json",
         )
-        create_map_zip(projected_geofile_path, arkid, ingestion_path)
-        create_data_zip(geofile_path, ingestion_path)
+        wrap_up_zip(geofile_path, arkid, ingestion_path, "map")
+        wrap_up_zip(geofile_path, arkid, ingestion_path, "data")
+
         doc_filepath = row.get("doc_zipfile_path")
         if doc_filepath:
             cp_document_file(doc_filepath, ingestion_path)
@@ -133,6 +134,9 @@ def cp_document_file(docfile_path, arkid_directory_path):
         log_raise_error(text)
 
 
+# Example:
+# geofile_path = r'D:\gtest\1950\1950prj_county.shp'
+# base = "D:\test\1950\1950prj_county"
 def map_sourcefiles(geofile_path, arkid):
     base = os.path.splitext(geofile_path)[0]
     dic = {}
@@ -148,29 +152,32 @@ def map_sourcefiles(geofile_path, arkid):
     return dic
 
 
+# Example:
+# geofile_path = r'D:\gtest\1950\1950prj_county.shp'
+# barename = "1950prj_county"
+# parent_path = "D:\test\1950"
 def data_sourcefiles(geofile_path):
-    base = os.path.splitext(geofile_path)[0]
+    barename = Path(geofile_path).stem
     parent_path = os.path.split(geofile_path)[0]
     dic = {}
-    for root, _, files in os.walk(parent_path):
-        for file in files:
-            original_filepath = os.path.join(root, file)
-            original_base = os.path.splitext(original_filepath)[0]
-            if original_base == base:
-                dic[original_filepath] = file
+    for file in os.listdir(parent_path):
+        name = Path(file).stem.split(".")[0]
+        if name == barename:
+            file_path = os.path.join(parent_path, file)
+            if os.path.isfile(file_path):
+                dic[file_path] = file
     return dic
 
 
-def create_map_zip(geofile_path, arkid, arkid_directory_path):
-    dic = map_sourcefiles(geofile_path, arkid)
-    zip_filepath = os.path.join(arkid_directory_path, "map.zip")
-    create_zipfile(dic, zip_filepath)
-
-
-def create_data_zip(geofile_path, arkid_directory_path):
-    dic = data_sourcefiles(geofile_path)
+def wrap_up_zip(geofile_path, arkid, arkid_directory_path, type):
+    dic = {}
+    if type == "map":
+        dic = map_sourcefiles(geofile_path, arkid)
+    if type == "data":
+        dic = data_sourcefiles(geofile_path)
     if dic:
-        zip_filepath = os.path.join(arkid_directory_path, "data.zip")
+        # filename = f"{type}.zip"
+        zip_filepath = os.path.join(arkid_directory_path, f"{type}.zip")
         create_zipfile(dic, zip_filepath)
     else:
         text = f"no source files: {geofile_path}"

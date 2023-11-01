@@ -1,7 +1,6 @@
 import arcpy
 import os
 import logging
-from typing import List
 from pathlib import Path
 from datetime import datetime
 from shutil import copyfile, rmtree
@@ -46,8 +45,8 @@ class SourceBatch(object):
             projection(geofile_path, prj_geofile_path)
 
     def _geo_init(self):
-        shapefile_paths = self._file_paths("shp")
-        tiffile_paths = self._file_paths("tif")
+        shapefile_paths = self._file_paths(".shp")
+        tiffile_paths = self._file_paths(".tif")
         if not shapefile_paths and not tiffile_paths:
             self.logging.info(
                 f"No shapefiles or raster files found in {self.source_dir}."
@@ -108,7 +107,7 @@ class SourceBatch(object):
             for l in list:
                 self.logging.info(f"{l}")
 
-    def _missed_file_paths_from_geofile(self, geofile, expected_exts) -> List:
+    def _missed_file_paths_from_geofile(self, geofile, expected_exts):
         paths = []
         base = os.path.splitext(geofile)[0]
         for ext in expected_exts:
@@ -117,13 +116,14 @@ class SourceBatch(object):
                 paths.append(expected_file_path)
         return paths
 
-    def _file_paths(self, ext) -> List:
-        return [
-            os.path.join(dirpath, filename)
-            for dirpath, dirs, filenames in os.walk(self.source_dir)
-            for filename in filenames
-            if filename.endswith(ext)
-        ]
+    def _file_paths(self, ext):
+        paths = []
+        for file in os.listdir(self.source_dir):
+            if file.endswith(ext):
+                file_path = os.path.join(self.source_dir, file)
+                if os.path.isfile(file_path):
+                    paths.append(file_path)
+        return paths
 
     def vector_projection(self, from_filepath, to_filepath):
         try:

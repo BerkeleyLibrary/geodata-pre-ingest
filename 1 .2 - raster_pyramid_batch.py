@@ -12,15 +12,19 @@ from datetime import datetime
 
 
 def add_pyramid_to_geotif_files():
-    geofiles = [
-        os.path.join(dirpath, filename)
-        for dirpath, dirs, filenames in os.walk(projected_batch_directory_path)
-        for filename in filenames
-        if filename.endswith("tif")
-    ]
-
+    geofiles = get_filepaths(projected_batch_directory_path, ".tif")
     for geofile in geofiles:
         pyramid(geofile)
+
+
+def get_filepaths(directory, ext):
+    paths = []
+    for file in os.listdir(directory):
+        if file.endswith(ext):
+            file_path = os.path.join(directory, file)
+            if os.path.isfile(file_path):
+                paths.append(file_path)
+    return paths
 
 
 def pyramid(filepath):

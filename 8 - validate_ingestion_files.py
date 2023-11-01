@@ -32,7 +32,7 @@ def validate_geoblacklight_schema(dir_path):
         with open(arrdvark_schema_file_path) as s:
             schema = json.load(s)
 
-        json_files = file_paths(dir_path, "json")
+        json_files = get_filepaths(dir_path, ".json")
 
         for json_file in json_files:
             data = ""
@@ -41,13 +41,23 @@ def validate_geoblacklight_schema(dir_path):
                 validate_output(data, schema, json_file)
 
 
-def file_paths(dir_path, ext):
-    return [
-        os.path.join(dirpath, filename)
-        for dirpath, dirs, filenames in os.walk(dir_path)
-        for filename in filenames
-        if filename.endswith(ext)
-    ]
+# def file_paths(dir_path, ext):
+#     return [
+#         os.path.join(dirpath, filename)
+#         for dirpath, dirs, filenames in os.walk(dir_path)
+#         for filename in filenames
+#         if filename.endswith(ext)
+#     ]
+
+
+def get_filepaths(directory, ext):
+    paths = []
+    for file in os.listdir(directory):
+        if file.endswith(ext):
+            file_path = os.path.join(directory, file)
+            if os.path.isfile(file_path):
+                paths.append(file_path)
+    return paths
 
 
 def validate_output(data, schema, json_file):

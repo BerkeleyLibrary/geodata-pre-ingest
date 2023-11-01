@@ -31,8 +31,8 @@ def export_resp_csv(geofile_paths):
 
 
 def geofile_paths():
-    shapefile_paths = file_paths("shp")
-    tiffile_paths = file_paths("tif")
+    shapefile_paths = get_filepaths(".shp")
+    tiffile_paths = get_filepaths(".tif")
     if shapefile_paths and tiffile_paths:
         raise ValueError(
             f"shapefiles and raster files found in the same sourece directory {source_batch_directory_path}"
@@ -40,13 +40,14 @@ def geofile_paths():
     return shapefile_paths if shapefile_paths else tiffile_paths
 
 
-def file_paths(ext):
-    return [
-        os.path.join(dirpath, filename)
-        for dirpath, dirs, filenames in os.walk(source_batch_directory_path)
-        for filename in filenames
-        if filename.endswith(ext)
-    ]
+def get_filepaths(ext):
+    paths = []
+    for file in os.listdir(source_batch_directory_path):
+        if file.endswith(ext):
+            file_path = os.path.join(source_batch_directory_path, file)
+            if os.path.isfile(file_path):
+                paths.append(file_path)
+    return paths
 
 
 def write_csv(file, header, rows):
