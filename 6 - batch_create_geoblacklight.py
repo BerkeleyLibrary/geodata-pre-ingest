@@ -114,11 +114,15 @@ def add_from_main_row(json_data, row, field_names):
         if name in CAPITALIZED_FIELDS:
             return [value.title() for value in values]
         if name.endswith("im"):
-            try:
-                return [int(value) for value in values]
-            except ValueError:
-                txt = f"{name} value is not a valid integer."
-                raise ValueError(txt)
+            if name.endswith("drsim"):
+                return [f"[{value}]" for value in values]
+            else:
+                try:
+                    return [int(value) for value in values]
+                except ValueError:
+                    txt = f"{name} value is not a valid integer."
+                    raise ValueError(txt)
+
         return values
 
     def single_value(name, val):
@@ -352,7 +356,6 @@ CAPITALIZED_FIELDS = [
     "dct_subject_sm",
     "gbl_resourceClass_sm",
     "gbl_resourceClass_sm",
-    "dct_accessRights_s",
 ]
 
 # Combine three rights to "dct_rights_sm" in Geoblacklight
