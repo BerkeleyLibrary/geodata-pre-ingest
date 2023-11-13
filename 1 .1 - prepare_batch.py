@@ -139,7 +139,7 @@ class SourceBatch(object):
             sr = arcpy.Describe(referenced_filepath).spatialReference
             arcpy.ProjectRaster_management(from_filepath, to_filepath, sr)
         except Exception as ex:
-            self.logging.info(f"{self.geofile} - {ex}")
+            self.logging.info(f"{from_filepath} - {ex}")
 
 
 # Default geofile extensions
