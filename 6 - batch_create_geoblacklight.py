@@ -11,7 +11,7 @@ import arcpy
 #                             1. functions                                                      #
 ################################################################################################
 def create_geoblacklight_files():
-    resp_dic = csv_dic(resp_csv_arkid_filepath)
+    resp_rows = csv_rows(resp_csv_arkid_filepath)
     field_names = geoblacklight_field_names(main_csv_arkid_filepath)
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
@@ -21,7 +21,7 @@ def create_geoblacklight_files():
                 text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
                 log_raise_error(text)
             resp_rows = [
-                resp_row for resp_row in resp_dic if arkid == resp_row["arkid"]
+                resp_row for resp_row in resp_rows if arkid == resp_row.get('arkid')
             ]
             create_geoblacklight_file(row, resp_rows, field_names)
 
@@ -268,13 +268,13 @@ def add_boundary(json_data, row):
     if geofile.endswith(".tif"):
         json_data["locn_geometry"] = geotiff_boundary()
 
-
-def csv_dic(csv_filepath):
-    lines = (line for line in open(csv_filepath, "r", encoding="utf-8"))
-    rows = (line.strip().split(",") for line in lines)
-    header = next(rows)
-    return [dict(zip(header, row)) for row in rows]
-
+def csv_rows(csv_filepath):
+    rows = []
+    with open(csv_filepath, "r", encoding="utf-8") as csvfile:
+        csv_reader = csv.DictReader(csvfile)
+        for row in csv_reader:
+            rows.append(row)
+    return rows
 
 def geoblacklight_field_names(csv_filepath):
     names = []
