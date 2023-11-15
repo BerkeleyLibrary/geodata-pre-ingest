@@ -11,7 +11,7 @@ import arcpy
 #                             1. functions                                                      #
 ################################################################################################
 def create_geoblacklight_files():
-    resp_rows = csv_rows(resp_csv_arkid_filepath)
+    all_resp_rows = csv_rows(resp_csv_arkid_filepath)
     field_names = geoblacklight_field_names(main_csv_arkid_filepath)
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
@@ -21,7 +21,7 @@ def create_geoblacklight_files():
                 text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
                 log_raise_error(text)
             resp_rows = [
-                resp_row for resp_row in resp_rows if arkid == resp_row.get('arkid')
+                resp_row for resp_row in all_resp_rows if arkid == resp_row.get('arkid')
             ]
             create_geoblacklight_file(row, resp_rows, field_names)
 
