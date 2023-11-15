@@ -178,7 +178,7 @@ def file_name(csvfilepath, output_dir):
 
 
 def write_file(hash, filepath):
-    with open(filepath, "w") as file:
+    with open(filepath, "w", encoding="utf-8") as file:
         file.write(f"\n Invalid fields:\n")
         for k, ls in hash.items():
             file.write(f"\n {k}:\n")

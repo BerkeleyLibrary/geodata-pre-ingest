@@ -94,7 +94,7 @@ def create_geoblacklight_file(row, resp_rows, field_names):
 
 
 def save_pretty_json_file(file_path, json_data):
-    with open(file_path, "w+") as geo_json:
+    with open(file_path, "w+", encoding="utf-8") as geo_json:
         geo_json.write(
             json.dumps(
                 json_data,
@@ -278,7 +278,7 @@ def csv_dic(csv_filepath):
 
 def geoblacklight_field_names(csv_filepath):
     names = []
-    with open(csv_filepath, "r") as file:
+    with open(csv_filepath, "r", encoding="utf-8") as file:
         csv_reader = csv.reader(file)
         headers = next(csv_reader)[3:]
         names = [h for h in headers if not h.endswith("_o")]

@@ -17,7 +17,7 @@ def create_merritt_menifest_file():
         "fileUrl | hashAlgorithm | hashValue | fileSize | fileName | primaryIdentifier | creator | title | date"
         + os.linesep
     )
-    with open(menifest_filename, "w") as f:
+    with open(menifest_filename, "w", encoding="utf-8") as f:
         f.write(header)
         f.write(content)
 
@@ -67,7 +67,7 @@ def url(arkid, access_right):
 
 def hash_value(data_zip_filename):
     try:
-        with open(data_zip_filename, "rb") as f:
+        with open(data_zip_filename, "rb", encoding="utf-8") as f:
             md5 = hashlib.md5(f.read()).hexdigest()
         return md5
     except FileNotFoundError as e:
