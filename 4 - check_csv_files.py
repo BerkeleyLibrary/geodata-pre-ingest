@@ -174,7 +174,7 @@ def csv_headers(csv_filepath):
 
 def file_name(csvfilepath, output_dir):
     name = Path(csvfilepath).stem
-    return os.path.join(output_dir, f"{name}.txt")
+    return os.path.join(output_dir, f"{name}_log.txt")
 
 
 def write_file(hash, filepath):
