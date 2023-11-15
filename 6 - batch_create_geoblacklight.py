@@ -107,12 +107,18 @@ def save_pretty_json_file(file_path, json_data):
 
 
 def add_from_main_row(json_data, row, field_names):
+    def capitalize_first_letter(value):
+        noCapWords = ["and", "is", "it", "or","if"]
+        words = value.split()
+        capitalized_words = [word[0].upper() + word[1:] if (word not in noCapWords) and (word[0].isalpha()) else word  for word in words]
+        return ' '.join(capitalized_words)
+    
     def multiple_values(name, val):
         values = val.split("$")
         if name == "dcat_theme_sm":
             return [ISOTOPIC[value.strip().zfill(3)] for value in values]
         if name in CAPITALIZED_FIELDS:
-            return [value.title() for value in values]
+            return [capitalize_first_letter(value) for value in values]
         if name.endswith("im"):
             if name.endswith("drsim"):
                 return [f"[{value}]" for value in values]
