@@ -56,7 +56,7 @@ def url(arkid, access_right):
     access = access_right.lower()
     if access == "public":
         download_host = host_public
-    elif access_right == "restricted":
+    elif access == "restricted":
         download_host = host_restricted
     else:
         print("dct_accessRights_s value is neither public nor restricted")
@@ -67,7 +67,7 @@ def url(arkid, access_right):
 
 def hash_value(data_zip_filename):
     try:
-        with open(data_zip_filename, "rb", encoding="utf-8") as f:
+        with open(data_zip_filename, "rb") as f:
             md5 = hashlib.md5(f.read()).hexdigest()
         return md5
     except FileNotFoundError as e:

@@ -63,7 +63,7 @@ def create_files_on_row(row, ingestion_dir_path, ogp_dir_path):
             ingestion_path,
             "geoblacklight.json",
         )
-        wrap_up_zip(geofile_path, arkid, ingestion_path, "map")
+        wrap_up_zip(projected_geofile_path, arkid, ingestion_path, "map")
         wrap_up_zip(geofile_path, arkid, ingestion_path, "data")
 
         doc_filepath = row.get("doc_zipfile_path")
@@ -148,7 +148,9 @@ def map_sourcefiles(geofile_path, arkid):
             dic[source_file] = f"{arkid}{ext}"
         else:
             text = f"missing projected file: {source_file}"
-            print(text) if ext == ".prj" else log_raise_error(text)
+            # give a warning: some projected GeoTIFF files from ArcGIS Pro don't include .prj file.
+            #  Check this after ingesting GeoTIFF to geoserver instance
+            print(f"please check:  {text}") if ext == ".prj" else log_raise_error(text)
     return dic
 
 
