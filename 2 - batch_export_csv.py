@@ -235,7 +235,7 @@ class GeoFile(object):
                 "point": "Point data",
             }
             shape = desc.shapeType.lower()
-            return shape_mapping.get(shape, "")
+            return f"{shape_mapping.get(shape, '')}$Vector data"
         return ""
 
     def _format(self):
