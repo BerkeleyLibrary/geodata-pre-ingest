@@ -337,7 +337,7 @@ ISOTOPIC = {
 }
 
 PREFIX = "berkeley"
-INSTITUTION = "Berkeley"
+INSTITUTION = "University of California Berkeley"
 GEOBLACKLGITH_VERSION = "Aardvark"
 
 HOSTS = {
