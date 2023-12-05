@@ -369,7 +369,7 @@ main_headers = [
     "rights_legal",
     "rights_security_o",
     "rights_security",
-    "rightsHolder",
+    # "rightsHolder",
     "dct_license_sm",
     "gbl_suppressed_b",
     "gbl_georeferenced_b",
