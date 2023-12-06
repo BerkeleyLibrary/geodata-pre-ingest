@@ -4,7 +4,6 @@ from pathlib import Path
 import csv
 import zipfile
 from shutil import copyfile, rmtree, copytree
-import json
 
 
 ################################################################################################
@@ -18,46 +17,6 @@ def final_directory_path(prefix):
         os.mkdir(directory_path)
     return directory_path
 
-# each subdirectory under ingestion_files has four files, which will be validated in next script
-def add_gbl_fileSize_s():
-    ingestion_file_dirpath = os.path.join(result_directory_path, "ingestion_files")
-    for root, _, files in os.walk(ingestion_file_dirpath):
-       for file in files:
-            file_path = os.path.join(root, file)
-            if file == "geoblacklight.json" and os.path.isfile(file_path):
-                data_file_path = os.path.join(root, "data.zip")
-                update_json_file(file_path,data_file_path)
-
-def update_json_file(json_file_path,data_file_path):
-    try:
-        data = {}
-        with open(json_file_path, 'r', encoding="utf-8") as file:
-            data = json.load(file)
-            file_size = get_file_size(data_file_path)
-            data['gbl_fileSize_s'] = file_size
-
-        save_pretty_json_file(json_file_path, data)
-    except Exception as ex:
-            print(f"Cannot update gbl_fileSizes, please check existing of files{json_file_path}; {data_file_path}; - {ex}")
-
-
-def get_file_size(file_path):
-    file_size_bytes = os.path.getsize(file_path)
-    file_size_mb = file_size_bytes / (1024.0 ** 2)
-    size = round(file_size_mb, 2)
-    return str(size)
-
-def save_pretty_json_file(file_path, json_data):
-    with open(file_path, "w+", encoding="utf-8") as geo_json:
-        geo_json.write(
-            json.dumps(
-                json_data,
-                sort_keys=True,
-                ensure_ascii=False,
-                indent=4,
-                separators=(",", ":"),
-            )
-        )
 
 def move_collection_geoblacklight_to_ogp():
     collection_path = os.path.join(result_directory_path, "ingestion_collection_files")
@@ -304,9 +263,6 @@ result_directory_path = r"C:\process_data\results"
 # |------ doc.zip
 # |------ iso19139.xml
 # |------ map.zip
-# additional: 
-# 1)  after creating data.zip file for each arkid related geofile, get data.zip file size, and update it to geoblacklight.json
-# 2)  moving collection geoblacklight.json to OGP
 ################################################################################################
 def output(msg):
     logging.info(msg)
@@ -339,7 +295,8 @@ if verify_setup(
     ],
 ):
     create_files()
-    add_gbl_fileSize_s()
     move_collection_geoblacklight_to_ogp()
     output(f"***completed {script_name}")
+
+
 

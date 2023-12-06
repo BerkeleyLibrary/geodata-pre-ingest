@@ -369,6 +369,8 @@ main_headers = [
     "rights_legal",
     "rights_security_o",
     "rights_security",
+    # "rightsHolder",
+    'gbl_fileSize_s',
     "dct_license_sm",
     "gbl_suppressed_b",
     "gbl_georeferenced_b",
