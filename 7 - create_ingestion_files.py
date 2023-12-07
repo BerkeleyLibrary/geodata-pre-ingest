@@ -3,20 +3,20 @@ import logging
 from pathlib import Path
 import csv
 import zipfile
-from shutil import copyfile, rmtree, copytree
+from shutil import copyfile, rmtree, copy2
 import json
 
 
 ################################################################################################
 #                             1. functions                                                     #
 ################################################################################################
-
-
-def final_directory_path(prefix):
-    directory_path = os.path.join(result_directory_path, f"{prefix}_files")
-    if not Path(directory_path).exists():
-        os.mkdir(directory_path)
-    return directory_path
+def create_files():
+    ingestion_dir_path = final_directory_path("ingestion")
+    with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
+        csv_reader = csv.DictReader(csvfile)
+        for row in csv_reader:
+            if row.get("gbl_resourceClass_sm").lower() != "collections":
+                create_files_on_row(row, ingestion_dir_path)
 
 # each subdirectory under ingestion_files has four files, which will be validated in next script
 def add_gbl_fileSize_s():
@@ -27,6 +27,16 @@ def add_gbl_fileSize_s():
             if file == "geoblacklight.json" and os.path.isfile(file_path):
                 data_file_path = os.path.join(root, "data.zip")
                 update_json_file(file_path,data_file_path)
+
+def get_ogp_geoblakcligh_files():
+    ogp_dir_path = final_directory_path("ogp")
+    move_geoblacklight("ingestion_files", ogp_dir_path)
+    move_geoblacklight("ingestion_collection_files", ogp_dir_path)
+
+def final_directory_path(prefix):
+    directory_path = os.path.join(result_directory_path, f"{prefix}_files")
+    ensure_empty_directory(directory_path)
+    return directory_path
 
 def update_json_file(json_file_path,data_file_path):
     try:
@@ -39,7 +49,6 @@ def update_json_file(json_file_path,data_file_path):
         save_pretty_json_file(json_file_path, data)
     except Exception as ex:
             print(f"Cannot update gbl_fileSizes, please check existing of files{json_file_path}; {data_file_path}; - {ex}")
-
 
 def get_file_size(file_path):
     file_size_bytes = os.path.getsize(file_path)
@@ -59,38 +68,20 @@ def save_pretty_json_file(file_path, json_data):
             )
         )
 
-def move_collection_geoblacklight_to_ogp():
-    collection_path = os.path.join(result_directory_path, "ingestion_collection_files")
-    ogp_path = os.path.join(result_directory_path, "ogp_files")
-    if os.path.exists(collection_path):
-        if not os.path.exists(ogp_path):
-            raise ValueError(f"{ogp_path} does not exists")
+def move_geoblacklight(dir_name, to_dir_path):
+    from_dir_path = os.path.join(result_directory_path, dir_name)
+    if os.path.exists(from_dir_path):
+        for root, _, files in os.walk(from_dir_path):
+            for file in files:
+                if file == "geoblacklight.json":
+                    file_path = os.path.join(root, file)
+                    if os.path.isfile(file_path):
+                        relative_path = os.path.relpath(file_path, from_dir_path)
+                        ogp_file_path = os.path.join(to_dir_path, relative_path)
+                        os.makedirs(os.path.dirname(ogp_file_path), exist_ok=True)
+                        copy2(file_path, ogp_file_path)
 
-        ark_dir_names = [
-            dir_name
-            for dir_name in os.listdir(collection_path)
-            if os.path.isdir(os.path.join(collection_path, dir_name))
-        ]
-        for name in ark_dir_names:
-            fr = os.path.join(collection_path, name)
-            to = os.path.join(ogp_path, name)
-            if os.path.exists(to):
-                rmtree(to)
-
-            copytree(fr, to)
-
-
-def create_files():
-    ingestion_dir_path = final_directory_path("ingestion")
-    ogp_dir_path = final_directory_path("ogp")
-    with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
-        csv_reader = csv.DictReader(csvfile)
-        for row in csv_reader:
-            if row.get("gbl_resourceClass_sm").lower() != "collections":
-                create_files_on_row(row, ingestion_dir_path, ogp_dir_path)
-
-
-def create_files_on_row(row, ingestion_dir_path, ogp_dir_path):
+def create_files_on_row(row, ingestion_dir_path):
     geofile_path = row.get("geofile")
     projected_geofile_path = correlated_filepath(geofile_path)
 
@@ -111,13 +102,7 @@ def create_files_on_row(row, ingestion_dir_path, ogp_dir_path):
         if doc_filepath:
             cp_document_file(doc_filepath, ingestion_path)
 
-    def create_ogp_file():
-        ogp_path = arkid_directory_path(arkid, ogp_dir_path)
-        cp_file(projected_geofile_path, ogp_path, "geoblacklight.json")
-
     create_ingestion_file()
-    create_ogp_file()
-
 
 def arkid_directory_path(arkid, directory_path):
     arkid_directory_path = os.path.join(directory_path, arkid)
@@ -306,7 +291,7 @@ result_directory_path = r"C:\process_data\results"
 # |------ map.zip
 # additional: 
 # 1)  after creating data.zip file for each arkid related geofile, get data.zip file size, and update it to geoblacklight.json
-# 2)  moving collection geoblacklight.json to OGP
+# 2)  moving ingenstion geoblacklight.json and collection geoblacklight.json to OGP directory
 ################################################################################################
 def output(msg):
     logging.info(msg)
@@ -340,6 +325,7 @@ if verify_setup(
 ):
     create_files()
     add_gbl_fileSize_s()
-    move_collection_geoblacklight_to_ogp()
+    get_ogp_geoblakcligh_files()
     output(f"***completed {script_name}")
+
 
