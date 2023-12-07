@@ -232,29 +232,30 @@ class RowTransformer(object):
                     useLimit_node.text = value
             else:  # add main csv validation befefore removing this code
                 print("Please check main_csv file, it may have no metadata content")
-
+        
+        def get_issued_date(val):
+            def m_d(str):
+                return str.strip().zfill(2)
+           
+            clr_val = val.replace('"', "")
+            ls = clr_val.split("-")
+            count = len(ls)
+            if count == 3:
+                return f"{ls[0]}-{m_d(ls[1])}-{m_d(ls[2])}"
+            if count == 2:
+                return f"{ls[0]}-{m_d(ls[1])}-01"
+            if count == 1:
+                return f"{ls[0]}-01-01"
+            raise ValueError(f"Incorrect dct_issued_s value: {val}")
+       
         # not every header has a related header_o
-        def main_col_val(header):
-            val = self.main_row.get(header)
-
-            def issued_date():
-                clr_val = val.replace('"', "")
-                ls = clr_val.split("-")
-                date_str = clr_val
-                if len(ls) == 2:
-                    date_str = f"ls[0]-ls[1]-01"
-                if len(ls) == 1:
-                    date_str = f"ls[0]-01-01"
-                return f"{date_str}T00:00:00"
-
-            if val and header.startswith("dct_issued_s"):
-                return issued_date()
-            return val
-
         def element_val(header):
-            val = main_col_val(header)
-            val_o = main_col_val(f"{header}_o")
-            return val_o if val_o and (not val) else val
+            val = self.main_row.get(header)
+            val_o = self.main_row.get(f"{header}_o")
+            chosen_val = val_o if val_o and (not val) else val
+            if chosen_val and header.startswith("dct_issued_s"):
+                return get_issued_date(chosen_val)
+            return chosen_val
 
         def transform_main_headers():
             for header in self.transform_main_headers:
