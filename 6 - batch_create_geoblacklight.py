@@ -25,13 +25,10 @@ def create_geoblacklight_files():
             ]
             create_geoblacklight_file(row, resp_rows, field_names)
 
-
 def final_directory_path(prefix):
     directory_path = os.path.join(result_directory_path, f"{prefix}_files")
-    if not Path(directory_path).exists():
-        os.mkdir(directory_path)
+    ensure_empty_directory(directory_path)
     return directory_path
-
 
 def correlated_filepath(geofile_path):
     if not source_batch_directory_path in geofile_path:
