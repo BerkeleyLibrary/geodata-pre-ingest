@@ -69,7 +69,9 @@ def proj_geofile_path(row):
         rel_geofile_name = os.path.relpath(geofile_path, source_batch_directory_path)
         return os.path.join(projected_batch_directory_path, rel_geofile_name)
     except Exception:
-        print(f"Could not find {proj_geofile_path}")
+        txt = f"Could not find {proj_geofile_path}"
+        print(txt)
+        raise ValueError(txt)
 
 
 def dataset_geoblacklight_file_path(row):
