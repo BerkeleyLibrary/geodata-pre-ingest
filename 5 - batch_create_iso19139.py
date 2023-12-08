@@ -12,12 +12,13 @@ from shutil import copyfile
 ################################################################################################
 #                             1. functions                                                    #
 ################################################################################################
+# Create iso19139 xml file for rows 'geofile' value is a valid filepath
 def create_iso19139_files():
     resp_dic = csv_dic(resp_csv_arkid_filepath)
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
-            if row.get("gbl_resourceClass_sm").lower() != "collections":
+            if has_dataset(row):
                 arkid = row.get("arkid")
                 if not arkid:
                     text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
@@ -29,6 +30,11 @@ def create_iso19139_files():
                 geofile_path = correlated_filepath(row.get("geofile"))
                 geofile = GeoFile(geofile_path, logging)
                 geofile.create_iso19139_file(row, resp_rows)
+
+
+def has_dataset(row):
+    geofile_path = row.get("geofile")
+    return os.path.isfile(geofile_path)
 
 
 def correlated_filepath(geofile_path):
@@ -232,11 +238,11 @@ class RowTransformer(object):
                     useLimit_node.text = value
             else:  # add main csv validation befefore removing this code
                 print("Please check main_csv file, it may have no metadata content")
-        
+
         def get_issued_date(val):
             def m_d(str):
                 return str.strip().zfill(2)
-           
+
             clr_val = val.replace('"', "")
             ls = clr_val.split("-")
             count = len(ls)
@@ -247,7 +253,7 @@ class RowTransformer(object):
             if count == 1:
                 return f"{ls[0]}-01-01"
             raise ValueError(f"Incorrect dct_issued_s value: {val}")
-       
+
         # not every header has a related header_o
         def element_val(header):
             val = self.main_row.get(header)
