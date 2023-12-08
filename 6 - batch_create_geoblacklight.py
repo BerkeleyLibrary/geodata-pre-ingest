@@ -21,28 +21,90 @@ def create_geoblacklight_files():
                 text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
                 log_raise_error(text)
             resp_rows = [
-                resp_row for resp_row in all_resp_rows if arkid == resp_row.get('arkid')
+                resp_row for resp_row in all_resp_rows if arkid == resp_row.get("arkid")
             ]
             create_geoblacklight_file(row, resp_rows, field_names)
+
+
+def create_geoblacklight_file_with_dataset(row, resp_rows, field_names):
+    json_data = {}
+    add_from_main_row(json_data, row, field_names)
+    add_from_main_row_rights(json_data, row)
+    add_from_resp_rows(json_data, resp_rows)
+    add_from_arkid(json_data, row)
+    add_default(json_data)
+
+    file_path = g_filepath_in_projected_direcoty(row)
+    save_pretty_json_file(file_path, json_data)
+
+
+def create_geoblacklight_file_without_dataset(row, resp_rows, field_names):
+    json_data = {}
+    add_from_main_row(json_data, row, field_names)
+    add_from_main_row_rights(json_data, row)
+    add_from_resp_rows(json_data, resp_rows)
+    add_from_arkid(json_data, row)
+    add_default(json_data)
+
+    file_path = dataset_geoblacklight_file_path(row)
+    save_pretty_json_file(file_path, json_data)
+
+
+def proj_geofile_path(row):
+    try:
+        geofile_path = row.get("geofile")
+        rel_geofile_name = os.path.relpath(geofile_path, source_batch_directory_path)
+        proj_geofile_path = os.path.join(
+            projected_batch_directory_path, rel_geofile_name
+        )
+    except Exception:
+        print(f"Could not find {proj_geofile_path}")
+
+
+def dataset_geoblacklight_file_path(row):
+    geofile_path = row.get("geofile_path")
+    rel_geofile_name = os.path.relpath(geofile_path, source_batch_directory_path)
+    proj_geofile_path = os.path.join(projected_batch_directory_path, rel_geofile_name)
+    base = os.path.splitext(proj_geofile_path)[0]
+    return f"{base}_geoblacklight.json"
+
+
+def non_dataset_geoblacklight_file_path(row):
+    arkid = row.get("arkid")
+    collection_dir_path = final_directory_path("ingestion_collection")
+    arkid_directory_path = os.path.join(collection_dir_path, arkid)
+    ensure_empty_directory(arkid_directory_path)
+    return f"{arkid_directory_path}/geoblacklight.json"
+
 
 def final_directory_path(prefix):
     directory_path = os.path.join(result_directory_path, f"{prefix}_files")
     ensure_empty_directory(directory_path)
     return directory_path
 
-def correlated_filepath(geofile_path):
-    if not source_batch_directory_path in geofile_path:
-        text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{source_batch_directory_path}'"
-        log_raise_error(text)
 
-    filepath = geofile_path.replace(
-        source_batch_directory_path, projected_batch_directory_path
-    )
-    if Path(filepath).is_file():
-        return filepath
-    else:
-        text = f"File {filepath} does not exist"
-        log_raise_error(text)
+def common_geoblacklight_fields(row, resp_rows, field_names):
+    json_data = {}
+    add_from_main_row(json_data, row, field_names)
+    add_from_main_row_rights(json_data, row)
+    add_from_resp_rows(json_data, resp_rows)
+    add_default(json_data)
+    return json_data
+
+
+# def correlated_filepath(geofile_path):
+#     if not source_batch_directory_path in geofile_path:
+#         text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{source_batch_directory_path}'"
+#         log_raise_error(text)
+
+#     filepath = geofile_path.replace(
+#         source_batch_directory_path, projected_batch_directory_path
+#     )
+#     if Path(filepath).is_file():
+#         return filepath
+#     else:
+#         text = f"File {filepath} does not exist"
+#         log_raise_error(text)
 
 
 def ensure_empty_directory(pathname):
@@ -60,34 +122,41 @@ def ensure_empty_directory(pathname):
         os.makedirs(pathname)
 
 
-def collection_geoblacklight_file_path(row):
-    arkid = row.get("arkid")
-    collection_dir_path = final_directory_path("ingestion_collection")
-    arkid_directory_path = os.path.join(collection_dir_path, arkid)
-    ensure_empty_directory(arkid_directory_path)
-    return f"{arkid_directory_path}/geoblacklight.json"
+# def collection_geoblacklight_file_path(row):
+#     arkid = row.get("arkid")
+#     collection_dir_path = final_directory_path("ingestion_collection")
+#     arkid_directory_path = os.path.join(collection_dir_path, arkid)
+#     ensure_empty_directory(arkid_directory_path)
+#     return f"{arkid_directory_path}/geoblacklight.json"
 
 
-def geoblacklight_filepath(row):
-    if row.get("gbl_resourceClass_sm").lower() == "collections":
-        return collection_geoblacklight_file_path(row)
-
-    geofile_path = row.get("geofile")
-    projected_geofile_path = correlated_filepath(geofile_path)
-    base = os.path.splitext(projected_geofile_path)[0]
-    return f"{base}_geoblacklight.json"
+# def geoblacklight_filepath(row):
+#     geofile_path = row.get("geofile")
+#     projected_geofile_path = correlated_filepath(geofile_path)
+#     base = os.path.splitext(projected_geofile_path)[0]
+#     return f"{base}_geoblacklight.json"
 
 
-def create_geoblacklight_file(row, resp_rows, field_names):
-    json_data = {}
-    add_from_main_row(json_data, row, field_names)
-    add_from_main_row_rights(json_data, row)
-    add_from_resp_rows(json_data, resp_rows)
-    add_from_arkid(json_data, row)
-    add_default(json_data)
+# def geoblacklight_filepath(row):
+#     if row.get("gbl_resourceClass_sm").lower() == "collections":
+#         return collection_geoblacklight_file_path(row)
 
-    file_path = geoblacklight_filepath(row)
-    save_pretty_json_file(file_path, json_data)
+#     geofile_path = row.get("geofile")
+#     projected_geofile_path = correlated_filepath(geofile_path)
+#     base = os.path.splitext(projected_geofile_path)[0]
+#     return f"{base}_geoblacklight.json"
+
+
+# def create_geoblacklight_file(row, resp_rows, field_names):
+#     json_data = {}
+#     add_from_main_row(json_data, row, field_names)
+#     add_from_main_row_rights(json_data, row)
+#     add_from_resp_rows(json_data, resp_rows)
+#     add_from_arkid(json_data, row)
+#     add_default(json_data)
+
+#     file_path = geoblacklight_filepath(row)
+#     save_pretty_json_file(file_path, json_data)
 
 
 def save_pretty_json_file(file_path, json_data):
@@ -105,11 +174,16 @@ def save_pretty_json_file(file_path, json_data):
 
 def add_from_main_row(json_data, row, field_names):
     def capitalize_first_letter(value):
-        noCapWords = ["and", "is", "it", "or","if"]
+        noCapWords = ["and", "is", "it", "or", "if"]
         words = value.split()
-        capitalized_words = [word[0].upper() + word[1:] if (word not in noCapWords) and (word[0].isalpha()) else word  for word in words]
-        return ' '.join(capitalized_words)
-    
+        capitalized_words = [
+            word[0].upper() + word[1:]
+            if (word not in noCapWords) and (word[0].isalpha())
+            else word
+            for word in words
+        ]
+        return " ".join(capitalized_words)
+
     def multiple_values(name, val):
         values = val.split("$")
         if name == "dcat_theme_sm":
@@ -192,49 +266,90 @@ def add_default(json_data):
 
 def add_from_arkid(json_data, row):
     arkid = row.get("arkid")
-    id = f"{PREFIX}-{arkid}"
-    access = row.get("dct_accessRights_s").strip().lower()
-
-    def hosts():
-        if access == "public":
-            return HOSTS
-        elif access == "restricted":
-            return HOSTS_SECURE
-        else:
-            txt = f"geofile: '{row.get('geofile')}':  incorrect value in  'dct_accessRights_s' column is not a valid file: {access}"
-            raise ValueError(txt)
-
-    hosts = hosts()
-
-    def dc_references():
-        type = row.get("gbl_resourceClass_sm").lower()
-        doc = doc_ref(row, hosts, id)
-        if type == "collections":
-            return "{" + doc + "}" if doc else ""
-        else:
-            iso139 = f"{hosts['ISO139']}{id}/iso19139.xml"
-            download = f"{hosts['download']}{id}/data.zip"
-            content = f"{hosts['wfs']},{hosts['wms']},{iso139},{download}"
-            if doc:
-                content = f"{content},{doc}"
-            ref = "{" + content + "}"
-        return ref.strip()
-
-    json_data["id"] = id
+    json_data["id"] = f"{PREFIX}-{arkid}"
     json_data["gbl_wxsIdentifier_s"] = arkid
-    references = dc_references()
-    if references:
-        json_data["dct_references_s"] = references
 
 
-def doc_ref(row, hosts, id):
+def ref_hosts(row):
+    access = row.get("dct_accessRights_s").strip().lower()
+    if access == "public":
+        return HOSTS
+    elif access == "restricted":
+        return HOSTS_SECURE
+    else:
+        txt = f"geofile: '{row.get('geofile')}':  incorrect value in  'dct_accessRights_s', value = {access}"
+        raise ValueError(txt)
+
+
+def dataset_references(row):
+    arkid = row.get("arkid")
+    id = f"{PREFIX}-{arkid}"
+    hosts = ref_hosts(row)
+    iso139 = f"{hosts['ISO139']}{id}/iso19139.xml"
+    download = f"{hosts['download']}{id}/data.zip"
+    content = f"{hosts['wfs']},{hosts['wms']},{iso139},{download}"
+    doc = ref_doc(row, hosts, id)
+    if doc:
+        content = f"{content},{doc}"
+    ref = "{" + content + "}"
+    return ref.strip()
+
+
+def non_dataset_references(row):
+    arkid = row.get("arkid")
+    id = f"{PREFIX}-{arkid}"
+    hosts = ref_hosts(row)
+    doc = ref_doc(row, hosts, id)
+    if doc:
+        return "{" + doc + "}"
+    return ""
+
+
+# def add_from_arkid(json_data, row):
+#     arkid = row.get("arkid")
+#     id = f"{PREFIX}-{arkid}"
+#     access = row.get("dct_accessRights_s").strip().lower()
+
+#     def hosts():
+#         if access == "public":
+#             return HOSTS
+#         elif access == "restricted":
+#             return HOSTS_SECURE
+#         else:
+#             txt = f"geofile: '{row.get('geofile')}':  incorrect value in  'dct_accessRights_s' column is not a valid file: {access}"
+#             raise ValueError(txt)
+
+#     hosts = hosts()
+
+#     def dc_references():
+#         type = row.get("gbl_resourceClass_sm").lower()
+#         doc = doc_ref(row, hosts, id)
+#         if type == "collections":
+#             return "{" + doc + "}" if doc else ""
+#         else:
+#             iso139 = f"{hosts['ISO139']}{id}/iso19139.xml"
+#             download = f"{hosts['download']}{id}/data.zip"
+#             content = f"{hosts['wfs']},{hosts['wms']},{iso139},{download}"
+#             if doc:
+#                 content = f"{content},{doc}"
+#             ref = "{" + content + "}"
+#         return ref.strip()
+
+#     json_data["id"] = id
+#     json_data["gbl_wxsIdentifier_s"] = arkid
+#     references = dc_references()
+#     if references:
+#         json_data["dct_references_s"] = references
+
+
+def ref_doc(row, hosts, id):
     file_path = row.get("doc_zipfile_path")
     if file_path:
         if os.path.isfile(file_path):
             basename = os.path.basename(file_path)
             f"{hosts['doc']}{id}/{basename}"
         else:
-            txt = f"geofile: '{row.get('geofile')}': file path in 'doc_zipfile_path' column is not a valid file: {file_path}"
+            txt = f"arkid: '{row.get('row_id')}': cannot find the document file {file_path} in 'doc_zipfile_path' column."
             raise ValueError(txt)
     return ""
 
@@ -271,6 +386,7 @@ def add_boundary(json_data, row):
     if geofile.endswith(".tif"):
         json_data["locn_geometry"] = geotiff_boundary()
 
+
 def csv_rows(csv_filepath):
     rows = []
     with open(csv_filepath, "r", encoding="utf-8") as csvfile:
@@ -279,6 +395,8 @@ def csv_rows(csv_filepath):
             rows.append(row)
     return rows
 
+
+# some columns in main csv file are only for ISO19139
 def geoblacklight_field_names(csv_filepath):
     names = []
     with open(csv_filepath, "r", encoding="utf-8") as file:
