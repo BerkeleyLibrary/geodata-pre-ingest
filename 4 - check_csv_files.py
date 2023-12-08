@@ -42,12 +42,7 @@ def func_invalid_cols_from_resp_row(row):
 
 
 def func_invalid_cols_from_main_row(row):
-    fieldnames = MAIN_REQUIRED_FIELDS
-    if row.get("gbl_resourceClass_sm").lower() == "collections":
-        fieldnames = [name for name in fieldnames if name != "geofile"]
-        fieldnames.append("doc_zipfile_path")
-
-    cols = get_empty_cols(row, fieldnames)
+    cols = get_empty_cols(row, MAIN_REQUIRED_FIELDS)
     cols.extend(invalid_main_value_cols(row))
     cols.extend(invalid_main_date_cols(row))
     cols.extend(invalid_main_range_cols(row))

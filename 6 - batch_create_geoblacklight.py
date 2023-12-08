@@ -23,30 +23,43 @@ def create_geoblacklight_files():
             resp_rows = [
                 resp_row for resp_row in all_resp_rows if arkid == resp_row.get("arkid")
             ]
-            create_geoblacklight_file(row, resp_rows, field_names)
+            if has_dataset(row):
+                create_geoblacklight_file_with_dataset(row, resp_rows, field_names)
+            else:
+                create_geoblacklight_file_without_dataset(row, resp_rows, field_names)
 
 
-def create_geoblacklight_file_with_dataset(row, resp_rows, field_names):
+def has_dataset(row):
+    geofile_path = row.get("geofile")
+    return os.path.isfile(geofile_path)
+
+
+def common_geoblacklight_fields(row, resp_rows, field_names):
     json_data = {}
     add_from_main_row(json_data, row, field_names)
     add_from_main_row_rights(json_data, row)
     add_from_resp_rows(json_data, resp_rows)
     add_from_arkid(json_data, row)
     add_default(json_data)
+    return json_data
 
-    file_path = g_filepath_in_projected_direcoty(row)
+
+def create_geoblacklight_file_with_dataset(row, resp_rows, field_names):
+    json_data = common_geoblacklight_fields(row, resp_rows, field_names)
+
+    add_dataset_references(json_data, row)
+    add_boundary(json_data, row)
+
+    file_path = dataset_geoblacklight_file_path(row)
     save_pretty_json_file(file_path, json_data)
 
 
 def create_geoblacklight_file_without_dataset(row, resp_rows, field_names):
-    json_data = {}
-    add_from_main_row(json_data, row, field_names)
-    add_from_main_row_rights(json_data, row)
-    add_from_resp_rows(json_data, resp_rows)
-    add_from_arkid(json_data, row)
-    add_default(json_data)
+    json_data = common_geoblacklight_fields(row, resp_rows, field_names)
 
-    file_path = dataset_geoblacklight_file_path(row)
+    add_non_dataset_references(json_data, row)
+
+    file_path = non_dataset_geoblacklight_file_path(row)
     save_pretty_json_file(file_path, json_data)
 
 
@@ -54,18 +67,14 @@ def proj_geofile_path(row):
     try:
         geofile_path = row.get("geofile")
         rel_geofile_name = os.path.relpath(geofile_path, source_batch_directory_path)
-        proj_geofile_path = os.path.join(
-            projected_batch_directory_path, rel_geofile_name
-        )
+        return os.path.join(projected_batch_directory_path, rel_geofile_name)
     except Exception:
         print(f"Could not find {proj_geofile_path}")
 
 
 def dataset_geoblacklight_file_path(row):
-    geofile_path = row.get("geofile_path")
-    rel_geofile_name = os.path.relpath(geofile_path, source_batch_directory_path)
-    proj_geofile_path = os.path.join(projected_batch_directory_path, rel_geofile_name)
-    base = os.path.splitext(proj_geofile_path)[0]
+    projected_geofile_path = proj_geofile_path(row)
+    base = os.path.splitext(projected_geofile_path)[0]
     return f"{base}_geoblacklight.json"
 
 
@@ -83,30 +92,6 @@ def final_directory_path(prefix):
     return directory_path
 
 
-def common_geoblacklight_fields(row, resp_rows, field_names):
-    json_data = {}
-    add_from_main_row(json_data, row, field_names)
-    add_from_main_row_rights(json_data, row)
-    add_from_resp_rows(json_data, resp_rows)
-    add_default(json_data)
-    return json_data
-
-
-# def correlated_filepath(geofile_path):
-#     if not source_batch_directory_path in geofile_path:
-#         text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{source_batch_directory_path}'"
-#         log_raise_error(text)
-
-#     filepath = geofile_path.replace(
-#         source_batch_directory_path, projected_batch_directory_path
-#     )
-#     if Path(filepath).is_file():
-#         return filepath
-#     else:
-#         text = f"File {filepath} does not exist"
-#         log_raise_error(text)
-
-
 def ensure_empty_directory(pathname):
     def rm_contents():
         for item in os.listdir(pathname):
@@ -120,43 +105,6 @@ def ensure_empty_directory(pathname):
         rm_contents()
     else:
         os.makedirs(pathname)
-
-
-# def collection_geoblacklight_file_path(row):
-#     arkid = row.get("arkid")
-#     collection_dir_path = final_directory_path("ingestion_collection")
-#     arkid_directory_path = os.path.join(collection_dir_path, arkid)
-#     ensure_empty_directory(arkid_directory_path)
-#     return f"{arkid_directory_path}/geoblacklight.json"
-
-
-# def geoblacklight_filepath(row):
-#     geofile_path = row.get("geofile")
-#     projected_geofile_path = correlated_filepath(geofile_path)
-#     base = os.path.splitext(projected_geofile_path)[0]
-#     return f"{base}_geoblacklight.json"
-
-
-# def geoblacklight_filepath(row):
-#     if row.get("gbl_resourceClass_sm").lower() == "collections":
-#         return collection_geoblacklight_file_path(row)
-
-#     geofile_path = row.get("geofile")
-#     projected_geofile_path = correlated_filepath(geofile_path)
-#     base = os.path.splitext(projected_geofile_path)[0]
-#     return f"{base}_geoblacklight.json"
-
-
-# def create_geoblacklight_file(row, resp_rows, field_names):
-#     json_data = {}
-#     add_from_main_row(json_data, row, field_names)
-#     add_from_main_row_rights(json_data, row)
-#     add_from_resp_rows(json_data, resp_rows)
-#     add_from_arkid(json_data, row)
-#     add_default(json_data)
-
-#     file_path = geoblacklight_filepath(row)
-#     save_pretty_json_file(file_path, json_data)
 
 
 def save_pretty_json_file(file_path, json_data):
@@ -278,10 +226,11 @@ def ref_hosts(row):
         return HOSTS_SECURE
     else:
         txt = f"geofile: '{row.get('geofile')}':  incorrect value in  'dct_accessRights_s', value = {access}"
+        print(txt)
         raise ValueError(txt)
 
 
-def dataset_references(row):
+def add_dataset_references(json_data, row):
     arkid = row.get("arkid")
     id = f"{PREFIX}-{arkid}"
     hosts = ref_hosts(row)
@@ -292,54 +241,16 @@ def dataset_references(row):
     if doc:
         content = f"{content},{doc}"
     ref = "{" + content + "}"
-    return ref.strip()
+    json_data["dct_references_s"] = ref.strip()
 
 
-def non_dataset_references(row):
+def add_non_dataset_references(json_data, row):
     arkid = row.get("arkid")
     id = f"{PREFIX}-{arkid}"
     hosts = ref_hosts(row)
     doc = ref_doc(row, hosts, id)
     if doc:
-        return "{" + doc + "}"
-    return ""
-
-
-# def add_from_arkid(json_data, row):
-#     arkid = row.get("arkid")
-#     id = f"{PREFIX}-{arkid}"
-#     access = row.get("dct_accessRights_s").strip().lower()
-
-#     def hosts():
-#         if access == "public":
-#             return HOSTS
-#         elif access == "restricted":
-#             return HOSTS_SECURE
-#         else:
-#             txt = f"geofile: '{row.get('geofile')}':  incorrect value in  'dct_accessRights_s' column is not a valid file: {access}"
-#             raise ValueError(txt)
-
-#     hosts = hosts()
-
-#     def dc_references():
-#         type = row.get("gbl_resourceClass_sm").lower()
-#         doc = doc_ref(row, hosts, id)
-#         if type == "collections":
-#             return "{" + doc + "}" if doc else ""
-#         else:
-#             iso139 = f"{hosts['ISO139']}{id}/iso19139.xml"
-#             download = f"{hosts['download']}{id}/data.zip"
-#             content = f"{hosts['wfs']},{hosts['wms']},{iso139},{download}"
-#             if doc:
-#                 content = f"{content},{doc}"
-#             ref = "{" + content + "}"
-#         return ref.strip()
-
-#     json_data["id"] = id
-#     json_data["gbl_wxsIdentifier_s"] = arkid
-#     references = dc_references()
-#     if references:
-#         json_data["dct_references_s"] = references
+        json_data["dct_references_s"] = "{" + doc + "}"
 
 
 def ref_doc(row, hosts, id):
@@ -355,7 +266,7 @@ def ref_doc(row, hosts, id):
 
 
 def add_boundary(json_data, row):
-    geofile = row.get("geofile").strip()
+    geofile = proj_geofile_path(row)
 
     def geotiff_boundary():
         try:
@@ -383,8 +294,11 @@ def add_boundary(json_data, row):
 
     if geofile.endswith(".shp"):
         json_data["locn_geometry"] = shapefile_boundary()
+        json_data["dcat_bbox"] = shapefile_boundary()
+
     if geofile.endswith(".tif"):
         json_data["locn_geometry"] = geotiff_boundary()
+        json_data["dcat_bbox"] = geotiff_boundary()
 
 
 def csv_rows(csv_filepath):

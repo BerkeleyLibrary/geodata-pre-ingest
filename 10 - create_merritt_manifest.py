@@ -28,10 +28,15 @@ def menifest_content():
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
-            if row.get("gbl_resourceClass_sm").lower() != "collections":
+            if has_dataset(row):
                 item = menifest_item(row, resp_rows)
                 content += item
     return content
+
+
+def has_dataset(row):
+    geofile_path = row.get("geofile")
+    return os.path.isfile(geofile_path)
 
 
 def menifest_item(row, resp_rows):
