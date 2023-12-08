@@ -295,12 +295,14 @@ def add_boundary(json_data, row):
             raise ValueError
 
     if geofile.endswith(".shp"):
-        json_data["locn_geometry"] = shapefile_boundary()
-        json_data["dcat_bbox"] = shapefile_boundary()
+        boundary = shapefile_boundary()
+        json_data["locn_geometry"] = boundary
+        json_data["dcat_bbox"] = boundary
 
     if geofile.endswith(".tif"):
-        json_data["locn_geometry"] = geotiff_boundary()
-        json_data["dcat_bbox"] = geotiff_boundary()
+        boundary = geotiff_boundary()
+        json_data["locn_geometry"] = boundary
+        json_data["dcat_bbox"] = boundary
 
 
 def csv_rows(csv_filepath):
