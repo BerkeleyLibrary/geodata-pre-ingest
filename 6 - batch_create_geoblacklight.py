@@ -260,7 +260,7 @@ def ref_doc(row, hosts, id):
     if file_path:
         if os.path.isfile(file_path):
             basename = os.path.basename(file_path)
-            f"{hosts['doc']}{id}/{basename}"
+            return f"{hosts['doc']}{id}/{basename}"
         else:
             txt = f"arkid: '{row.get('row_id')}': cannot find the document file {file_path} in 'doc_zipfile_path' column."
             raise ValueError(txt)
