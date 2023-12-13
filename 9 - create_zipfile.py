@@ -16,8 +16,7 @@ def zip_directories():
             for root, _, files in os.walk(source_dir):
                 for file in files:
                     file_path = os.path.join(root, file)
-                    destname = os.path.relpath(file_path, result_directory_path)
-                    dest_rel_path = os.path.join(zipfile_name, destname)
+                    dest_rel_path = os.path.relpath(file_path, result_directory_path)
                     zipf.write(file_path, dest_rel_path)
 
 
