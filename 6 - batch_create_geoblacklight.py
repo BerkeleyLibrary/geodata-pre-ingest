@@ -232,12 +232,17 @@ def ref_hosts(row):
         raise ValueError(txt)
 
 
+def filename_with_wq(filename):
+    wq = '"'
+    return f"{filename}{wq}"
+
+
 def add_dataset_references(json_data, row):
     arkid = row.get("arkid")
     id = f"{PREFIX}-{arkid}"
     hosts = ref_hosts(row)
-    iso139 = f"{hosts['ISO139']}{id}/iso19139.xml"
-    download = f"{hosts['download']}{id}/data.zip"
+    iso139 = f"{hosts['ISO139']}{id}/{filename_with_wq('iso19139.xml')}"
+    download = f"{hosts['download']}{id}/{filename_with_wq('data.zip')}"
     content = f"{hosts['wfs']},{hosts['wms']},{iso139},{download}"
     doc = ref_doc(row, hosts, id)
     if doc:
@@ -260,7 +265,8 @@ def ref_doc(row, hosts, id):
     if file_path:
         if os.path.isfile(file_path):
             basename = os.path.basename(file_path)
-            return f"{hosts['doc']}{id}/{basename}"
+            filename_doc = filename_with_wq(basename)
+            return f"{hosts['doc']}{id}/{filename_doc}"
         else:
             txt = f"arkid: '{row.get('row_id')}': cannot find the document file {file_path} in 'doc_zipfile_path' column."
             raise ValueError(txt)
