@@ -136,6 +136,8 @@ def add_from_main_row(json_data, row, field_names):
 
     def multiple_values(name, val):
         values = val.split("$")
+        if name in RELATION_FIELDS:
+            return [f"{PREFIX}-{val.strip()}" for val in values]
         if name == "dcat_theme_sm":
             return [ISOTOPIC[value.strip().zfill(3)] for value in values]
         if name in CAPITALIZED_FIELDS:
@@ -412,6 +414,16 @@ EXCLUDING_FIELDS = [
     "rights_security",
     "doc_zipfile_path",
     "summary",
+]
+
+RELATION_FIELDS = [
+    "dct_isReplacedBy_sm",
+    "dct_replaces_sm",
+    "dct_isVersionOf_sm",
+    "dct_source_sm",
+    "dct_isPartOf_sm",
+    "pcdm_memberOf_sm",
+    "dct_relation_sm",
 ]
 
 
