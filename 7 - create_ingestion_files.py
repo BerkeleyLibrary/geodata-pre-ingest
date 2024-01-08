@@ -53,7 +53,7 @@ def update_json_file(json_file_path, data_file_path):
         with open(json_file_path, "r", encoding="utf-8") as file:
             data = json.load(file)
             file_size = get_file_size(data_file_path)
-            data["gbl_fileSize_s"] = file_size
+            data["gbl_fileSize_s"] = f"{file_size} MB"
 
         save_pretty_json_file(json_file_path, data)
     except Exception as ex:
