@@ -1,8 +1,10 @@
 import os
 import logging
-from pathlib import Path
 import csv
 import hashlib
+from pathlib import Path
+from datetime import datetime
+
 
 
 ################################################################################################
@@ -11,15 +13,19 @@ import hashlib
 
 
 def create_merritt_menifest_file():
-    menifest_filename = os.path.join(result_directory_path, f"merritt.txt")
+    filename = menifest_filename()
     content = menifest_content()
     header = (
-        "fileUrl | hashAlgorithm | hashValue | fileSize | fileName | primaryIdentifier | creator | title | date"
+        "fileUrl | hashAlgorithm | hashValue | fileSize | fileName | localIdentifier | creator | title | date"
         + os.linesep
     )
-    with open(menifest_filename, "w", encoding="utf-8") as f:
+    with open(filename, "w", encoding="utf-8") as f:
         f.write(header)
         f.write(content)
+
+def menifest_filename():
+    nanme = f"merritt_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.txt"
+    return os.path.join(result_directory_path, nanme)
 
 
 def menifest_content():
@@ -52,7 +58,7 @@ def menifest_item(row, resp_rows):
     size = file_size(data_zip_filename)
 
     return (
-        f"{url(arkid, access_right)}|MD5|{value}|{size}|Data.zip|{primary_identifer(arkid)}|{creater}|{title(arkid, dct_title_s)}|{md_date}"
+        f"{url(arkid, access_right)}|MD5|{value}|{size}|Data.zip|{local_identifer(arkid)}|{creater}|{title(arkid, dct_title_s)}|{md_date}"
         + os.linesep
     )
 
@@ -91,7 +97,7 @@ def file_size(data_zip_filename):
         log_raise_error(txt)
 
 
-def primary_identifer(arkid):
+def local_identifer(arkid):
     return f"ark:/28722/{arkid}"
 
 
@@ -118,7 +124,7 @@ def col_value(row, name):
 
 
 def title(arkid, dct_title_s):
-    return f"{dct_title_s} {primary_identifer(arkid)}"
+    return f"{dct_title_s} {local_identifer(arkid)}"
 
 
 def date(row):
