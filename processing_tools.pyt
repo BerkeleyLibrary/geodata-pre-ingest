@@ -52,17 +52,21 @@ class PrepareBatchTool:
 
     def getParameterInfo(self):
         """Define the tool parameters."""
-        # input_param = common_helper.processing_directory()
-        # input_param.defaultValue = "C:\process_data\source_batch"
+        output_param = arcpy.Parameter(
+            displayName="Projected to Directory",
+            name="Projected to Directory",
+            datatype="GPString",
+            direction="Output"
 
-        # output_param = arcpy.Parameter(
-        #     displayName="Output Directory",
-        #     name="output_directory",
-        #     datatype="DEFolder",
-        #     parameterType="Required",
-        #     direction="Output"
-        # )
-        return []
+        )
+        
+        # arcpy.SetParameterAsText(output_param, 'result')
+        return [output_param]
+
+    def updateParameters(self, parameters):
+        val = "Please select a geodata batch in tool 0. 0 - Select a processing batch" if (workspace_directory.projected_batch_directory_path is None) else  workspace_directory.projected_batch_directory_path
+        parameters[0].value = val
+        return
      
 
     def execute(self, parameters, messages):
