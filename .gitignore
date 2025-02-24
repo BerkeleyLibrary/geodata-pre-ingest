@@ -1,1 +1,4 @@
 GpMessages
+*.pyc
+__pycache__/*
+.backups
