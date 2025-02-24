@@ -75,14 +75,13 @@ class SelectWorkspaceTool:
    
     def execute(self, parameters, messages):
         parent_path= parameters[0].valueAsText
-        util.setup_workspace(parent_path)
-        # workspace_directory.source_batch_directory_path = fr"{parent_path}\source_batch_directory_path"
-        # workspace_directory.projected_batch_directory_path = fr"{parent_path}\source_batch_projected"     
-        # workspace_directory.csv_files_directory_path = fr"{parent_path}\csv_files_directory_path"
-        # workspace_directory.csv_files_arkid_directory_path = fr"{parent_path}\csv_files_arkid_directory_path"
-        # workspace_directory.results_directory_path = fr"{parent_path}\results_directory_path"
-        # workspace_directory.log_directory_path = fr"{parent_path}\log_directory_path"
-
+        # util.setup_workspace(parent_path)
+        workspace_directory.source_batch_directory_path = fr"{parent_path}\source_batch"
+        workspace_directory.projected_batch_directory_path = fr"{parent_path}\source_batch_projected"     
+        workspace_directory.csv_files_directory_path = fr"{parent_path}\csv_files"
+        workspace_directory.csv_files_arkid_directory_path = fr"{parent_path}\csv_files_arkid"
+        workspace_directory.results_directory_path = fr"{parent_path}\results"
+        workspace_directory.log_directory_path = fr"{parent_path}\log"
         return
 
    
@@ -93,23 +92,32 @@ class PrepareBatchTool:
         self.description = "1 .1 - prepare_batch - desc"
 
     def getParameterInfo(self):
-        """Define the tool parameters."""
-        output_param = arcpy.Parameter(
-            displayName="Projected to Directory",
-            name="Projected to Directory",
+        from_source_path_param = arcpy.Parameter(
+            displayName="Projected from below source batch directory",
+            name="From Directory",
+            datatype="GPString",
+            direction="Output"
+        )    
+        to_projected_path_param = arcpy.Parameter(
+            displayName="To this directory",
+            name="To Directory",
             datatype="GPString",
             direction="Output"
 
         )
         
-        # arcpy.SetParameterAsText(output_param, 'result')
-        return [output_param]
+        return [ from_source_path_param, to_projected_path_param]
 
     def updateParameters(self, parameters):
-        val = "Please select a geodata batch in tool 0. 0 - Select a processing batch" if (workspace_directory.projected_batch_directory_path is None) else  workspace_directory.projected_batch_directory_path
-        parameters[0].value = val
+        val = "Please select a geodata batch in tool 0. 0 - Select a processing batch"
+        val1 = val
+        val2 = val
+        if (workspace_directory.projected_batch_directory_path is not None):
+            val1 = workspace_directory.source_batch_directory_path
+            val2 = workspace_directory.projected_batch_directory_path            
+        parameters[0].value = val1
+        parameters[1].value = val2
         return
-     
 
     def execute(self, parameters, messages):
         arcpy.AddMessage("!!- starting preparing data!!!.")
@@ -131,6 +139,7 @@ class PrepareBatchTool:
         projected_batch_directory_path = workspace_directory.projected_batch_directory_path
 
        
+        arcpy.AddMessage(source_batch_directory_path)
 
         arcpy.AddMessage(projected_batch_directory_path)
 
@@ -148,7 +157,7 @@ class PrepareBatchTool:
             source_batch.check_files()
             source_batch.prepare(projected_batch_directory_path, geotif_referenced_filepath)
         script_name = "1 .1 - prepare_batch.py"
-        arcpy.AddMessage(f"***completed {script_name}")
+        arcpy.AddMessage(f"***completed1 {script_name}")
         return
 
     
