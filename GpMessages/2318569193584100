@@ -1,6 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?><messages><msg code="0" type="2">Start Time: Thursday, February 13, 2025 3:07:27 PM</msg><msg code="0" type="0">!!- starting preparing data!!!.</msg><msg code="1" type="100">﻿Traceback (most recent call last):
-﻿  File "D:\github_projects\geodata-pre-ingest\processing_tools.pyt", line 78, in execute
-﻿    projected_batch_directory_path =  common_helper.the_path(source_batch_directory_path)
-﻿                                      ^^^^^^^^^^^^^^^^^^^^^^
-﻿AttributeError: module 'common_helper' has no attribute 'the_path'
-</msg><msg code="-2147467259" type="100">Failed to execute (PrepareBatchTool).</msg><msg code="0" type="3">Failed at Thursday, February 13, 2025 3:07:27 PM (Elapsed Time: 0.01 seconds)</msg></messages>
