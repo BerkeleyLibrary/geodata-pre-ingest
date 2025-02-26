@@ -2,12 +2,11 @@
 
 import arcpy
 import os
+import logger
 
 class CreateWorkspaceTool(object):
     def __init__(self):
-        self.label = "0 - Create workspace template directory"
-        self.title = "This is a title"
-        self.description = "0 - Create a template processing workspace "
+        self.label = "0 .0 - Create workspace template directory"
 
     def getParameterInfo(self):
         dir_path_param = arcpy.Parameter(
@@ -37,5 +36,5 @@ class CreateWorkspaceTool(object):
         for name in sub_dir_names:
             path = os.path.join(process_worksapce, name)
             os.makedirs(path, exist_ok=True)
-
+        logger.output("workspace created!!")
         return

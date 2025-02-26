@@ -3,9 +3,10 @@
 from pathlib import Path
 from datetime import datetime
 from shutil import copyfile, rmtree
-from create_workspace_tool import CreateWorkspaceTool
-from select_workspace_tool import SelectWorkspaceTool
-from prepare_batch_tool import PrepareBatchTool
+from tool_create_workspace import CreateWorkspaceTool
+from tool_select_workspace import SelectWorkspaceTool
+from tool_prepare_batch import PrepareBatchTool
+from tool_raster_pyramid_batch import CreateRasterPyramidTool
 
 
 class Toolbox:
@@ -14,4 +15,4 @@ class Toolbox:
         .pyt file)."""
         self.label = "GeoblacklightToolbox"
         self.alias = "geoblacklight_toolbox"    
-        self.tools = [CreateWorkspaceTool,SelectWorkspaceTool, PrepareBatchTool]
+        self.tools = [CreateWorkspaceTool,SelectWorkspaceTool, PrepareBatchTool, CreateRasterPyramidTool]

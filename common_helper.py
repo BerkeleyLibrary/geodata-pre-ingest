@@ -23,3 +23,11 @@ def the_path(batch_path):
     parent_path = os.path.dirname(batch_path)
     path1 = fr"{parent_path}\source_batch_projected"
     return path1
+
+
+
+
+# import os
+# os.environ["p_path"] = r"\\napa\mapsshare\yzhou\process_data"
+# m = os.getenv("p_path")
+# print(m)
