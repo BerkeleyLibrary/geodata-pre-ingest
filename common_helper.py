@@ -1,6 +1,7 @@
 import arcpy
 import os
 from pathlib import Path
+import instances
 
 #1. mapsshare:  \\napa\mapsshare\yzhou\process_data\source_batch
 
@@ -19,10 +20,13 @@ def verify_setup(file_paths, directory_paths):
             verified = False
     return verified
 
-def the_path(batch_path):
-    parent_path = os.path.dirname(batch_path)
-    path1 = fr"{parent_path}\source_batch_projected"
-    return path1
+def stop_execute(parameters, n):
+    return any(param.value == instances.no_prcess_path_selected for param in parameters[:n])
+
+# def the_path(batch_path):
+#     parent_path = os.path.dirname(batch_path)
+#     path1 = fr"{parent_path}\source_batch_projected"
+#     return path1
 
 
 

@@ -7,6 +7,7 @@ from tool_create_workspace import CreateWorkspaceTool
 from tool_select_workspace import SelectWorkspaceTool
 from tool_prepare_batch import PrepareBatchTool
 from tool_raster_pyramid_batch import CreateRasterPyramidTool
+from tool_batch_export_csv import BatchExportCsvTool
 
 
 class Toolbox:
@@ -15,4 +16,8 @@ class Toolbox:
         .pyt file)."""
         self.label = "GeoblacklightToolbox"
         self.alias = "geoblacklight_toolbox"    
-        self.tools = [CreateWorkspaceTool,SelectWorkspaceTool, PrepareBatchTool, CreateRasterPyramidTool]
+        self.tools = [CreateWorkspaceTool,
+                      SelectWorkspaceTool, 
+                      PrepareBatchTool, 
+                      CreateRasterPyramidTool, 
+                      BatchExportCsvTool]

@@ -1,6 +1,5 @@
 
 import arcpy
-import os
 import logging
 from pathlib import Path
 from datetime import datetime
@@ -9,6 +8,7 @@ import common_helper
 import workspace_directory
 import prepare_batch
 import logger
+import instances
 
 class PrepareBatchTool(object):
     def __init__(self):
@@ -33,14 +33,13 @@ class PrepareBatchTool(object):
         return [ from_source_path_param, to_projected_path_param]
 
     def updateParameters(self, parameters):
-        val = "Please select a geodata batch in tool 0. 0 - Select a processing batch"
-        val1 = val
-        val2 = val
+        val0= instances.no_prcess_path_selected
+        val1= val0
         if (workspace_directory.projected_batch_directory_path is not None):
-            val1 = workspace_directory.source_batch_directory_path
-            val2 = workspace_directory.projected_batch_directory_path            
-        parameters[0].value = val1
-        parameters[1].value = val2
+            val0= workspace_directory.source_batch_directory_path
+            val1= workspace_directory.projected_batch_directory_path            
+        parameters[0].value = val0
+        parameters[1].value = val1
         return
 
     def execute(self, parameters, messages):
@@ -61,7 +60,7 @@ class PrepareBatchTool(object):
             source_batch.prepare(projected_batch_directory_path, geotif_referenced_filepath)
         script_name = "1 .1 - prepare_batch.py"
         # arcpy.AddMessage(f"***completed1 {script_name}")
-        a = f"***completed11111 {script_name}"
+        a = f"***completed2222 {script_name}"
         logger.output(a)
         return
 
