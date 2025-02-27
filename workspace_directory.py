@@ -1,6 +1,6 @@
 import os
 
-
+process_directory_path = None
 source_batch_directory_path = None
 projected_batch_directory_path = None
 csv_files_directory_path = None

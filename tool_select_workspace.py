@@ -22,6 +22,7 @@ class SelectWorkspaceTool(object):
     def execute(self, parameters, messages):
         parent_path= parameters[0].valueAsText
         # util.setup_workspace(parent_path)
+        workspace_directory.process_directory_path = parent_path
         workspace_directory.source_batch_directory_path = fr"{parent_path}\source_batch"
         workspace_directory.projected_batch_directory_path = fr"{parent_path}\source_batch_projected"     
         workspace_directory.csv_files_directory_path = fr"{parent_path}\csv_files"

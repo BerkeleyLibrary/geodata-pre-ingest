@@ -2,7 +2,7 @@
 
 import arcpy
 import os
-import logger
+import the_logger
 
 class CreateWorkspaceTool(object):
     def __init__(self):
@@ -36,5 +36,5 @@ class CreateWorkspaceTool(object):
         for name in sub_dir_names:
             path = os.path.join(process_worksapce, name)
             os.makedirs(path, exist_ok=True)
-        logger.output("workspace created!!")
+        the_logger.output("workspace created!!")
         return

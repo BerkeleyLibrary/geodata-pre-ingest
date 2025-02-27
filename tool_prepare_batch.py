@@ -7,7 +7,7 @@ from shutil import copyfile, rmtree
 import common_helper
 import workspace_directory
 import prepare_batch
-import logger
+import the_logger
 import instances
 
 class PrepareBatchTool(object):
@@ -61,7 +61,7 @@ class PrepareBatchTool(object):
         script_name = "1 .1 - prepare_batch.py"
         # arcpy.AddMessage(f"***completed1 {script_name}")
         a = f"***completed2222 {script_name}"
-        logger.output(a)
+        the_logger.output(a)
         return
 
     

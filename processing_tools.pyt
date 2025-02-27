@@ -9,7 +9,6 @@ from tool_prepare_batch import PrepareBatchTool
 from tool_raster_pyramid_batch import CreateRasterPyramidTool
 from tool_batch_export_csv import BatchExportCsvTool
 
-
 class Toolbox:
     def __init__(self):
         """Define the toolbox (the name of the toolbox is the name of the
