@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import arcpy
-# import util
+import the_logger
 import workspace_directory
 
 class SelectWorkspaceTool(object):
@@ -29,6 +29,7 @@ class SelectWorkspaceTool(object):
         workspace_directory.csv_files_arkid_directory_path = fr"{parent_path}\csv_files_arkid"
         workspace_directory.results_directory_path = fr"{parent_path}\results"
         workspace_directory.log_directory_path = fr"{parent_path}\log"
+        workspace_directory.logger = the_logger.setup_logger(workspace_directory.log_directory_path)
         return
 
    

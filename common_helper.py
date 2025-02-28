@@ -2,6 +2,7 @@ import arcpy
 import os
 from pathlib import Path
 import instances
+import workspace_directory
 
 #1. mapsshare:  \\napa\mapsshare\yzhou\process_data\source_batch
 
@@ -22,6 +23,17 @@ def verify_setup(file_paths, directory_paths):
 
 def stop_execute(parameters, n):
     return any(param.value == instances.no_prcess_path_selected for param in parameters[:n])
+
+def output(msg, is_error=False):
+    logger = workspace_directory.logger
+    if is_error:
+        val = "❌ " + msg
+        logger.error(val)
+        arcpy.AddError(val)
+    else:
+        val = "✅ " + msg
+        logger.info(val)
+        arcpy.AddMessage(val)
 
 # def the_path(batch_path):
 #     parent_path = os.path.dirname(batch_path)
