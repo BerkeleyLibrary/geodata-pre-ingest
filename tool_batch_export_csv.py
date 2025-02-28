@@ -4,8 +4,6 @@ import common_helper
 import workspace_directory
 import batch_export_csv
 import instances
-import the_logger
-
 
 class BatchExportCsvTool(object):
     def __init__(self):
@@ -43,15 +41,11 @@ class BatchExportCsvTool(object):
         source_batch_directory_path = workspace_directory.source_batch_directory_path
         csv_files_directory_path = workspace_directory.csv_files_directory_path 
 
-        if common_helper.stop_execute(parameters, 2):
-             # no workspace_directory.logger because of no process directory selected yet
+        if common_helper.failed_to_execute(parameters, 2):
+             # workspace_directory.logger = none when failed to excuete
              arcpy.AddError("Error: ❌ no data process path was selected yet, cannot export a CSV file")
              return
-            #  raise arcpy.ExecuteError
-        
-        # path = workspace_directory.log_directory_path
-        # logger = workspace_directory.logger
-        # common_helper.output(logger,path)
+    
         common_helper.output(fr"Starting to export csv file from - {source_batch_directory_path}")
         if common_helper.verify_setup([], [source_batch_directory_path, csv_files_directory_path]):
             batch_export_csv.run_tool(source_batch_directory_path, csv_files_directory_path)

@@ -1,13 +1,12 @@
 
 import arcpy
 import logging
-from pathlib import Path
-from datetime import datetime
-from shutil import copyfile, rmtree
+# from pathlib import Path
+# from datetime import datetime
+# from shutil import copyfile, rmtree
 import common_helper
 import workspace_directory
 import prepare_batch
-import the_logger
 import instances
 
 class PrepareBatchTool(object):
@@ -55,15 +54,11 @@ class PrepareBatchTool(object):
             [geotif_referenced_filepath],
             [source_batch_directory_path, projected_batch_directory_path],
         ):
-            common_helper.output("Starting preparing  batch")
+            common_helper.output("Starting preparing batch")
             source_batch = prepare_batch.SourceBatch(source_batch_directory_path, logging)
             source_batch.check_files()
             source_batch.prepare(projected_batch_directory_path, geotif_referenced_filepath)
-            common_helper.output("Completed preparing  batch")
-        # script_name = "1 .1 - prepare_batch.py"
-        # # arcpy.AddMessage(f"***completed1 {script_name}")
-        # a = f"***completed2222 {script_name}"
-        # the_logger.output(a)
+            common_helper.output("Completed preparing batch")
         return
 
     

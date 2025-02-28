@@ -21,24 +21,28 @@ def verify_setup(file_paths, directory_paths):
             verified = False
     return verified
 
-def stop_execute(parameters, n):
+def failed_to_execute(parameters, n):
     return any(param.value == instances.no_prcess_path_selected for param in parameters[:n])
 
-def output(msg, is_error=False):
+def output(msg, level='info'):
     logger = workspace_directory.logger
-    if is_error:
-        val = "❌ " + msg
-        logger.error(val)
-        arcpy.AddError(val)
-    else:
+    type = level.lower(level)   
+    if type == 'info':
         val = "✅ " + msg
         logger.info(val)
         arcpy.AddMessage(val)
-
-# def the_path(batch_path):
-#     parent_path = os.path.dirname(batch_path)
-#     path1 = fr"{parent_path}\source_batch_projected"
-#     return path1
+    elif type == 'error':
+        val = "❌ " + msg
+        logger.error(val)
+        arcpy.AddError(val)
+    elif type == 'warning':
+        val = "⚠️ " + msg
+        logger.warning(val)
+        arcpy.AddMessage(val)
+    else:
+        val = "❌ " + type + msg
+        logger.error(val)
+        arcpy.AddError(val)
 
 
 

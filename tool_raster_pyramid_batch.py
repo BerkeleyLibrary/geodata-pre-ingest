@@ -1,11 +1,12 @@
 import arcpy
-import os
-import logging
-from typing import List
-from pathlib import Path
-from datetime import datetime
+# import os
+# import logging
+# from typing import List
+# from pathlib import Path
+# from datetime import datetime
 import workspace_directory
 import raster_pyramid_batch
+import common_helper
 
 
 class CreateRasterPyramidTool(object):
@@ -38,5 +39,7 @@ class CreateRasterPyramidTool(object):
             [],
             [projected_batch_directory_path],
         ):
+            
             raster_pyramid_batch.add_pyramid_to_geotif_files()
-            # output(f"***completed {script_name}")
+            common_helper.output("GeoTIFF files pyramids created!!")
+        return
