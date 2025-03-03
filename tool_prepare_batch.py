@@ -1,9 +1,6 @@
 
 import arcpy
 import logging
-# from pathlib import Path
-# from datetime import datetime
-# from shutil import copyfile, rmtree
 import common_helper
 import workspace_directory
 import prepare_batch
@@ -11,7 +8,7 @@ import instances
 
 class PrepareBatchTool(object):
     def __init__(self):
-        self.label = "1 .1 - prepare_batch"
+        self.label = "1 .1 - Run to prepare_batch"
         self.description = "1 .1 - prepare_batch - desc"
 
     def getParameterInfo(self):

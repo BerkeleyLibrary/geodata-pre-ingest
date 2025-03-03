@@ -7,8 +7,7 @@ import instances
 
 class BatchExportCsvTool(object):
     def __init__(self):
-        self.label = "2 - Export metadata to a CSV file"
-        
+        self.label = "2 - Run to export metadata to a CSV file"
 
     def getParameterInfo(self):
         from_source_path_param = arcpy.Parameter(

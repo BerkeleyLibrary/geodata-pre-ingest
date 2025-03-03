@@ -6,7 +6,7 @@ import common_helper
 
 class CreateWorkspaceTool(object):
     def __init__(self):
-        self.label = "0 .0 - Create workspace template directory"
+        self.label = "0 .0 - Create a new data processing directory with workspace template"
 
     def getParameterInfo(self):
         dir_path_param = arcpy.Parameter(
@@ -18,7 +18,7 @@ class CreateWorkspaceTool(object):
         )
 
         workspace_name_param = arcpy.Parameter(
-            displayName="Input a workspace name",
+            displayName="Input a data processing directory name",
             name="Input Processing directory name",
             datatype="GPString",
             parameterType="Required",

@@ -11,7 +11,7 @@ import common_helper
 
 class CreateRasterPyramidTool(object):
     def __init__(self):
-        self.label = "1 .2 - Create raster pyramid for projected raster GeoTIFF files"
+        self.label = "1 .2 - Run to create raster pyramid for projected raster GeoTIFF files"
         self.title = "This is a title"
         
     def getParameterInfo(self):

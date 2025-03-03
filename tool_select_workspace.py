@@ -5,7 +5,7 @@ import workspace_directory
 
 class SelectWorkspaceTool(object):
     def __init__(self):
-        self.label = "0 .1 - Select a processing batch"
+        self.label = "0 .1 - Select a data processing directory"
         self.description = "0.0 - "
 
     def getParameterInfo(self):
@@ -21,7 +21,6 @@ class SelectWorkspaceTool(object):
    
     def execute(self, parameters, messages):
         parent_path= parameters[0].valueAsText
-        # util.setup_workspace(parent_path)
         workspace_directory.process_directory_path = parent_path
         workspace_directory.source_batch_directory_path = fr"{parent_path}\source_batch"
         workspace_directory.projected_batch_directory_path = fr"{parent_path}\source_batch_projected"     
