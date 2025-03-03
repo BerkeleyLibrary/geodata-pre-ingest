@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 import csv
 import re
 from datetime import date, datetime
+import common_helper
 
 
 ################################################################################################
@@ -510,10 +511,24 @@ GeoFile.main_elements = main_elements
 #     C:\process_data\csv_files\main.csv
 #     C:\process_data\csv_files\resp.csv
 ################################################################################################
+# def run_tool(source_batch_directory_path, csv_files_directory_path):
+#     all_geofile_paths = geofile_paths(source_batch_directory_path)
+#     export_main_csv(csv_files_directory_path, all_geofile_paths)
+#     export_resp_csv(csv_files_directory_path, all_geofile_paths)
+
 def run_tool(source_batch_directory_path, csv_files_directory_path):
-    all_geofile_paths = geofile_paths(source_batch_directory_path)
-    export_main_csv(csv_files_directory_path, all_geofile_paths)
-    export_resp_csv(csv_files_directory_path, all_geofile_paths)
+    common_helper.output(fr"Starting to export csv file from - {source_batch_directory_path}")
+    if common_helper.verify_setup([], [source_batch_directory_path, csv_files_directory_path]):
+        all_geofile_paths = geofile_paths(source_batch_directory_path)
+        export_main_csv(csv_files_directory_path, all_geofile_paths)
+        export_resp_csv(csv_files_directory_path, all_geofile_paths)
+        common_helper.output(fr"Completed to export csv file from - {source_batch_directory_path}")
+
+    
+        # common_helper.output(fr"Starting to export csv file from - {source_batch_directory_path}")
+        # if common_helper.verify_setup([], [source_batch_directory_path, csv_files_directory_path]):
+        #     batch_export_csv.run_tool(source_batch_directory_path, csv_files_directory_path)
+        #     common_helper.output(fr"Completed to export csv file from - {source_batch_directory_path}")
 
 # def output(msg):
 #     logging.info(msg)

@@ -47,20 +47,4 @@ class PrepareBatchTool(object):
         prepare_batch.run_tool(source_batch_directory_path, projected_batch_directory_path)
         return
 
-        # # A GeoTIFF projected file
-        # geotif_referenced_filepath = (
-        #     r"C:\pre-ingestion-config\projected_raster\5048_1_reproject4326.tif"
-        # )
-
-        # if common_helper.verify_setup(
-        #     [geotif_referenced_filepath],
-        #     [source_batch_directory_path, projected_batch_directory_path],
-        # ):
-        #     common_helper.output("Starting preparing batch")
-        #     source_batch = prepare_batch.SourceBatch(source_batch_directory_path, logging)
-        #     source_batch.check_files() # todo: move this to other tool
-        #     source_batch.prepare(projected_batch_directory_path, geotif_referenced_filepath)
-        #     common_helper.output("Completed preparing batch")
-       
-
     
