@@ -36,5 +36,5 @@ class CreateWorkspaceTool(object):
         for name in sub_dir_names:
             path = os.path.join(process_worksapce, name)
             os.makedirs(path, exist_ok=True)
-        arcpy.AddMessage(f"✅ Data process path and workspaces created at {process_dir}")
+        arcpy.AddMessage(f"✅ Data processing directory and workspace is created at {process_dir}")
         return

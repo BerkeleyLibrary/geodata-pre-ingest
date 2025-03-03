@@ -29,6 +29,7 @@ class SelectWorkspaceTool(object):
         workspace_directory.results_directory_path = fr"{parent_path}\results"
         workspace_directory.log_directory_path = fr"{parent_path}\log"
         workspace_directory.logger = the_logger.setup_logger(workspace_directory.log_directory_path)
+        arcpy.AddMessage(f"✅ Data processing directory is selected: {parent_path}")
         return
 
    

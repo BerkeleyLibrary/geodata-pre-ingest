@@ -1,5 +1,4 @@
 import arcpy
-import os
 from pathlib import Path
 import instances
 import workspace_directory
