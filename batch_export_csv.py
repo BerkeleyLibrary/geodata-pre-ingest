@@ -1,7 +1,7 @@
 import arcpy
 from arcpy import metadata as md
 import os
-import logging
+# import logging
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import csv
@@ -16,7 +16,7 @@ import common_helper
 
 
 def export_main_csv(csv_files_directory_path, geofile_paths):
-    rows = [GeoFile(geofile_path, logging).main_row() for geofile_path in geofile_paths]
+    rows = [GeoFile(geofile_path).main_row() for geofile_path in geofile_paths]
     file = os.path.join(csv_files_directory_path, "main.csv")
     write_csv(file, GeoFile.main_headers, rows)
 
@@ -24,7 +24,7 @@ def export_main_csv(csv_files_directory_path, geofile_paths):
 def export_resp_csv(csv_files_directory_path, geofile_paths):
     rows = []
     for geofile_path in geofile_paths:
-        resp_rows = GeoFile(geofile_path, logging).resp_rows()
+        resp_rows = GeoFile(geofile_path).resp_rows()
         rows.extend(resp_rows)
 
     file = os.path.join(csv_files_directory_path, "resp.csv")
@@ -69,10 +69,10 @@ class GeoFile(object):
     resp_headers = []
     resp_elements = {}
 
-    def __init__(self, geofile, logging):
+    def __init__(self, geofile):
         self.geofile = geofile
         self.root = self._root()
-        self.logging = logging
+        # self.logging = logging
 
     def main_row(self):
         row = [
@@ -112,7 +112,8 @@ class GeoFile(object):
             item_md.saveAsXML(xml_filepath, "EXACT_COPY")
         except Exception as ex:
             msg = f"Could not export to xml file from {self.geofile}"
-            self.logging.info(f"{msg} - {ex}")
+            # self.logging.info(f"{msg} - {ex}")
+            common_helper.output(msg, 1)
             raise ValueError(msg)
 
     def column_from_main_elements(self, header):

@@ -27,23 +27,23 @@ def no_processing_directory_selected(parameters, n):
         return True
     return False
 
-def output(msg, level='info'):
+def output(msg, level=0):
     logger = workspace_directory.logger
-    type = level.lower()   
-    if type == 'info':
+     
+    if level == 0: #'info'
         val = "✅ " + msg
         logger.info(val)
         arcpy.AddMessage(val)
-    elif type == 'error':
-        val = "❌ " + msg
-        logger.error(val)
-        arcpy.AddError(val)
-    elif type == 'warning':
+    elif level == 1: #'warning'
         val = "⚠️ " + msg
         logger.warning(val)
         arcpy.AddMessage(val)
+    elif level == 2: #'error'
+        val = "❌ " + msg
+        logger.error(val)
+        arcpy.AddError(val)
     else:
-        val = "❌ " + type + msg
+        val = "❌ " + "incorrect log level - " + msg
         logger.error(val)
         arcpy.AddError(val)
 
