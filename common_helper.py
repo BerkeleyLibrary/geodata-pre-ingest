@@ -21,12 +21,15 @@ def verify_setup(file_paths, directory_paths):
             verified = False
     return verified
 
-def failed_to_execute(parameters, n):
-    return any(param.value == instances.no_prcess_path_selected for param in parameters[:n])
+def no_processing_directory_selected(parameters, n):
+    if  any(param.value == instances.no_prcess_path_selected for param in parameters[:n]):
+        arcpy.AddError("Error: ❌ no data processing directory was selected from tool 0.1")
+        return True
+    return False
 
 def output(msg, level='info'):
     logger = workspace_directory.logger
-    type = level.lower(level)   
+    type = level.lower()   
     if type == 'info':
         val = "✅ " + msg
         logger.info(val)
