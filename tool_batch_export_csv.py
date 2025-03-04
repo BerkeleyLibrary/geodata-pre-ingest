@@ -3,7 +3,7 @@ import arcpy
 import common_helper
 import workspace_directory
 import batch_export_csv
-import instances
+import constants
 
 class BatchExportCsvTool(object):
     def __init__(self):
@@ -27,7 +27,7 @@ class BatchExportCsvTool(object):
         return [ from_source_path_param, to_csv_path_param]
 
     def updateParameters(self, parameters):
-        val0 = instances.no_prcess_path_selected
+        val0 = constants.no_prcess_path_selected
         val1 = val0
         if (workspace_directory.source_batch_directory_path is not None):
             val0 = workspace_directory.source_batch_directory_path

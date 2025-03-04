@@ -1,6 +1,6 @@
 import arcpy
 from pathlib import Path
-import instances
+import constants
 import workspace_directory
 
 #1. mapsshare:  \\napa\mapsshare\yzhou\process_data\source_batch
@@ -21,7 +21,7 @@ def verify_setup(file_paths, directory_paths):
     return verified
 
 def no_processing_directory_selected(parameters, n):
-    if  any(param.value == instances.no_prcess_path_selected for param in parameters[:n]):
+    if  any(param.value == constants.no_prcess_path_selected for param in parameters[:n]):
         arcpy.AddError("Error: ❌ no data processing directory was selected from tool 0.1")
         return True
     return False

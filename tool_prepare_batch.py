@@ -4,7 +4,7 @@ import logging
 import common_helper
 import workspace_directory
 import prepare_batch
-import instances
+import constants
 
 class PrepareBatchTool(object):
     def __init__(self):
@@ -29,7 +29,7 @@ class PrepareBatchTool(object):
         return [ from_source_path_param, to_projected_path_param]
 
     def updateParameters(self, parameters):
-        val0= instances.no_prcess_path_selected
+        val0= constants.no_prcess_path_selected
         val1= val0
         if (workspace_directory.projected_batch_directory_path is not None):
             val0= workspace_directory.source_batch_directory_path
