@@ -68,7 +68,6 @@ def add_hash_arkid(row, hash):
 
 def log_raise_error(msg):
     common_helper.output(msg, 1)
-    # logging.exception(msg)
     raise ValueError(msg)
 
 
@@ -127,33 +126,12 @@ def new_filepath(csv_files_arkid_directory_path, filepath):
     return os.path.join(csv_files_arkid_directory_path, f"{filename}_arkid.csv")
 
 
-################################################################################################
-#                                 2. set up                                                    #
-################################################################################################
-
-# # 1. Please provide your local log file path
-# logfile = r"C:\process_data\log\process.log"
-# logging.basicConfig(
-#     filename=logfile,
-#     level=logging.INFO,
-#     format="%(message)s - %(asctime)s - %(funcName)s - %(levelname)s",
-# )
-
-# 2. please provide EZID config file path
+# EZID config file path
 config_file = r"C:\pre-ingestion-config/config.json"
 
-# # 3. please provide main_csv file path:
-# main_csv_filepath = r"C:\process_data\csv_files\main.csv"
-
-# # 4. please provide resp_csv file path:
-# resp_csv_filepath = r"C:\process_data\csv_files\resp.csv"
-
-# # 5. Place to save the new main csv file and resp csv file with arkid assigned
-# csv_files_arkid_directory_path = r"C:\process_data\csv_files_arkid"
-
 
 ################################################################################################
-#                                3. instructions
+#                                2. instructions
 #  a. mian_csv file:
 #                a new arkid will be minted and added to the 'arkid' column for each row,
 #                unless a row has an existing arkid.
