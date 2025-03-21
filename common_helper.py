@@ -47,6 +47,14 @@ def output(msg, level=0):
         arcpy.AddError(val)
 
 
+def files_existed(file_paths):
+    file_existed = True
+    for file_path in file_paths:
+        if not Path(file_path).is_file():
+            msg = f"{file_path} does not exit."
+            output(msg, 1)
+            file_existed  = False
+    return  file_existed 
 
 
 # import os
