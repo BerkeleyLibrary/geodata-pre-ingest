@@ -11,7 +11,7 @@ import common_helper
 ################################################################################################
 #                             1. functions                                                     #
 ################################################################################################
-def validate_csv_files(main_csv_arkid_filepath, resp_csv_arkid_filepath, main_csv_headers):
+def validate_csv_files(main_csv_arkid_filepath, resp_csv_arkid_filepath):
     validate_csv(main_csv_arkid_filepath, func_invalid_cols_from_main_row)
     validate_csv(resp_csv_arkid_filepath, func_invalid_cols_from_resp_row)
 
@@ -104,7 +104,7 @@ def f_v(fieldname, value, word="or"):
     fieldname_o = f"{fieldname}_o"
     new_name = (
         f"{fieldname} {word} {fieldname_o}"
-        if fieldname_o in main_csv_headers
+        if fieldname_o in main_csv_headers()
         else fieldname
     )
     return [new_name, value]
@@ -324,52 +324,29 @@ RESP_ROLE = range(1, 12)
 #      D:\results\main_sample_raster_arkids8.txt
 #      D:\results\main_sample_raster1.txt
 ################################################################################################
-# main_csv_headers = []
+verification_headers = []
+def setup_main_csv_headers(main_csvfile_path):
+    global verification_headers
+    verification_headers = csv_headers(main_csvfile_path)
+
+def reset_main_csv_headers():
+    global verification_headers
+    verification_headers = []
+
+def main_csv_headers():
+    return verification_headers
+
+    
 def run_tool():
     csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path
-    main_csv_arkid_filepath = fr"{csv_files_arkid_directory_path}\main.csv"
-    resp_csv_arkid_filepath = fr"{csv_files_arkid_directory_path}\resp.csv"     
-   
-    common_helper.output(fr"*** Starting to verify CSV files from {csv_files_arkid_directory_path}")
+    main_csv_arkid_filepath = fr"{csv_files_arkid_directory_path}\main_arkid.csv"
+    resp_csv_arkid_filepath = fr"{csv_files_arkid_directory_path}\resp_arkid.csv"     
+       
     if not common_helper.verify_setup( [main_csv_arkid_filepath, resp_csv_arkid_filepath], [csv_files_arkid_directory_path]):
         return 
     
-    main_csv_headers = csv_headers(main_csv_arkid_filepath)
-    validate_csv_files(main_csv_arkid_filepath,  resp_csv_arkid_filepath, main_csv_headers )
+    common_helper.output(fr"*** Starting to verify CSV files from {csv_files_arkid_directory_path}")
+    setup_main_csv_headers(main_csv_arkid_filepath)
+    validate_csv_files(main_csv_arkid_filepath,  resp_csv_arkid_filepath)
+    reset_main_csv_headers()
     common_helper.output("*** CSV files verifcation completed .", 0)
-
-
-
-
-
-# def output(msg):
-#     logging.info(msg)
-#     print(msg)
-
-
-# def verify_setup(file_paths, directory_paths):
-#     verified = True
-#     for file_path in file_paths:
-#         if not Path(file_path).is_file():
-#             print(f"{file_path} does not exit.")
-#             verified = False
-
-#     for directory_path in directory_paths:
-#         if not Path(directory_path).is_dir():
-#             print(f"{directory_path} does not exit.")
-#             verified = False
-#     return verified
-
-
-# main_csv_headers = []
-
-
-# script_name = "4 - check_csv_files.py"
-# output(f"***starting  {script_name}")
-
-# if verify_setup(
-#     [main_csv_arkid_filepath, resp_csv_arkid_filepath], [result_directory_path]
-# ):
-#     main_csv_headers = csv_headers(main_csv_arkid_filepath)
-#     validate_csv_files()
-#     output(f"***completed {script_name}")

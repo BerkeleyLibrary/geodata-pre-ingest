@@ -9,6 +9,7 @@ from tool_prepare_batch import PrepareBatchTool
 from tool_raster_pyramid_batch import CreateRasterPyramidTool
 from tool_batch_export_csv import BatchExportCsvTool
 from tool_assign_arkid import AssignArkidTool
+from tool_check_csv_files import CheckCsvFilesTool
 
 class Toolbox:
     def __init__(self):
@@ -21,4 +22,5 @@ class Toolbox:
                       PrepareBatchTool, 
                       CreateRasterPyramidTool, 
                       BatchExportCsvTool,
-                      AssignArkidTool]
+                      AssignArkidTool, 
+                      CheckCsvFilesTool]
