@@ -7,13 +7,24 @@ from datetime import datetime
 from pathlib import Path
 from arcpy import metadata as md
 from shutil import copyfile
+import workspace_directory
+import common_helper
+
+
+#   source_batch_directory_path = workspace_directory.source_batch_directory_path
+#     projected_batch_directory_path = workspace_directory.projected_batch_directory_path
+#     csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path  
+#     main_csv_arkid_filepath = fr"{csv_files_arkid_directory_path }\main_arkid.csv"
+#     resp_csv_arkid_filepath = fr"{csv_files_arkid_directory_path }\resp_arkid.csv" 
 
 
 ################################################################################################
 #                             1. functions                                                    #
 ################################################################################################
 # Create iso19139 xml file for rows 'geofile' value is a valid filepath
-def create_iso19139_files():
+def create_iso19139_files(source_batch_directory_path,projected_batch_directory_path,csv_files_arkid_directory_path):
+    resp_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'resp')
+    main_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'main')
     resp_dic = csv_dic(resp_csv_arkid_filepath)
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
@@ -22,14 +33,17 @@ def create_iso19139_files():
                 arkid = row.get("arkid")
                 if not arkid:
                     text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
-                    log_raise_error(text)
+                    common_helper.log_raise_error(text)
                 resp_rows = [
                     resp_row for resp_row in resp_dic if arkid == resp_row["arkid"]
                 ]
 
-                geofile_path = correlated_filepath(row.get("geofile"))
-                geofile = GeoFile(geofile_path, logging)
+                geofile_path = correlated_filepath(source_batch_directory_path, projected_batch_directory_path, row.get("geofile"))
+                geofile = GeoFile(geofile_path)
                 geofile.create_iso19139_file(row, resp_rows)
+
+
+
 
 
 def has_dataset(row):
@@ -37,10 +51,10 @@ def has_dataset(row):
     return os.path.isfile(geofile_path)
 
 
-def correlated_filepath(geofile_path):
+def correlated_filepath(source_batch_directory_path, projected_batch_directory_path,geofile_path):
     if not source_batch_directory_path in geofile_path:
         text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{source_batch_directory_path}'"
-        log_raise_error(text)
+        common_helper.log_raise_error(text)
 
     filepath = geofile_path.replace(
         source_batch_directory_path, projected_batch_directory_path
@@ -49,7 +63,7 @@ def correlated_filepath(geofile_path):
         return filepath
     else:
         text = f"File {filepath} does not exist"
-        log_raise_error(text)
+        common_helper.log_raise_error(text)
 
 
 def csv_dic(csv_filepath):
@@ -59,17 +73,17 @@ def csv_dic(csv_filepath):
     return [dict(zip(header, row)) for row in rows]
 
 
-def log_raise_error(text):
-    logging.info(text)
-    raise ValueError(text)
+# def log_raise_error(text):
+#     logging.info(text)
+#     raise ValueError(text)
 
 
 ################################################################################################
 #                             2. class  - initial metadata from *.tif.xml or *.shp.xml         #
 ################################################################################################
 class GeoFile(object):
-    def __init__(self, geofile_path, logging):
-        self.logging = logging
+    def __init__(self, geofile_path):
+        # self.logging = logging
         self.geofile_path = geofile_path
         self.basename = os.path.splitext(self.geofile_path)[0]
         self.tempfile_path = self._extended_filepath("_temp.xml")
@@ -84,12 +98,16 @@ class GeoFile(object):
         self._write_tempfile(main_row, resp_row)
         self._import_tempfile()
         self._transform_iso19139()
-        self.logging.info(f"{self.geofile_path} - iso19139.xml created")
+        # self.logging.info(f"{self.geofile_path} - iso19139.xml created")
+        msg = f"{self.geofile_path} - iso19139.xml created"
+        common_helper.output(msg)
 
     def _copy_tempfile(self):
         esri_xml = f"{self.geofile_path}.xml"
         if not os.path.isfile(esri_xml):
-            print(f"warning: {esri_xml} not found")
+            # print(f"warning: {esri_xml} not found")
+            msg =  f"warning: {esri_xml} not found"
+            common_helper.output(msg, 1)
             raise FileNotFoundError
 
         copyfile(esri_xml, self.tempfile_path)
@@ -105,18 +123,18 @@ class GeoFile(object):
     def _write_tempfile(self, main_row, resp_row):
         try:
             transformer = RowTransformer(
-                self.tempfile_path, main_row, resp_row, self.logging
+                self.tempfile_path, main_row, resp_row
             )
             transformer()
         except Exception as ex:
-            self._log_raise_error("Could not write metadata to", ex)
+            common_helper.log_raise_error("Could not write metadata to", ex)
 
     def _export_tempfile(self):
         try:
             item_md = md.Metadata(self.basename)
             item_md.saveAsXML(self.tempfile_path, "EXACT_COPY")
         except Exception as ex:
-            self._log_raise_error("Could not export tempfile to", ex)
+            common_helper.log_raise_error("Could not export tempfile to", ex)
 
     def _import_tempfile(self):
         try:
@@ -124,19 +142,19 @@ class GeoFile(object):
             item_md.importMetadata(self.tempfile_path, "ARCGIS_METADATA")
             item_md.save()
         except Exception as ex:
-            self._log_raise_error("Could not import tempfile to", ex)
+            common_helper.log_raise_error("Could not import tempfile to", ex)
 
     def _transform_iso19139(self):
         try:
             item_md = md.Metadata(self.basename)
             item_md.exportMetadata(self.iso19139_path, "ISO19139")
         except Exception as ex:
-            self._log_raise_error("Could not transform iso19139 to", ex)
+            common_helper.log_raise_error("Could not transform iso19139 to", ex)
 
-    def _log_raise_error(self, text, ex):
-        msg = f"{text} {self.geofile_path}"
-        self.logging.info(f"{msg} - {ex}")
-        raise ValueError(msg)
+    # def _log_raise_error(self, text, ex):
+    #     msg = f"{text} {self.geofile_path}"
+    #     self.logging.info(f"{msg} - {ex}")
+    #     raise ValueError(msg)
 
 
 class RowTransformer(object):
@@ -146,8 +164,8 @@ class RowTransformer(object):
     main_elements = {}
     resp_elements = {}
 
-    def __init__(self, tempfile, main_row, resp_rows, logging):
-        self.logging = logging
+    def __init__(self, tempfile, main_row, resp_rows):
+        # self.logging = logging
         self.tempfile = tempfile
         self.tree = ET.parse(self.tempfile)
         self.root = self.tree.getroot()
@@ -376,7 +394,9 @@ class RowTransformer(object):
             clr_role = resp_row["role"].strip().zfill(3)
             roleCd = ET.SubElement(role, "RoleCd", attrib={"value": clr_role})
         else:
-            self.logging.info(f"File- {self.tempfile} has no responsible party ")
+            # self.logging.info(f"File- {self.tempfile} has no responsible party ")
+            msg =  f"File- {self.tempfile} has no responsible party "
+            common_helper.output(msg, 1)
 
     def _add_ucb_distributor(self):
         def add_sub_node(parent, child_node_name, val):
@@ -527,57 +547,72 @@ RowTransformer.main_elements = MAIN_ELEMENTS
 #                                 3. set up                                                    #
 ################################################################################################
 
-# 1. setup log file path
-logfile = r"C:\process_data\log\process.log"
-logging.basicConfig(
-    filename=logfile,
-    level=logging.INFO,
-    format="%(message)s - %(asctime)s",
-)
+# # 1. setup log file path
+# logfile = r"C:\process_data\log\process.log"
+# logging.basicConfig(
+#     filename=logfile,
+#     level=logging.INFO,
+#     format="%(message)s - %(asctime)s",
+# )
 
-# 2. source batch directory
-source_batch_directory_path = r"C:\process_data\source_batch"
+# # 2. source batch directory
+# source_batch_directory_path = r"C:\process_data\source_batch"
 
 
-# 3. Projected batch directory path
-projected_batch_directory_path = r"C:\process_data\source_batch_projected"
+# # 3. Projected batch directory path
+# projected_batch_directory_path = r"C:\process_data\source_batch_projected"
 
-# 4. please provide main csv and resp csv files here, check csv files in script "4 - check_csv_files.py", before running this script:
-main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
-resp_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\resp_arkid.csv"
+# # 4. please provide main csv and resp csv files here, check csv files in script "4 - check_csv_files.py", before running this script:
+# main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
+# resp_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\resp_arkid.csv"
 
 
 ################################################################################################
 #                    4. Create an ISO19139.xml file for each  geofile                               #
 ################################################################################################
-def output(msg):
-    logging.info(msg)
-    print(msg)
+# def output(msg):
+#     logging.info(msg)
+#     print(msg)
 
 
-def verify_setup(file_paths, directory_paths):
-    verified = True
-    for file_path in file_paths:
-        if not Path(file_path).is_file():
-            print(f"{file_path} does not exit.")
-            verified = False
+# def verify_setup(file_paths, directory_paths):
+#     verified = True
+#     for file_path in file_paths:
+#         if not Path(file_path).is_file():
+#             print(f"{file_path} does not exit.")
+#             verified = False
 
-    for directory_path in directory_paths:
-        if not Path(directory_path).is_dir():
-            print(f"{directory_path} does not exit.")
-            verified = False
-    return verified
+#     for directory_path in directory_paths:
+#         if not Path(directory_path).is_dir():
+#             print(f"{directory_path} does not exit.")
+#             verified = False
+#     return verified
 
 
-script_name = "5 - batch_create_iso19139.py"
-output(f"***starting  {script_name}")
+# script_name = "5 - batch_create_iso19139.py"
+# output(f"***starting  {script_name}")
 
-if verify_setup(
-    [main_csv_arkid_filepath, resp_csv_arkid_filepath],
-    [source_batch_directory_path, projected_batch_directory_path],
-):
-    # 1. Get a geofile name from main csv file
-    # 2. Find the geofile in projected directory
-    # 3. Create an iso19139 xml file for each geofile found in 2
-    create_iso19139_files()
-    output(f"***completed {script_name}")
+# if verify_setup(
+#     [main_csv_arkid_filepath, resp_csv_arkid_filepath],
+#     [source_batch_directory_path, projected_batch_directory_path],
+# ):
+#     # 1. Get a geofile name from main csv file
+#     # 2. Find the geofile in projected directory
+#     # 3. Create an iso19139 xml file for each geofile found in 2
+#     create_iso19139_files()
+#     output(f"***completed {script_name}")
+
+def run_tool():
+    source_batch_directory_path = workspace_directory.source_batch_directory_path
+    projected_batch_directory_path = workspace_directory.projected_batch_directory_path
+    csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path  
+    main_csv_arkid_filepath = fr"{csv_files_arkid_directory_path }\main_arkid.csv"
+    resp_csv_arkid_filepath = fr"{csv_files_arkid_directory_path }\resp_arkid.csv"       
+
+    common_helper.output(fr"*** Starting to create iso19139 to  {projected_batch_directory_path}")
+    if not common_helper.verify_setup([main_csv_arkid_filepath, resp_csv_arkid_filepath], [source_batch_directory_path, projected_batch_directory_path]):
+        return 
+
+    create_iso19139_files(source_batch_directory_path,projected_batch_directory_path,csv_files_arkid_directory_path)
+    # If all steps completed successfully
+    common_helper.output("*** ARKID assignment completed successfully.", 0)

@@ -26,6 +26,17 @@ def no_processing_directory_selected(parameters, n):
         return True
     return False
 
+# def not_selected(parameters, n):
+#     if  any(param.value == constants.no_prcess_path_selected for param in parameters[:n]):
+#         return True
+#     return False
+
+def verify_selected_source_batch_directory(parameters, n):
+    if any(param.value == constants.no_prcess_path_selected for param in parameters[:n]):
+        arcpy.AddError("Error: ❌ no data processing directory was selected from tool 0.1, please select one")
+        raise arcpy.ExecuteError
+    return
+   
 def output(msg, level=0):
     logger = workspace_directory.logger
      
@@ -56,6 +67,18 @@ def files_existed(file_paths):
             file_existed  = False
     return  file_existed 
 
+def directories_existed(directory_paths):
+    for directory_path in directory_paths:
+        if not Path(directory_path).is_dir():
+            print(f"{directory_path} does not exit.")
+            verified = False
+
+def csv_arkid_filepath(directory_path, name):
+    return fr"{directory_path }\{name}_arkid.csv"
+
+def log_raise_error(msg):
+    output(msg, 1)
+    raise ValueError(msg)
 
 # import os
 # os.environ["p_path"] = r"\\napa\mapsshare\yzhou\process_data"
