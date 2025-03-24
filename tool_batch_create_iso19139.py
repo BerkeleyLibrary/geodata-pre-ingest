@@ -43,10 +43,11 @@ class BatchCreateIso19139Tool(object):
         if (workspace_directory.source_batch_directory_path is not None):
             val0 = workspace_directory.source_batch_directory_path
             val1 = workspace_directory.projected_batch_directory_path
-            csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path  
-            val2 = fr"{csv_files_arkid_directory_path }\main_arkid.csv"
-            val3 = fr"{csv_files_arkid_directory_path }\resp_arkid.csv"       
 
+            csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path       
+            val2 = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'main')
+            val3 = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'resp')
+            
         for i, val in enumerate([val0, val1, val2, val3]):
             parameters[i].value = val
         return

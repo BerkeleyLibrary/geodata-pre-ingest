@@ -514,8 +514,9 @@ def run_tool():
     source_batch_directory_path = workspace_directory.source_batch_directory_path
     projected_batch_directory_path = workspace_directory.projected_batch_directory_path
     csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path  
-    main_csv_arkid_filepath = fr"{csv_files_arkid_directory_path }\main_arkid.csv"
-    resp_csv_arkid_filepath = fr"{csv_files_arkid_directory_path }\resp_arkid.csv"       
+      
+    resp_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'resp')
+    main_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'main')
 
     common_helper.output(fr"*** Starting to create iso19139 to  {projected_batch_directory_path}")
     if not common_helper.verify_setup([main_csv_arkid_filepath, resp_csv_arkid_filepath], [source_batch_directory_path, projected_batch_directory_path]):
