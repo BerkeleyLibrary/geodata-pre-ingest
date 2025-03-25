@@ -1,16 +1,18 @@
 import os
-import logging
+# import logging
 import json
 import csv
 from shutil import rmtree
 from pathlib import Path
 import arcpy
+import workspace_directory
+import common_helper
 
 
 ################################################################################################
 #                             1. functions                                                      #
 ################################################################################################
-def create_geoblacklight_files():
+def create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath):
     all_resp_rows = csv_rows(resp_csv_arkid_filepath)
     field_names = geoblacklight_field_names(main_csv_arkid_filepath)
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
@@ -19,7 +21,7 @@ def create_geoblacklight_files():
             arkid = row.get("arkid")
             if not arkid:
                 text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
-                log_raise_error(text)
+                common_helper.log_raise_error(text, 1)
             resp_rows = [
                 resp_row for resp_row in all_resp_rows if arkid == resp_row.get("arkid")
             ]
@@ -66,8 +68,8 @@ def create_geoblacklight_file_without_dataset(row, resp_rows, field_names):
 def proj_geofile_path(row):
     try:
         geofile_path = row.get("geofile")
-        rel_geofile_name = os.path.relpath(geofile_path, source_batch_directory_path)
-        return os.path.join(projected_batch_directory_path, rel_geofile_name)
+        rel_geofile_name = os.path.relpath(geofile_path, workspace_directory.source_batch_directory_path)
+        return os.path.join(workspace_directory.projected_batch_directory_path, rel_geofile_name)
     except Exception:
         txt = f"Could not find {proj_geofile_path}"
         print(txt)
@@ -89,7 +91,7 @@ def non_dataset_geoblacklight_file_path(row):
 
 
 def final_directory_path(prefix):
-    directory_path = os.path.join(result_directory_path, f"{prefix}_files")
+    directory_path = os.path.join(workspace_directory.results_directory_path, f"{prefix}_files")
     ensure_empty_directory(directory_path)
     return directory_path
 
@@ -346,9 +348,9 @@ def resp_names(rows, code):
     return [name.strip() for name in names if name]
 
 
-def log_raise_error(text):
-    logging.info(text)
-    raise ValueError(text)
+# def log_raise_error(text):
+#     logging.info(text)
+#     raise ValueError(text)
 
 
 ################################################################################################
@@ -426,66 +428,83 @@ RELATION_FIELDS = [
     "dct_relation_sm",
 ]
 
+def run_tool():
+    source_batch_directory_path = workspace_directory.source_batch_directory_path
+    projected_batch_directory_path = workspace_directory.projected_batch_directory_path
+    results_directory_path = workspace_directory.results_directory_path
+    csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path  
+      
+    resp_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'resp')
+    main_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'main')
+ 
+
+    common_helper.output(fr"*** Starting to create geoblacklight file to  {results_directory_path }")
+    if not common_helper.verify_setup([main_csv_arkid_filepath, resp_csv_arkid_filepath], [source_batch_directory_path, projected_batch_directory_path, results_directory_path]):
+        return 
+
+    create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath)
+    common_helper.output("*** Geoblacklight JSON files created successfully.", 0)
+
 
 ################################################################################################
 #                                 3. set up                                                    #
 ################################################################################################
 
-# 1. setup log file path
-logfile = r"C:\process_data\log\process.log"
-logging.basicConfig(
-    filename=logfile,
-    level=logging.INFO,
-    format="%(message)s - %(asctime)s",
-)
+# # 1. setup log file path
+# logfile = r"C:\process_data\log\process.log"
+# logging.basicConfig(
+#     filename=logfile,
+#     level=logging.INFO,
+#     format="%(message)s - %(asctime)s",
+# )
 
-# 2. Source batch directory path
-source_batch_directory_path = r"C:\process_data\source_batch"
+# # 2. Source batch directory path
+# source_batch_directory_path = r"C:\process_data\source_batch"
 
-# 3. Projected batch directory path
-projected_batch_directory_path = r"C:\process_data\source_batch_projected"
+# # 3. Projected batch directory path
+# projected_batch_directory_path = r"C:\process_data\source_batch_projected"
 
-# 4. please provide main csv and resp csv files here, check csv files in script "4 - check_csv_files.py", before running this script:
-main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
-resp_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\resp_arkid.csv"
+# # 4. please provide main csv and resp csv files here, check csv files in script "4 - check_csv_files.py", before running this script:
+# main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
+# resp_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\resp_arkid.csv"
 
-# 5. please provide result directory path (the same as in "7 - create_ingestion_files.py")
-#    this script will save collection's geoblacklight json files to ruesult_driectory_path
-result_directory_path = r"C:\process_data\results"
+# # 5. please provide result directory path (the same as in "7 - create_ingestion_files.py")
+# #    this script will save collection's geoblacklight json files to ruesult_driectory_path
+# result_directory_path = r"C:\process_data\results"
 
 
 ################################################################################################
 #                    4. Create a geoblacklight.json file for each  geofile                     #
 ################################################################################################
-def output(msg):
-    logging.info(msg)
-    print(msg)
+# def output(msg):
+#     logging.info(msg)
+#     print(msg)
 
 
-def verify_setup(file_paths, directory_paths):
-    verified = True
-    for file_path in file_paths:
-        if not Path(file_path).is_file():
-            print(f"{file_path} does not exit.")
-            verified = False
+# def verify_setup(file_paths, directory_paths):
+#     verified = True
+#     for file_path in file_paths:
+#         if not Path(file_path).is_file():
+#             print(f"{file_path} does not exit.")
+#             verified = False
 
-    for directory_path in directory_paths:
-        if not Path(directory_path).is_dir():
-            print(f"{directory_path} does not exit.")
-            verified = False
-    return verified
+#     for directory_path in directory_paths:
+#         if not Path(directory_path).is_dir():
+#             print(f"{directory_path} does not exit.")
+#             verified = False
+#     return verified
 
 
-script_name = "6 - batch_create_geoblacklight.py"
-output(f"***starting  {script_name}")
+# script_name = "6 - batch_create_geoblacklight.py"
+# output(f"***starting  {script_name}")
 
-if verify_setup(
-    [logfile, main_csv_arkid_filepath, resp_csv_arkid_filepath],
-    [
-        projected_batch_directory_path,
-        source_batch_directory_path,
-        result_directory_path,
-    ],
-):
-    create_geoblacklight_files()
-    output(f"***completed {script_name}")
+# if verify_setup(
+#     [logfile, main_csv_arkid_filepath, resp_csv_arkid_filepath],
+#     [
+#         projected_batch_directory_path,
+#         source_batch_directory_path,
+#         result_directory_path,
+#     ],
+# ):
+#     create_geoblacklight_files()
+#     output(f"***completed {script_name}")
