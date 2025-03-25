@@ -81,8 +81,18 @@ def log_raise_error(msg):
     output(msg, 1)
     raise ValueError(msg)
 
+def paths_exist(paths, is_file=True):
+    all_exist = True
+    for path in paths:
+        path_obj = Path(path)
+        if (is_file and not path_obj.is_file()) or (not is_file and not path_obj.is_dir()):
+            msg = f"{path} does not exist."
+            output(msg, 1)
+            all_exist = False
+    return all_exist
+
+
 def workspace_directories_exist():
-    exist = True
     directory_paths = [workspace_directory.process_directory_path, 
                        workspace_directory.source_batch_directory_path, 
                        workspace_directory.process_directory_path,
@@ -90,12 +100,16 @@ def workspace_directories_exist():
                        workspace_directory.projected_batch_directory_path,
                        workspace_directory.results_directory_path,
                        workspace_directory.log_directory_path]
-    for directory_path in directory_paths:
-        if not Path(directory_path).is_dir():
-            txt = f"{directory_path} does not exit."
-            output(txt, 1)
-            exist = False
-    return exist
+    return paths_exist(directory_paths, False)
+
+def verify_workspace_and_files(file_paths):
+    all_files_exist = paths_exist(file_paths)
+    all_directories_exist =  workspace_directories_exist()
+    output(str(all_files_exist))
+    output(str(all_directories_exist))
+    if not (all_files_exist and all_directories_exist):
+        raise ValueError(fr"Missing workspace direcotories and CSV files, please see the log file '{workspace_directory.log_directory_path}/process.txt' for details")
+
 # import os
 # os.environ["p_path"] = r"\\napa\mapsshare\yzhou\process_data"
 # m = os.getenv("p_path")

@@ -431,19 +431,12 @@ RELATION_FIELDS = [
 ]
 
 def run_tool():
-    source_batch_directory_path = workspace_directory.source_batch_directory_path
-    projected_batch_directory_path = workspace_directory.projected_batch_directory_path
-    results_directory_path = workspace_directory.results_directory_path
     csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path  
-      
     resp_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'resp')
     main_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'main')
  
-
-    common_helper.output(fr"*** Starting to create geoblacklight files to  {results_directory_path }")
-    if not common_helper.verify_setup([main_csv_arkid_filepath, resp_csv_arkid_filepath], [source_batch_directory_path, projected_batch_directory_path, results_directory_path]):
-        return 
-
+    common_helper.output(fr"*** Starting to create geoblacklight files to  {workspace_directory.projected_batch_directory_path}")
+    common_helper.verify_workspace_and_files([main_csv_arkid_filepath, resp_csv_arkid_filepath])
     create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath)
     common_helper.output("*** Geoblacklight JSON files created successfully.", 0)
 
