@@ -68,11 +68,12 @@ def files_existed(file_paths):
     return  file_existed 
 
 def directories_existed(directory_paths):
+    exist = True
     for directory_path in directory_paths:
         if not Path(directory_path).is_dir():
-            print(f"{directory_path} does not exit.")
-            verified = False
-
+            msg = f"{directory_path} does not exit."
+            exist = False
+    return exist
 def csv_arkid_filepath(directory_path, name):
     return fr"{directory_path }\{name}_arkid.csv"
 
@@ -80,6 +81,21 @@ def log_raise_error(msg):
     output(msg, 1)
     raise ValueError(msg)
 
+def workspace_directories_exist():
+    exist = True
+    directory_paths = [workspace_directory.process_directory_path, 
+                       workspace_directory.source_batch_directory_path, 
+                       workspace_directory.process_directory_path,
+                       workspace_directory.csv_files_directory_path,
+                       workspace_directory.projected_batch_directory_path,
+                       workspace_directory.results_directory_path,
+                       workspace_directory.log_directory_path]
+    for directory_path in directory_paths:
+        if not Path(directory_path).is_dir():
+            txt = f"{directory_path} does not exit."
+            output(txt, 1)
+            exist = False
+    return exist
 # import os
 # os.environ["p_path"] = r"\\napa\mapsshare\yzhou\process_data"
 # m = os.getenv("p_path")

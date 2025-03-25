@@ -11,6 +11,7 @@ from tool_batch_export_csv import BatchExportCsvTool
 from tool_assign_arkid import AssignArkidTool
 from tool_check_csv_files import CheckCsvFilesTool
 from tool_batch_create_iso19139 import BatchCreateIso19139Tool
+from tool_batch_create_geoblacklight import BatchCreateGeoblacklightTool
 
 class Toolbox:
     def __init__(self):
@@ -25,4 +26,5 @@ class Toolbox:
                       BatchExportCsvTool,
                       AssignArkidTool, 
                       CheckCsvFilesTool,
-                      BatchCreateIso19139Tool]
+                      BatchCreateIso19139Tool,
+                      BatchCreateGeoblacklightTool]

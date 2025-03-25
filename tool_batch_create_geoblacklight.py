@@ -5,9 +5,9 @@ import workspace_directory
 import batch_create_geoblacklight
 import constants
 
-class BatchCreateIso19139Tool(object):
+class BatchCreateGeoblacklightTool(object):
     def __init__(self):
-        self.label = "5 - Run to create ISO19139 xml files for the batch"
+        self.label = "6 - Run to create Geoblacklight JSON files for the batch"
 
     def getParameterInfo(self):
         source_batch_directory_path_param = arcpy.Parameter(

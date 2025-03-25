@@ -72,7 +72,7 @@ def proj_geofile_path(row):
         return os.path.join(workspace_directory.projected_batch_directory_path, rel_geofile_name)
     except Exception:
         txt = f"Could not find {proj_geofile_path}"
-        print(txt)
+        common_helper.output(txt, 1)
         raise ValueError(txt)
 
 
@@ -119,7 +119,7 @@ def save_pretty_json_file(file_path, json_data):
                 sort_keys=True,
                 ensure_ascii=False,
                 indent=4,
-                separators=(",", ":"),
+                separators=(",", ": "),
             )
         )
 
@@ -232,7 +232,7 @@ def ref_hosts(row):
         return HOSTS_SECURE
     else:
         txt = f"geofile: '{row.get('geofile')}':  incorrect value in  'dct_accessRights_s', value = {access}"
-        print(txt)
+        common_helper.output(txt, 1)
         raise ValueError(txt)
 
 
@@ -289,7 +289,8 @@ def add_boundary(json_data, row):
             S = raster.extent.YMin
             return "ENVELOPE({0},{1},{2},{3})".format(W, E, N, S)
         except:
-            print(f"No boundary found: {geofile}")
+            txt = f"No boundary found: {geofile}"
+            common_helper.output(txt, 1)
             raise ValueError
 
     def shapefile_boundary():
@@ -301,7 +302,8 @@ def add_boundary(json_data, row):
             S = extent.YMin
             return "ENVELOPE({0},{1},{2},{3})".format(W, E, N, S)
         except:
-            print(f"No boundary found: {geofile}")
+            txt = f"No boundary found: {geofile}"
+            common_helper.output(txt, 1)
             raise ValueError
 
     if geofile.endswith(".shp"):
@@ -392,11 +394,11 @@ HOSTS = {
 }
 
 HOSTS_SECURE = {
-    "ISO139": '"http://www.isotc211.org/schemas/2005/gmd/":"https://spatial.lib.berkeley.edu/UCB/',
+    "ISO139": '"http://www.isotc211.org/schemas/2005/gmd/":"https://spatial.lib.berkeley.edu/metadata/',
     "download": '"http://schema.org/downloadUrl":"https://spatial.lib.berkeley.edu/UCB/',
     "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices-secure.lib.berkeley.edu/geoserver/wfs"',
     "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices-secure.lib.berkeley.edu/geoserver/wms"',
-    "doc": '"http://lccn.loc.gov/sh85035852":"https://spatial.lib.berkeley.edu/UCB/',
+    "doc": '"http://lccn.loc.gov/sh85035852":"https://spatial.lib.berkeley.edu/metadata/',
 }
 
 
@@ -438,7 +440,7 @@ def run_tool():
     main_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'main')
  
 
-    common_helper.output(fr"*** Starting to create geoblacklight file to  {results_directory_path }")
+    common_helper.output(fr"*** Starting to create geoblacklight files to  {results_directory_path }")
     if not common_helper.verify_setup([main_csv_arkid_filepath, resp_csv_arkid_filepath], [source_batch_directory_path, projected_batch_directory_path, results_directory_path]):
         return 
 
