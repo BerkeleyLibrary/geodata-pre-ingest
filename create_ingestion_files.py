@@ -1,5 +1,5 @@
 import os
-import logging
+# import logging
 from pathlib import Path
 import csv
 import zipfile
@@ -58,9 +58,8 @@ def update_json_file(json_file_path, data_file_path):
 
         save_pretty_json_file(json_file_path, data)
     except Exception as ex:
-        print(
-            f"Cannot update gbl_fileSizes, please check existing of files{json_file_path}; {data_file_path}; - {ex}"
-        )
+        msg =  f"Cannot update gbl_fileSizes, please check existing of files{json_file_path}; {data_file_path}; - {ex}"
+        common_helper.output(msg, 1)
 
 
 def get_file_size(file_path):
@@ -131,7 +130,7 @@ def arkid_directory_path(arkid, directory_path):
 def correlated_filepath(geofile_path):
     if not workspace_directory.source_batch_directory_path in geofile_path:
         text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{workspace_directory.source_batch_directory_path}'"
-        log_raise_error(text)
+        common_helper.log_raise_error(text)
 
     filepath = geofile_path.replace(
        workspace_directory.source_batch_directory_path, workspace_directory.projected_batch_directory_path
@@ -140,7 +139,7 @@ def correlated_filepath(geofile_path):
         return filepath
     else:
         text = f"File {filepath} does not exist"
-        log_raise_error(text)
+        common_helper.log_raise_error(text)
 
 
 # cannot use rmtree to remove directories,
@@ -163,7 +162,7 @@ def cp_file(geofile_path, arkid_directory_path, name):
 
     else:
         text = f"missing file: {from_filepath}"
-        log_raise_error(text)
+        common_helper.log_raise_error(text)
 
 
 def cp_document_file(docfile_path, arkid_directory_path):
@@ -174,7 +173,7 @@ def cp_document_file(docfile_path, arkid_directory_path):
 
     else:
         text = f"missing document file: {docfile_path}"
-        log_raise_error(text)
+        common_helper.log_raise_error(text)
 
 
 # Example:
@@ -193,7 +192,7 @@ def map_sourcefiles(geofile_path, arkid):
             text = f"missing projected file: {source_file}"
             # give a warning: some projected GeoTIFF files from ArcGIS Pro don't include .prj file.
             #  Check this after ingesting GeoTIFF to geoserver instance
-            print(f"please check:  {text}") if ext == ".prj" else log_raise_error(text)
+            common_helper.output(f"please check:  {text}") if ext == ".prj" else common_helper.log_raise_error(text)
     return dic
 
 
@@ -226,7 +225,7 @@ def wrap_up_zip(geofile_path, arkid, arkid_directory_path, type):
         create_zipfile(dic, zip_filepath)
     else:
         text = f"no source files: {geofile_path}"
-        log_raise_error(text)
+        common_helper.log_raise_error(text)
 
 
 def create_zipfile(dic, zip_filepath):
@@ -245,9 +244,9 @@ def get_extensions(geofile_path):
     return dic.get(ext)
 
 
-def log_raise_error(text):
-    logging.info(text)
-    raise ValueError(text)
+# def log_raise_error(text):
+#     logging.info(text)
+#     raise ValueError(text)
 
 
 def ensure_empty_directory(pathname):
