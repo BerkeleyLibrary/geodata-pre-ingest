@@ -63,9 +63,7 @@ class BatchCreateGeoblacklightTool(object):
 
     def execute(self, parameters, messages):
         try:
-            common_helper.verify_selected_source_batch_directory(parameters, 5)
             batch_create_geoblacklight.run_tool()
-
         except:
             arcpy.AddError("An error occurred while executing tool_batch_create_iso19139.")
             raise
