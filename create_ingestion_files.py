@@ -5,12 +5,13 @@ import csv
 import zipfile
 from shutil import copyfile, rmtree, copy2
 import json
-
+import common_helper
+import workspace_directory
 
 ################################################################################################
 #                             1. functions                                                     #
 ################################################################################################
-def create_files():
+def create_files(main_csv_arkid_filepath):
     ingestion_dir_path = final_directory_path("ingestion")
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
@@ -26,7 +27,7 @@ def has_dataset(row):
 
 # each subdirectory under ingestion_files has four files, which will be validated in next script
 def add_gbl_fileSize_s():
-    ingestion_file_dirpath = os.path.join(result_directory_path, "ingestion_files")
+    ingestion_file_dirpath = os.path.join(workspace_directory.results_directory_path, "ingestion_files")
     for root, _, files in os.walk(ingestion_file_dirpath):
         for file in files:
             file_path = os.path.join(root, file)
@@ -42,7 +43,7 @@ def get_ogp_geoblakcligh_files():
 
 
 def final_directory_path(prefix):
-    directory_path = os.path.join(result_directory_path, f"{prefix}_files")
+    directory_path = os.path.join(workspace_directory.results_directory_path, f"{prefix}_files")
     ensure_empty_directory(directory_path)
     return directory_path
 
@@ -83,7 +84,7 @@ def save_pretty_json_file(file_path, json_data):
 
 
 def move_geoblacklight(dir_name, to_dir_path):
-    from_dir_path = os.path.join(result_directory_path, dir_name)
+    from_dir_path = os.path.join(workspace_directory.results_directory_path, dir_name)
     if os.path.exists(from_dir_path):
         for root, _, files in os.walk(from_dir_path):
             for file in files:
@@ -128,12 +129,12 @@ def arkid_directory_path(arkid, directory_path):
 
 # Check geofiles listed in main csv are from source batch dirctory
 def correlated_filepath(geofile_path):
-    if not source_batch_directory_path in geofile_path:
-        text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{source_batch_directory_path}'"
+    if not workspace_directory.source_batch_directory_path in geofile_path:
+        text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{workspace_directory.source_batch_directory_path}'"
         log_raise_error(text)
 
     filepath = geofile_path.replace(
-        source_batch_directory_path, projected_batch_directory_path
+       workspace_directory.source_batch_directory_path, workspace_directory.projected_batch_directory_path
     )
     if Path(filepath).is_file():
         return filepath
@@ -264,27 +265,27 @@ shp_exts = [".cpg", ".dbf", ".prj", ".sbn", ".sbx", ".shp", ".shx"]
 tif_exts = [".tif", ".tfw", ".prj", ".tif.ovr"]
 # [".tif", ".aux", ".tfw", ".prj", ".tif.ovr"]
 
-# 1. setup log file path
-logfile = r"C:\process_data\log\process.log"
-logging.basicConfig(
-    filename=logfile,
-    level=logging.INFO,
-    format="%(message)s - %(asctime)s",
-)
+# # 1. setup log file path
+# logfile = r"C:\process_data\log\process.log"
+# logging.basicConfig(
+#     filename=logfile,
+#     level=logging.INFO,
+#     format="%(message)s - %(asctime)s",
+# )
 
-# 2. Please provide source data directory path,
-#    make sure this is the source directory path from which main.csv file was generated.
-source_batch_directory_path = r"C:\process_data\source_batch"
+# # 2. Please provide source data directory path,
+# #    make sure this is the source directory path from which main.csv file was generated.
+# source_batch_directory_path = r"C:\process_data\source_batch"
 
-# 3. Please provide projected data directory path
-projected_batch_directory_path = r"C:\process_data\source_batch_projected"
+# # 3. Please provide projected data directory path
+# projected_batch_directory_path = r"C:\process_data\source_batch_projected"
 
 
-# 4. Please provide main csv file path which have been assigned with arkids
-main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
+# # 4. Please provide main csv file path which have been assigned with arkids
+# main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
 
-# 5. please provide result directory path
-result_directory_path = r"C:\process_data\results"
+# # 5. please provide result directory path
+# result_directory_path = r"C:\process_data\results"
 
 
 ################################################################################################
@@ -309,37 +310,48 @@ result_directory_path = r"C:\process_data\results"
 # 1)  after creating data.zip file for each arkid related geofile, get data.zip file size, and update it to geoblacklight.json
 # 2)  moving ingenstion geoblacklight.json and collection geoblacklight.json to OGP directory
 ################################################################################################
-def output(msg):
-    logging.info(msg)
-    print(msg)
-
-
-def verify_setup(file_paths, directory_paths):
-    verified = True
-    for file_path in file_paths:
-        if not Path(file_path).is_file():
-            print(f"{file_path} does not exit.")
-            verified = False
-
-    for directory_path in directory_paths:
-        if not Path(directory_path).is_dir():
-            print(f"{directory_path} does not exit.")
-            verified = False
-    return verified
-
-
-script_name = "7 - create_ingestion_files.py"
-output(f"***starting  {script_name}")
-
-if verify_setup(
-    [main_csv_arkid_filepath],
-    [
-        source_batch_directory_path,
-        projected_batch_directory_path,
-        result_directory_path,
-    ],
-):
-    create_files()
+def run_tool():
+    csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path  
+    main_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'main')
+    common_helper.verify_workspace_and_files([main_csv_arkid_filepath])
+ 
+    common_helper.output(fr"*** Starting to create result files to  {workspace_directory.results_directory_path}")
+    create_files(main_csv_arkid_filepath)
     add_gbl_fileSize_s()
     get_ogp_geoblakcligh_files()
-    output(f"***completed {script_name}")
+    common_helper.output("*** Result files created successfully.", 0)
+
+# def output(msg):
+#     logging.info(msg)
+#     print(msg)
+
+
+# def verify_setup(file_paths, directory_paths):
+#     verified = True
+#     for file_path in file_paths:
+#         if not Path(file_path).is_file():
+#             print(f"{file_path} does not exit.")
+#             verified = False
+
+#     for directory_path in directory_paths:
+#         if not Path(directory_path).is_dir():
+#             print(f"{directory_path} does not exit.")
+#             verified = False
+#     return verified
+
+
+# script_name = "7 - create_ingestion_files.py"
+# output(f"***starting  {script_name}")
+
+# if verify_setup(
+#     [main_csv_arkid_filepath],
+#     [
+#         source_batch_directory_path,
+#         projected_batch_directory_path,
+#         result_directory_path,
+#     ],
+# ):
+#     create_files()
+#     add_gbl_fileSize_s()
+#     get_ogp_geoblakcligh_files()
+#     output(f"***completed {script_name}")
