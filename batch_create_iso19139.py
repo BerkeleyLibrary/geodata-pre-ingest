@@ -9,9 +9,7 @@ import common_helper
 
 
 # Create iso19139 xml file for 'geofile' rows (if value is a valid filepath)
-def create_iso19139_files(source_batch_directory_path,projected_batch_directory_path,csv_files_arkid_directory_path):
-    resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
-    main_csv_arkid_filepath = common_helper.csv_filepath('main', True)
+def create_iso19139_files(main_csv_arkid_filepath, resp_csv_arkid_filepath):
     resp_dic = csv_dic(resp_csv_arkid_filepath)
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
@@ -25,7 +23,7 @@ def create_iso19139_files(source_batch_directory_path,projected_batch_directory_
                     resp_row for resp_row in resp_dic if arkid == resp_row["arkid"]
                 ]
 
-                geofile_path = correlated_filepath(source_batch_directory_path, projected_batch_directory_path, row.get("geofile"))
+                geofile_path = correlated_filepath(row.get("geofile"))
                 geofile = GeoFile(geofile_path)
                 geofile.create_iso19139_file(row, resp_rows)
 
@@ -34,7 +32,9 @@ def has_dataset(row):
     return os.path.isfile(geofile_path)
 
 
-def correlated_filepath(source_batch_directory_path, projected_batch_directory_path,geofile_path):
+def correlated_filepath(geofile_path):
+    source_batch_directory_path = workspace_directory.source_batch_directory_path
+    projected_batch_directory_path = workspace_directory.projected_batch_directory_path
     if not source_batch_directory_path in geofile_path:
         text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{source_batch_directory_path}'"
         common_helper.log_raise_error(text)
@@ -511,16 +511,7 @@ RowTransformer.transform_main_headers = TRANSFORM_MAIN_HEADERS
 RowTransformer.main_elements = MAIN_ELEMENTS
 
 def run_tool():
-    source_batch_directory_path = workspace_directory.source_batch_directory_path
-    projected_batch_directory_path = workspace_directory.projected_batch_directory_path
-    csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path  
-      
     resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
     main_csv_arkid_filepath = common_helper.csv_filepath('main', True)
-
-    common_helper.output(fr"*** Starting to create iso19139 to  {projected_batch_directory_path}")
-    if not common_helper.verify_setup([main_csv_arkid_filepath, resp_csv_arkid_filepath], [source_batch_directory_path, projected_batch_directory_path]):
-        return 
-
-    create_iso19139_files(source_batch_directory_path,projected_batch_directory_path,csv_files_arkid_directory_path)
-    common_helper.output("*** ISO19139 xml files created successfully.", 0)
+    common_helper.verify_workspace_and_files([main_csv_arkid_filepath, resp_csv_arkid_filepath])
+    create_iso19139_files(main_csv_arkid_filepath, resp_csv_arkid_filepath)

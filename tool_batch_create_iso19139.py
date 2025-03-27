@@ -53,10 +53,6 @@ class BatchCreateIso19139Tool(object):
         return
 
     def execute(self, parameters, messages):
-        try:
-            common_helper.verify_selected_source_batch_directory(parameters, 4)
-            batch_create_iso19139.run_tool()
-
-        except:
-            arcpy.AddError("An error occurred while executing tool_batch_create_iso19139.")
-            raise
+        common_helper.call_run_tool('batch_create_iso19139')
+        return
+  
