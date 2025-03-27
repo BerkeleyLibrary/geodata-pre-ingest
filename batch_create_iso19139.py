@@ -10,8 +10,8 @@ import common_helper
 
 # Create iso19139 xml file for 'geofile' rows (if value is a valid filepath)
 def create_iso19139_files(source_batch_directory_path,projected_batch_directory_path,csv_files_arkid_directory_path):
-    resp_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'resp')
-    main_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'main')
+    resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
+    main_csv_arkid_filepath = common_helper.csv_filepath('main', True)
     resp_dic = csv_dic(resp_csv_arkid_filepath)
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
@@ -515,8 +515,8 @@ def run_tool():
     projected_batch_directory_path = workspace_directory.projected_batch_directory_path
     csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path  
       
-    resp_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'resp')
-    main_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'main')
+    resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
+    main_csv_arkid_filepath = common_helper.csv_filepath('main', True)
 
     common_helper.output(fr"*** Starting to create iso19139 to  {projected_batch_directory_path}")
     if not common_helper.verify_setup([main_csv_arkid_filepath, resp_csv_arkid_filepath], [source_batch_directory_path, projected_batch_directory_path]):

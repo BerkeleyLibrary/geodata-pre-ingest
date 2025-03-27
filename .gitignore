@@ -4,3 +4,4 @@ __pycache__/*
 .backups
 .mypy_cache
 geodata_processing_tools.gdb
+temp

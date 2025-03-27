@@ -74,8 +74,14 @@ def directories_existed(directory_paths):
             msg = f"{directory_path} does not exit."
             exist = False
     return exist
-def csv_arkid_filepath(directory_path, name):
-    return fr"{directory_path }\{name}_arkid.csv"
+# def csv_arkid_filepath(directory_path, name):
+#     return fr"{directory_path }\{name}_arkid.csv"
+
+def csv_filepath(name, has_arkid=False):
+    if has_arkid:
+        return fr"{workspace_directory.csv_files_arkid_directory_path}\{name}_arkid.csv"
+    else:
+        return fr"{workspace_directory.csv_files_directory_path }\{name}.csv"
 
 def log_raise_error(msg):
     output(msg, 1)

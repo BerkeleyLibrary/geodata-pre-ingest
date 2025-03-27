@@ -53,8 +53,8 @@ class BatchCreateGeoblacklightTool(object):
             val1 = workspace_directory.projected_batch_directory_path
 
             csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path       
-            val2 = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'main')
-            val3 = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'resp')
+            val2 = common_helper.csv_filepath('main', True)
+            val3 = common_helper.csv_filepath('resp', True)
             
             val4 = workspace_directory.results_directory_path
         for i, val in enumerate([val0, val1, val2, val3, val4]):

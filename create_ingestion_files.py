@@ -310,8 +310,8 @@ tif_exts = [".tif", ".tfw", ".prj", ".tif.ovr"]
 # 2)  moving ingenstion geoblacklight.json and collection geoblacklight.json to OGP directory
 ################################################################################################
 def run_tool():
-    csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path  
-    main_csv_arkid_filepath = common_helper.csv_arkid_filepath(csv_files_arkid_directory_path, 'main')
+    # csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path  
+    main_csv_arkid_filepath = common_helper.csv_filepath('main', True)
     common_helper.verify_workspace_and_files([main_csv_arkid_filepath])
  
     common_helper.output(fr"*** Starting to create result files to  {workspace_directory.results_directory_path}")
