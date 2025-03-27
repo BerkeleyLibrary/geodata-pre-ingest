@@ -2,12 +2,11 @@
 import arcpy
 import common_helper
 import workspace_directory
-import batch_export_csv
 import constants
 
 class BatchExportCsvTool(object):
     def __init__(self):
-        self.label = "2 - Run to export metadata to a CSV file"
+        self.label = "2 - Run to export metadata from source data to CSV files"
 
     def getParameterInfo(self):
         from_source_path_param = arcpy.Parameter(
@@ -37,11 +36,6 @@ class BatchExportCsvTool(object):
         return
 
     def execute(self, parameters, messages):
-        if common_helper.no_processing_directory_selected(parameters, 2):
-           return
-        
-        source_batch_directory_path = workspace_directory.source_batch_directory_path
-        csv_files_directory_path = workspace_directory.csv_files_directory_path 
-        batch_export_csv.run_tool(source_batch_directory_path, csv_files_directory_path)
+        common_helper.call_run_tool('batch_export_csv')
         return
     

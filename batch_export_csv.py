@@ -8,12 +8,19 @@ import csv
 import re
 from datetime import date, datetime
 import common_helper
+import workspace_directory
 
 
 ################################################################################################
 #                             1. class and function                                             #
 ################################################################################################
 
+def export_to_csv_files():
+    all_geofile_paths = geofile_paths()
+    csv_files_directory_path = workspace_directory.csv_files_directory_path
+    export_main_csv(csv_files_directory_path, all_geofile_paths)
+    export_resp_csv(csv_files_directory_path, all_geofile_paths)
+        
 
 def export_main_csv(csv_files_directory_path, geofile_paths):
     rows = [GeoFile(geofile_path).main_row() for geofile_path in geofile_paths]
@@ -31,7 +38,8 @@ def export_resp_csv(csv_files_directory_path, geofile_paths):
     write_csv(file, GeoFile.resp_headers, rows)
 
 
-def geofile_paths(source_batch_directory_path):
+def geofile_paths():
+    source_batch_directory_path = workspace_directory.source_batch_directory_path
     shapefile_paths = get_filepaths(source_batch_directory_path,".shp")
     tiffile_paths = get_filepaths(source_batch_directory_path,".tif")
     if shapefile_paths and tiffile_paths:
@@ -499,10 +507,16 @@ GeoFile.main_elements = main_elements
 #     C:\process_data\csv_files\resp.csv
 ################################################################################################
 
-def run_tool(source_batch_directory_path, csv_files_directory_path):
-    common_helper.output(fr"Starting to export csv file from - {source_batch_directory_path}")
-    if common_helper.verify_setup([], [source_batch_directory_path, csv_files_directory_path]):
-        all_geofile_paths = geofile_paths(source_batch_directory_path)
-        export_main_csv(csv_files_directory_path, all_geofile_paths)
-        export_resp_csv(csv_files_directory_path, all_geofile_paths)
-        common_helper.output(fr"Completed to export csv file from - {source_batch_directory_path}")
+def run_tool():
+    resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
+    main_csv_arkid_filepath = common_helper.csv_filepath('main', True)
+  
+    common_helper.verify_workspace_and_files([main_csv_arkid_filepath, resp_csv_arkid_filepath])
+    export_to_csv_files()
+
+    # # common_helper.output(fr"Starting to export csv file from - {source_batch_directory_path}")
+    # # if common_helper.verify_setup([], [source_batch_directory_path, csv_files_directory_path]):
+    # all_geofile_paths = geofile_paths(source_batch_directory_path)
+    # export_main_csv(csv_files_directory_path, all_geofile_paths)
+    # export_resp_csv(csv_files_directory_path, all_geofile_paths)
+        
