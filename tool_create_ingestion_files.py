@@ -53,10 +53,7 @@ class CreateIngestionFilesTool(object):
         return
 
     def execute(self, parameters, messages):
-        try:
-            create_ingestion_files.run_tool()
-        except:
-            arcpy.AddError("An error occurred while executing tool_create_ingetion_files.")
-            raise
+        common_helper.call_run_tool('create_ingestion_files')
+        return
 
   

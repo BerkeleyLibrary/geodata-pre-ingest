@@ -12,6 +12,7 @@ from tool_assign_arkid import AssignArkidTool
 from tool_check_csv_files import CheckCsvFilesTool
 from tool_batch_create_iso19139 import BatchCreateIso19139Tool
 from tool_batch_create_geoblacklight import BatchCreateGeoblacklightTool
+from tool_create_ingestion_files import CreateIngestionFilesTool
 
 class Toolbox:
     def __init__(self):
@@ -27,4 +28,5 @@ class Toolbox:
                       AssignArkidTool, 
                       CheckCsvFilesTool,
                       BatchCreateIso19139Tool,
-                      BatchCreateGeoblacklightTool]
+                      BatchCreateGeoblacklightTool,
+                      CreateIngestionFilesTool]

@@ -309,48 +309,10 @@ tif_exts = [".tif", ".tfw", ".prj", ".tif.ovr"]
 # 1)  after creating data.zip file for each arkid related geofile, get data.zip file size, and update it to geoblacklight.json
 # 2)  moving ingenstion geoblacklight.json and collection geoblacklight.json to OGP directory
 ################################################################################################
-def run_tool():
-    # csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path  
+def run_tool(): 
     main_csv_arkid_filepath = common_helper.csv_filepath('main', True)
     common_helper.verify_workspace_and_files([main_csv_arkid_filepath])
- 
-    common_helper.output(fr"*** Starting to create result files to  {workspace_directory.results_directory_path}")
+   
     create_files(main_csv_arkid_filepath)
     add_gbl_fileSize_s()
     get_ogp_geoblakcligh_files()
-    common_helper.output("*** Result files created successfully.")
-
-# def output(msg):
-#     logging.info(msg)
-#     print(msg)
-
-
-# def verify_setup(file_paths, directory_paths):
-#     verified = True
-#     for file_path in file_paths:
-#         if not Path(file_path).is_file():
-#             print(f"{file_path} does not exit.")
-#             verified = False
-
-#     for directory_path in directory_paths:
-#         if not Path(directory_path).is_dir():
-#             print(f"{directory_path} does not exit.")
-#             verified = False
-#     return verified
-
-
-# script_name = "7 - create_ingestion_files.py"
-# output(f"***starting  {script_name}")
-
-# if verify_setup(
-#     [main_csv_arkid_filepath],
-#     [
-#         source_batch_directory_path,
-#         projected_batch_directory_path,
-#         result_directory_path,
-#     ],
-# ):
-#     create_files()
-#     add_gbl_fileSize_s()
-#     get_ogp_geoblakcligh_files()
-#     output(f"***completed {script_name}")
