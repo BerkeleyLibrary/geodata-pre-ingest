@@ -318,7 +318,7 @@ def run_tool():
     create_files(main_csv_arkid_filepath)
     add_gbl_fileSize_s()
     get_ogp_geoblakcligh_files()
-    common_helper.output("*** Result files created successfully.", 0)
+    common_helper.output("*** Result files created successfully.")
 
 # def output(msg):
 #     logging.info(msg)
