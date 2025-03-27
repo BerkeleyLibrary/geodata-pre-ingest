@@ -52,5 +52,5 @@ class AssignArkidTool(object):
         return
 
     def execute(self, parameters, messages):
-        common_helper.call_run('assign_arkid')
+        common_helper.call_run_tool('assign_arkid')
         return

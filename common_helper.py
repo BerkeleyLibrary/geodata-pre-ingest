@@ -117,7 +117,7 @@ def verify_workspace_and_files(file_paths):
 
 
 
-def call_run(module_name):
+def call_run_tool(module_name):
     try:
         output(fr"*** Starting to run tool_{module_name}.")
         module = importlib.import_module(module_name)
