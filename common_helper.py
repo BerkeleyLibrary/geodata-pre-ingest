@@ -112,8 +112,6 @@ def workspace_directories_exist():
 def verify_workspace_and_files(file_paths):
     all_files_exist = paths_exist(file_paths)
     all_directories_exist =  workspace_directories_exist()
-    output(str(all_files_exist))
-    output(str(all_directories_exist))
     if not (all_files_exist and all_directories_exist):
         raise ValueError(fr"Missing workspace direcotories and CSV files, please see the log file '{workspace_directory.log_directory_path}/process.txt' for details")
 
@@ -121,9 +119,11 @@ def verify_workspace_and_files(file_paths):
 
 def call_run(module_name):
     try:
+        output(fr"*** Starting to run tool_{module_name}.")
         module = importlib.import_module(module_name)
         if hasattr(module, 'run_tool'):
             module.run_tool()
+            output(fr"*** Completed to run tool_{module_name}.")
         else:
             output(f"{module_name}.py does not have a 'run_tool' method.", 2)
     except ModuleNotFoundError:

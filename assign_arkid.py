@@ -158,7 +158,7 @@ def run_tool():
     main_csv_filepath = common_helper.csv_filepath('main')
     resp_csv_filepath = common_helper.csv_filepath('resp')     
    
-    common_helper.output(fr"*** Starting to assign arkids to {workspace_directory.csv_files_arkid_directory_path}")
+    # common_helper.output(fr"*** Starting to assign arkids to {workspace_directory.csv_files_arkid_directory_path}")
     common_helper.verify_workspace_and_files([main_csv_filepath, resp_csv_filepath])
      
     resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
@@ -179,7 +179,7 @@ def run_tool():
     if not is_assigned( resp_csv_arkid_filepath):
         msg = f" {resp_csv_filepath} has missing arkids, please check log file for details"
         common_helper.output(msg, 1)
-        return
-
-    # If all steps completed successfully
-    common_helper.output("*** ARKID assignment completed successfully.")
+        # return
+    
+    # # If all steps completed successfully
+    # common_helper.output("*** ARKID assignment completed successfully.")
