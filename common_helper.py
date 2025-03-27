@@ -1,5 +1,6 @@
 import arcpy
 from pathlib import Path
+import importlib
 import constants
 import workspace_directory
 
@@ -115,6 +116,25 @@ def verify_workspace_and_files(file_paths):
     output(str(all_directories_exist))
     if not (all_files_exist and all_directories_exist):
         raise ValueError(fr"Missing workspace direcotories and CSV files, please see the log file '{workspace_directory.log_directory_path}/process.txt' for details")
+
+
+
+def call_run(module_name):
+    try:
+        module = importlib.import_module(module_name)
+        if hasattr(module, 'run_tool'):
+            module.run_tool()
+        else:
+            output(f"{module_name}.py does not have a 'run_tool' method.", 2)
+    except ModuleNotFoundError:
+        output(f"Module {module_name} not found.", 2)
+        raise
+    except Exception as e:
+        arcpy.AddError(f"An error occurred while executing tool_{module_name}.")
+        raise
+
+
+
 
 # import os
 # os.environ["p_path"] = r"\\napa\mapsshare\yzhou\process_data"

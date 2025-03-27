@@ -52,11 +52,5 @@ class AssignArkidTool(object):
         return
 
     def execute(self, parameters, messages):
-        if common_helper.no_processing_directory_selected(parameters, 3):
-           return
-        if not common_helper.files_existed([parameters[0].value, parameters[1].value]):
-           return
-        
-        assign_arkid.run_tool()
+        common_helper.call_run('assign_arkid')
         return
-    
