@@ -337,16 +337,11 @@ def main_csv_headers():
     return verification_headers
 
     
-def run_tool():
-    csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path
-    main_csv_arkid_filepath = fr"{csv_files_arkid_directory_path}\main_arkid.csv"
-    resp_csv_arkid_filepath = fr"{csv_files_arkid_directory_path}\resp_arkid.csv"     
-       
-    if not common_helper.verify_setup( [main_csv_arkid_filepath, resp_csv_arkid_filepath], [csv_files_arkid_directory_path]):
-        return 
-    
-    common_helper.output(fr"*** Starting to verify CSV files from {csv_files_arkid_directory_path}")
+def run_tool():    
+    resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
+    main_csv_arkid_filepath = common_helper.csv_filepath('main', True)
+    common_helper.verify_workspace_and_files([main_csv_arkid_filepath, resp_csv_arkid_filepath])
+
     setup_main_csv_headers(main_csv_arkid_filepath)
     validate_csv_files(main_csv_arkid_filepath,  resp_csv_arkid_filepath)
     reset_main_csv_headers()
-    common_helper.output("*** CSV files verifcation completed .", 0)

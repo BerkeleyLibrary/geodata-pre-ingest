@@ -46,12 +46,7 @@ class CheckCsvFilesTool(object):
         return
 
     def execute(self, parameters, messages):
-        if common_helper.no_processing_directory_selected(parameters, 3):
-           raise Exception(constants.no_prcess_path_selected)
-          
-        if not common_helper.files_existed([parameters[0].value, parameters[1].value]):
-           raise Exception("Missing CSV files")
-           
-        check_csv_files.run_tool()
+        common_helper.call_run_tool('check_csv_files')
         return
+    
     
