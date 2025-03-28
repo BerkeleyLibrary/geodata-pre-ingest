@@ -8,18 +8,18 @@ import workspace_directory
 
 
 # batch_directory = fr"\\napa\mapsshare\yzhou\process_data\source_batch"
-def verify_setup(file_paths, directory_paths):
-    verified = True
-    for file_path in file_paths:
-        if not Path(file_path).is_file():
-            print(f"{file_path} does not exit.")
-            verified = False
+# def verify_setup(file_paths, directory_paths):
+#     verified = True
+#     for file_path in file_paths:
+#         if not Path(file_path).is_file():
+#             print(f"{file_path} does not exit.")
+#             verified = False
 
-    for directory_path in directory_paths:
-        if not Path(directory_path).is_dir():
-            print(f"{directory_path} does not exit.")
-            verified = False
-    return verified
+#     for directory_path in directory_paths:
+#         if not Path(directory_path).is_dir():
+#             print(f"{directory_path} does not exit.")
+#             verified = False
+#     return verified
 
 def no_processing_directory_selected(parameters, n):
     if  any(param.value == constants.no_prcess_path_selected for param in parameters[:n]):

@@ -39,12 +39,7 @@ class PrepareBatchTool(object):
         return
 
     def execute(self, parameters, messages):
-        if common_helper.no_processing_directory_selected(parameters, 2):
-           return
-            
-        source_batch_directory_path = workspace_directory.source_batch_directory_path
-        projected_batch_directory_path = workspace_directory.projected_batch_directory_path
-        prepare_batch.run_tool(source_batch_directory_path, projected_batch_directory_path)
+        common_helper.call_run_tool('prepare_batch')
         return
 
     

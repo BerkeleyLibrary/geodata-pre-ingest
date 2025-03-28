@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from shutil import copyfile, rmtree
 import common_helper
+import workspace_directory
 
 ################################################################################################
 #                             1. class                                                         #
@@ -10,9 +11,9 @@ import common_helper
 
 
 class SourceBatch(object):
-    def __init__(self, source_dir):
+    def __init__(self):
        
-        self.source_dir = source_dir
+        self.source_dir = workspace_directory.source_batch_directory_path
         self.all_file_paths = self._file_paths("")
         self._geo_init()
 
@@ -20,7 +21,7 @@ class SourceBatch(object):
         self._check_missed_files()
         self._check_exceptional_files()
 
-    def prepare(self, workspace_path, referenced_filepath):
+    def prepare(self, referenced_filepath):
         def is_projected(file_path):
             if Path(file_path).is_file():
                 sr_name = arcpy.Describe(file_path).spatialReference.name
@@ -37,7 +38,7 @@ class SourceBatch(object):
 
         for geofile_path in self.geofile_paths:
             name = os.path.basename(geofile_path)
-            prj_geofile_path = os.path.join(workspace_path, name)
+            prj_geofile_path = os.path.join(workspace_directory.projected_batch_directory_path, name)
             if is_projected(prj_geofile_path):
                 continue
             projection(geofile_path, prj_geofile_path)
@@ -49,7 +50,7 @@ class SourceBatch(object):
             # self.logging.info(
             #     f"No shapefiles or raster files found in {self.source_dir}."
             # )
-            common_helper.output(f"No shapefiles or raster files found in {self.source_dir}.")
+            common_helper.output(f"No shapefiles or raster files found in {self.source_dir}.", 2)
             raise ValueError(
                 "Directory should include either shapefiles or raster files"
             )
@@ -112,15 +113,15 @@ class SourceBatch(object):
             if stem not in geo_stems:
                 paths.append(file_path)
         self._logger("Exceptional files:", paths)
-        # common_helper.output(f"Exceptional files:: { paths.join(';')}")
+        # common_helper.output(f"Exceptional files: { paths.join(';')}")
 
     def _logger(self, summary, list):
         if len(list) > 0:
             # self.logging.info(f"{summary}")
-            common_helper.output(f"{summary}")
+            common_helper.output(f"{summary}", 2)
             for l in list:
                 # self.logging.info(f"{l}")
-                common_helper.output(f"{l}")
+                common_helper.output(f"{l}", 2)
 
     def _missed_file_paths_from_geofile(self, geofile, expected_exts):
         paths = []
@@ -170,21 +171,16 @@ DEFAULT_VECTOR_EXTS = [
     ".sbx",
     ".shp",
     ".shp.xml",
-    ".shx",
+    ".shx"
 ]
   
-
-def run_tool(source_batch_directory_path, projected_batch_directory_path):
+def run_tool():
     # A GeoTIFF projected file
     geotif_referenced_filepath = (
         r"C:\pre-ingestion-config\projected_raster\5048_1_reproject4326.tif"
     )
-    if common_helper.verify_setup(
-        [geotif_referenced_filepath],
-        [source_batch_directory_path, projected_batch_directory_path],
-    ):
-        common_helper.output("Starting preparing batch")
-        source_batch = SourceBatch(source_batch_directory_path)
-        source_batch.check_files() # todo: move this to other tool
-        source_batch.prepare(projected_batch_directory_path, geotif_referenced_filepath)
-        common_helper.output("Completed preparing batch")
+    common_helper.verify_workspace_and_files([geotif_referenced_filepath])
+    
+    source_batch = SourceBatch()
+    source_batch.check_files() # todo: move this to other tool
+    source_batch.prepare(geotif_referenced_filepath)
