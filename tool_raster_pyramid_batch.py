@@ -29,9 +29,13 @@ class CreateRasterPyramidTool(object):
         return
 
     def execute(self, parameters, messages):
-        if common_helper.no_processing_directory_selected(parameters, 1):
-           return
-        
-        projected_batch_directory_path = workspace_directory.projected_batch_directory_path
-        raster_pyramid_batch.run_tool(projected_batch_directory_path)
+        common_helper.call_run_tool('raster_pyramid_batch')
         return
+
+
+        # if common_helper.no_processing_directory_selected(parameters, 1):
+        #    return
+        
+        # projected_batch_directory_path = workspace_directory.projected_batch_directory_path
+        # raster_pyramid_batch.run_tool(projected_batch_directory_path)
+        # return

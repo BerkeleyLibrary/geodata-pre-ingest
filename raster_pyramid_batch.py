@@ -1,6 +1,7 @@
 import arcpy
 import os
 import common_helper
+import workspace_directory
 
 
 ################################################################################################
@@ -8,13 +9,14 @@ import common_helper
 ################################################################################################
 
 
-def add_pyramid_to_geotif_files(projected_batch_directory_path):
-    geofiles = get_filepaths(projected_batch_directory_path, ".tif")
+def add_pyramid_to_geotif_files():
+    geofiles = get_filepaths(".tif")
     for geofile in geofiles:
         pyramid(geofile)
 
 
-def get_filepaths(directory, ext):
+def get_filepaths(ext):
+    directory = workspace_directory.projected_batch_directory_path
     paths = []
     for file in os.listdir(directory):
         if file.endswith(ext):
@@ -44,12 +46,18 @@ def pyramid(filepath):
 ################################################################################################
 #                                2. Run options                                                #
 ################################################################################################
-def run_tool(projected_batch_directory_path):
-    if common_helper.verify_setup(
-            [],
-            [projected_batch_directory_path],
-        ):
-            common_helper.output(f"Starting to add pyramids to: {projected_batch_directory_path}")
-            add_pyramid_to_geotif_files(projected_batch_directory_path)
-            common_helper.output(f"Completed to adding pyramids to: {projected_batch_directory_path}")
+def run_tool():
+    add_pyramid_to_geotif_files()
+        
+
+
+
+# def run_tool(projected_batch_directory_path):
+#     if common_helper.verify_setup(
+#             [],
+#             [projected_batch_directory_path],
+#         ):
+#             common_helper.output(f"Starting to add pyramids to: {projected_batch_directory_path}")
+#             add_pyramid_to_geotif_files(projected_batch_directory_path)
+#             common_helper.output(f"Completed to adding pyramids to: {projected_batch_directory_path}")
 
