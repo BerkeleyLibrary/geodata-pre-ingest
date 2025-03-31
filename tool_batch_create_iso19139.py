@@ -2,7 +2,6 @@
 import arcpy
 import common_helper
 import workspace_directory
-import batch_create_iso19139
 import constants
 
 class BatchCreateIso19139Tool(object):

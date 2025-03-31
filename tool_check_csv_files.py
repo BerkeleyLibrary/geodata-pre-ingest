@@ -2,7 +2,6 @@
 import arcpy
 import common_helper
 import workspace_directory
-import check_csv_files
 import constants
 
 

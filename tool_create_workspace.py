@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import arcpy
 import os
-import common_helper
 
 class CreateWorkspaceTool(object):
     def __init__(self):

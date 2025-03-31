@@ -2,7 +2,6 @@
 import arcpy
 import common_helper
 import workspace_directory
-import create_ingestion_files
 import constants
 
 class CreateIngestionFilesTool(object):

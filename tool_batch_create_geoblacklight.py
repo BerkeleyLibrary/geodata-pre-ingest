@@ -2,7 +2,6 @@
 import arcpy
 import common_helper
 import workspace_directory
-import batch_create_geoblacklight
 import constants
 
 class BatchCreateGeoblacklightTool(object):

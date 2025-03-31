@@ -1,12 +1,7 @@
 
 import arcpy
-# from lib import common_helper
-# from lib import workspace_directory
-# from lib import assign_arkid
-# from lib import constants
 import common_helper
 import workspace_directory
-import assign_arkid
 import constants
 
 

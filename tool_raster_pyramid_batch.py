@@ -1,6 +1,5 @@
 import arcpy
 import workspace_directory
-import raster_pyramid_batch
 import common_helper
 import constants
 
@@ -31,11 +30,3 @@ class CreateRasterPyramidTool(object):
     def execute(self, parameters, messages):
         common_helper.call_run_tool('raster_pyramid_batch')
         return
-
-
-        # if common_helper.no_processing_directory_selected(parameters, 1):
-        #    return
-        
-        # projected_batch_directory_path = workspace_directory.projected_batch_directory_path
-        # raster_pyramid_batch.run_tool(projected_batch_directory_path)
-        # return

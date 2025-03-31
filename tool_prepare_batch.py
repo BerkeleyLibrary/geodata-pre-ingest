@@ -1,9 +1,7 @@
 
 import arcpy
-import logging
 import common_helper
 import workspace_directory
-import prepare_batch
 import constants
 
 class PrepareBatchTool(object):
