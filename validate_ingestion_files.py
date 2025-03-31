@@ -1,17 +1,10 @@
 import os
-# import logging
 import json
 from pathlib import Path
 import jsonschema
 from jsonschema import validate
 import workspace_directory
 import common_helper
-
-
-################################################################################################
-#                             1. functions                                                      #
-################################################################################################
-
 
 def validate_files(dir_path):
     basenames = ["map.zip", "data.zip", "geoblacklight.json", "iso19139.xml"]
@@ -27,7 +20,6 @@ def validate_files(dir_path):
         for filepath in missing_filepaths:
             common_helper.output(filepath, 1)
 
-
 def validate_geoblacklight_schema(dir_path, arrdvark_schema_file_path):
     if Path(dir_path).is_dir():
         schema = ""
@@ -42,16 +34,6 @@ def validate_geoblacklight_schema(dir_path, arrdvark_schema_file_path):
                 data = json.load(d)
                 validate_output(data, schema, json_file)
 
-
-# def file_paths(dir_path, ext):
-#     return [
-#         os.path.join(dirpath, filename)
-#         for dirpath, dirs, filenames in os.walk(dir_path)
-#         for filename in filenames
-#         if filename.endswith(ext)
-#     ]
-
-
 def get_filepaths(directory, ext):
     paths = []
     for file in os.listdir(directory):
@@ -60,7 +42,6 @@ def get_filepaths(directory, ext):
             if os.path.isfile(file_path):
                 paths.append(file_path)
     return paths
-
 
 def validate_output(data, schema, json_file):
     try:
@@ -83,35 +64,6 @@ def validate_output(data, schema, json_file):
     except:
         common_helper.output(f"exception in validating {json_file}", 2)
 
-
-################################################################################################
-#                                 2. set up                                                    #
-################################################################################################
-
-# # 1. Please provide your local log file path
-# logfile = r"C:\process_data\log\process.log"
-# logging.basicConfig(
-#     filename=logfile,
-#     level=logging.INFO,
-#     format="%(message)s - %(asctime)s - %(funcName)s - %(levelname)s",
-# )
-# # 1. arrdvark json schema file
-# arrdvark_schema_file_path = (
-#     r"C:\pre-ingestion-config\geoblacklight-schema-aardvark.json"
-# )
-
-# # 2. geofiles geoblackligt json file location
-# geoblacklight_directory_path = r"C:\process_data\results\ingestion_files"
-
-# # 3. collection geoblackligt json file location
-# geoblacklight_collection_directory_path = (
-#     r"C:\process_data\results\ingestion_collection_files"
-# )
-
-
-################################################################################################
-#                                3. Run                                              #
-################################################################################################
 def run_tool():
     # 1. arrdvark json schema file
     arrdvark_schema_file_path = (
@@ -129,36 +81,3 @@ def run_tool():
     validate_geoblacklight_schema(geoblacklight_directory_path, arrdvark_schema_file_path)
     validate_geoblacklight_schema(geoblacklight_collection_directory_path, arrdvark_schema_file_path)
     validate_files(geoblacklight_directory_path)
-
-
-# def output(msg):
-#     logging.info(msg)
-#     print(msg)
-
-
-# def verify_setup(file_paths, directory_paths):
-#     verified = True
-#     for file_path in file_paths:
-#         if not Path(file_path).is_file():
-#             print(f"{file_path} does not exit.")
-#             verified = False
-
-#     for directory_path in directory_paths:
-#         if not Path(directory_path).is_dir():
-#             print(f"{directory_path} does not exit.")
-#             verified = False
-#     return verified
-
-
-# script_name = "8 - validate_ingestion_files.py"
-# output(f"***starting  {script_name}")
-
-# if verify_setup(
-#     [arrdvark_schema_file_path],
-#     [geoblacklight_directory_path],
-# ):
-#     validate_geoblacklight_schema(geoblacklight_directory_path)
-#     validate_geoblacklight_schema(geoblacklight_collection_directory_path)
-
-#     validate_files(geoblacklight_directory_path)
-#     output(f"***completed {script_name}")
