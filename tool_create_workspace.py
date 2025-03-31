@@ -28,13 +28,16 @@ class CreateWorkspaceTool(object):
         return [ dir_path_param,  workspace_name_param]
 
     def execute(self, parameters, messages):
-        process_dir =  parameters[0].valueAsText
-        process_worksapce = os.path.join(process_dir, parameters[1].valueAsText )
-        os.makedirs(process_worksapce, exist_ok=True)
+
+        workspace_directory =  parameters[0].valueAsText
+        workspace_name = os.path.join(workspace_directory, parameters[1].valueAsText )
+
+        arcpy.AddMessage(f"✅ *** Starting to create data processing directory and sub-directories at {workspace_directory}")
+        os.makedirs(workspace_name, exist_ok=True)
 
         sub_dir_names = ["csv_files", "csv_files_arkid", "results", "source_batch","log","source_batch_projected"]
-        for name in sub_dir_names:
-            path = os.path.join(process_worksapce, name)
+        for dir_name in sub_dir_names:
+            path = os.path.join(workspace_name, dir_name)
             os.makedirs(path, exist_ok=True)
-        arcpy.AddMessage(f"✅ Data processing directory and workspace is created at {process_dir}")
+        arcpy.AddMessage(f"✅ *** Data processing directory and sub-directories have been created at {workspace_directory}")
         return
