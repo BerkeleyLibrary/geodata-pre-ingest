@@ -13,6 +13,7 @@ from tool_check_csv_files import CheckCsvFilesTool
 from tool_batch_create_iso19139 import BatchCreateIso19139Tool
 from tool_batch_create_geoblacklight import BatchCreateGeoblacklightTool
 from tool_create_ingestion_files import CreateIngestionFilesTool
+from tool_validate_ingestion_files import ValidateIngestionFilesTool
 
 class Toolbox:
     def __init__(self):
@@ -29,4 +30,5 @@ class Toolbox:
                       CheckCsvFilesTool,
                       BatchCreateIso19139Tool,
                       BatchCreateGeoblacklightTool,
-                      CreateIngestionFilesTool]
+                      CreateIngestionFilesTool,
+                      ValidateIngestionFilesTool]
