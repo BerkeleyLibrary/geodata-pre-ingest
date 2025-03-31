@@ -4,13 +4,6 @@ import os
 from pathlib import Path
 import json
 import common_helper
-import workspace_directory
-
-
-################################################################################################
-#                             1. functions                                                      #
-################################################################################################
-
 
 def mint_ark():
     config = ez_config()
@@ -56,7 +49,6 @@ def add_mint_arkid(row):
     arkid = mint_ark()
     row["arkid"] = arkid
 
-
 def add_hash_arkid(row, hash):
     geofile = row.get("geofile")
     arkid = hash.get(geofile)
@@ -66,11 +58,6 @@ def add_hash_arkid(row, hash):
         msg = f"No arkid in main_csv file for geofile {geofile}"
         common_helper.log_raise_error(msg)
 
-# def log_raise_error(msg):
-#     common_helper.output(msg, 1)
-#     raise ValueError(msg)
-
-
 def is_assigned(file):
     with open(file, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
@@ -79,7 +66,6 @@ def is_assigned(file):
             if not arkid:
                 return False
     return True
-
 
 def assign_main_csv(main_csv_filepath, main_csv_arkid_filepath):
     rows = rows_with_arkid(main_csv_filepath)
@@ -96,7 +82,6 @@ def assign_resp_csv(resp_csv_filepath, new_main_csv_filepath, new_resp_csv_filep
     else:
         common_helper.log_raise_error(f"no arkid or geofile ?, please check {new_main_csv_filepath}")
 
-
 def arkid_hash(csv_filepath):
     hash = {}
     with open(csv_filepath, "r", encoding="utf-8") as csvfile:
@@ -104,7 +89,6 @@ def arkid_hash(csv_filepath):
         for row in csv_reader:
             hash[row.get("geofile")] = row.get("arkid")
     return hash
-
 
 def write_csv(filename_path, rows):
     if rows:
@@ -116,11 +100,9 @@ def write_csv(filename_path, rows):
     else:
         common_helper.log_raise_error(f"no rows to add to {filename_path}")
 
-
 def ez_config():
     with open(config_file, "r") as f:
         return json.load(f)
-
 
 def new_filepath(csv_files_arkid_directory_path, filepath):
     filename = Path(filepath).stem
@@ -132,7 +114,6 @@ config_file = r"C:\pre-ingestion-config/config.json"
 
 
 ################################################################################################
-#                                2. instructions
 #  a. mian_csv file:
 #                a new arkid will be minted and added to the 'arkid' column for each row,
 #                unless a row has an existing arkid.
@@ -156,9 +137,7 @@ config_file = r"C:\pre-ingestion-config/config.json"
 
 def run_tool():
     main_csv_filepath = common_helper.csv_filepath('main')
-    resp_csv_filepath = common_helper.csv_filepath('resp')     
-   
-    # common_helper.output(fr"*** Starting to assign arkids to {workspace_directory.csv_files_arkid_directory_path}")
+    resp_csv_filepath = common_helper.csv_filepath('resp')        
     common_helper.verify_workspace_and_files([main_csv_filepath, resp_csv_filepath])
      
     resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
@@ -179,7 +158,3 @@ def run_tool():
     if not is_assigned( resp_csv_arkid_filepath):
         msg = f" {resp_csv_filepath} has missing arkids, please check log file for details"
         common_helper.output(msg, 1)
-        # return
-    
-    # # If all steps completed successfully
-    # common_helper.output("*** ARKID assignment completed successfully.")

@@ -5,11 +5,6 @@ from shutil import copyfile, rmtree
 import common_helper
 import workspace_directory
 
-################################################################################################
-#                             1. class                                                         #
-################################################################################################
-
-
 class SourceBatch(object):
     def __init__(self):
        
@@ -47,18 +42,12 @@ class SourceBatch(object):
         shapefile_paths = self._file_paths(".shp")
         tiffile_paths = self._file_paths(".tif")
         if not shapefile_paths and not tiffile_paths:
-            # self.logging.info(
-            #     f"No shapefiles or raster files found in {self.source_dir}."
-            # )
             common_helper.output(f"No shapefiles or raster files found in {self.source_dir}.", 2)
             raise ValueError(
                 "Directory should include either shapefiles or raster files"
             )
 
         if shapefile_paths and tiffile_paths:
-            # self.logging.info(
-            #     f"Mixing shapefiles and raster files found in {self.source_dir}."
-            # )
             common_helper.output(f"Mixing shapefiles and raster files found in {self.source_dir}.")
             raise ValueError(
                 "Both shapefiles and raster files found. Directory should include either shapefiles or raster files."
@@ -94,7 +83,6 @@ class SourceBatch(object):
             paths.extend(
                 self._missed_file_paths_from_geofile(geofile_path, expected_exts)
             )
-        # common_helper.output(f"Missing files: { paths.join(';')}")
         self._logger("Missing files:", paths)
 
     def _check_exceptional_files(self):
@@ -113,14 +101,11 @@ class SourceBatch(object):
             if stem not in geo_stems:
                 paths.append(file_path)
         self._logger("Exceptional files:", paths)
-        # common_helper.output(f"Exceptional files: { paths.join(';')}")
 
     def _logger(self, summary, list):
         if len(list) > 0:
-            # self.logging.info(f"{summary}")
             common_helper.output(f"{summary}", 2)
             for l in list:
-                # self.logging.info(f"{l}")
                 common_helper.output(f"{l}", 2)
 
     def _missed_file_paths_from_geofile(self, geofile, expected_exts):
@@ -148,7 +133,6 @@ class SourceBatch(object):
             sr.loadFromString(wkt)
             arcpy.Project_management(from_filepath, to_filepath, sr)
         except Exception as ex:
-            # self.logging.info(f"{from_filepath} - {ex}")
             common_helper.output(f"{from_filepath} - {ex}")
 
     def raster_projection(self, from_filepath, to_filepath, referenced_filepath):
@@ -156,7 +140,6 @@ class SourceBatch(object):
             sr = arcpy.Describe(referenced_filepath).spatialReference
             arcpy.ProjectRaster_management(from_filepath, to_filepath, sr)
         except Exception as ex:
-            # self.logging.info(f"{from_filepath} - {ex}")
             common_helper.output(f"{from_filepath} - {ex}")
 
 

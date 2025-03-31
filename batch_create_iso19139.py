@@ -399,11 +399,7 @@ class RowTransformer(object):
         RoleCd = self._add_element(role, "RoleCd")
         RoleCd.set("value", "005")
 
-
-################################################################################################
-#                    2.      constant variables                                                #
-################################################################################################
-
+# Set up constant variables 
 TRANSFORM_MAIN_HEADERS = [
     "dct_title_s",
     "dct_alternative_sm",
@@ -514,4 +510,5 @@ def run_tool():
     resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
     main_csv_arkid_filepath = common_helper.csv_filepath('main', True)
     common_helper.verify_workspace_and_files([main_csv_arkid_filepath, resp_csv_arkid_filepath])
+
     create_iso19139_files(main_csv_arkid_filepath, resp_csv_arkid_filepath)

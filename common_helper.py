@@ -21,22 +21,22 @@ import workspace_directory
 #             verified = False
 #     return verified
 
-def no_processing_directory_selected(parameters, n):
-    if  any(param.value == constants.no_prcess_path_selected for param in parameters[:n]):
-        arcpy.AddError("Error: ❌ no data processing directory was selected from tool 0.1")
-        return True
-    return False
+# def no_processing_directory_selected(parameters, n):
+#     if  any(param.value == constants.no_prcess_path_selected for param in parameters[:n]):
+#         arcpy.AddError("Error: ❌ no data processing directory was selected from tool 0.1")
+#         return True
+#     return False
 
 # def not_selected(parameters, n):
 #     if  any(param.value == constants.no_prcess_path_selected for param in parameters[:n]):
 #         return True
 #     return False
 
-def verify_selected_source_batch_directory(parameters, n):
-    if any(param.value == constants.no_prcess_path_selected for param in parameters[:n]):
-        arcpy.AddError("Error: ❌ no data processing directory was selected from tool 0.1, please select one")
-        raise arcpy.ExecuteError
-    return
+# def verify_selected_source_batch_directory(parameters, n):
+#     if any(param.value == constants.no_prcess_path_selected for param in parameters[:n]):
+#         arcpy.AddError("Error: ❌ no data processing directory was selected from tool 0.1, please select one")
+#         raise arcpy.ExecuteError
+#     return
    
 def output(msg, level=0):
     logger = workspace_directory.logger
@@ -59,22 +59,22 @@ def output(msg, level=0):
         arcpy.AddError(val)
 
 
-def files_existed(file_paths):
-    file_existed = True
-    for file_path in file_paths:
-        if not Path(file_path).is_file():
-            msg = f"{file_path} does not exit."
-            output(msg, 1)
-            file_existed  = False
-    return  file_existed 
+# def files_existed(file_paths):
+#     file_existed = True
+#     for file_path in file_paths:
+#         if not Path(file_path).is_file():
+#             msg = f"{file_path} does not exit."
+#             output(msg, 1)
+#             file_existed  = False
+#     return  file_existed 
 
-def directories_existed(directory_paths):
-    exist = True
-    for directory_path in directory_paths:
-        if not Path(directory_path).is_dir():
-            msg = f"{directory_path} does not exit."
-            exist = False
-    return exist
+# def directories_existed(directory_paths):
+#     exist = True
+#     for directory_path in directory_paths:
+#         if not Path(directory_path).is_dir():
+#             msg = f"{directory_path} does not exit."
+#            exist = False
+#     return exist 
 # def csv_arkid_filepath(directory_path, name):
 #     return fr"{directory_path }\{name}_arkid.csv"
 

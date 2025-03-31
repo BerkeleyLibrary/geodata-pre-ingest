@@ -1,5 +1,4 @@
 import os
-# import logging
 import json
 import csv
 from shutil import rmtree
@@ -8,10 +7,6 @@ import arcpy
 import workspace_directory
 import common_helper
 
-
-################################################################################################
-#                             1. functions                                                      #
-################################################################################################
 def create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath):
     all_resp_rows = csv_rows(resp_csv_arkid_filepath)
     field_names = geoblacklight_field_names(main_csv_arkid_filepath)
@@ -349,16 +344,7 @@ def resp_names(rows, code):
                 names.append(o_name)
     return [name.strip() for name in names if name]
 
-
-# def log_raise_error(text):
-#     logging.info(text)
-#     raise ValueError(text)
-
-
-################################################################################################
-#                    2. set constant variables to class methods                                #
-################################################################################################
-
+# Set up constant variables to class methods                                
 ISOTOPIC = {
     "001": "Farming",
     "002": "Biota",
@@ -401,7 +387,6 @@ HOSTS_SECURE = {
     "doc": '"http://lccn.loc.gov/sh85035852":"https://spatial.lib.berkeley.edu/metadata/',
 }
 
-
 CAPITALIZED_FIELDS = [
     "dct_spatial_sm",
     "dct_subject_sm",
@@ -433,70 +418,6 @@ RELATION_FIELDS = [
 def run_tool():
     resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
     main_csv_arkid_filepath = common_helper.csv_filepath('main', True)
-  
     common_helper.verify_workspace_and_files([main_csv_arkid_filepath, resp_csv_arkid_filepath])
+    
     create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath)
-
-
-################################################################################################
-#                                 3. set up                                                    #
-################################################################################################
-
-# # 1. setup log file path
-# logfile = r"C:\process_data\log\process.log"
-# logging.basicConfig(
-#     filename=logfile,
-#     level=logging.INFO,
-#     format="%(message)s - %(asctime)s",
-# )
-
-# # 2. Source batch directory path
-# source_batch_directory_path = r"C:\process_data\source_batch"
-
-# # 3. Projected batch directory path
-# projected_batch_directory_path = r"C:\process_data\source_batch_projected"
-
-# # 4. please provide main csv and resp csv files here, check csv files in script "4 - check_csv_files.py", before running this script:
-# main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
-# resp_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\resp_arkid.csv"
-
-# # 5. please provide result directory path (the same as in "7 - create_ingestion_files.py")
-# #    this script will save collection's geoblacklight json files to ruesult_driectory_path
-# result_directory_path = r"C:\process_data\results"
-
-
-################################################################################################
-#                    4. Create a geoblacklight.json file for each  geofile                     #
-################################################################################################
-# def output(msg):
-#     logging.info(msg)
-#     print(msg)
-
-
-# def verify_setup(file_paths, directory_paths):
-#     verified = True
-#     for file_path in file_paths:
-#         if not Path(file_path).is_file():
-#             print(f"{file_path} does not exit.")
-#             verified = False
-
-#     for directory_path in directory_paths:
-#         if not Path(directory_path).is_dir():
-#             print(f"{directory_path} does not exit.")
-#             verified = False
-#     return verified
-
-
-# script_name = "6 - batch_create_geoblacklight.py"
-# output(f"***starting  {script_name}")
-
-# if verify_setup(
-#     [logfile, main_csv_arkid_filepath, resp_csv_arkid_filepath],
-#     [
-#         projected_batch_directory_path,
-#         source_batch_directory_path,
-#         result_directory_path,
-#     ],
-# ):
-#     create_geoblacklight_files()
-#     output(f"***completed {script_name}")

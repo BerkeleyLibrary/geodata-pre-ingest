@@ -1,16 +1,10 @@
 import os
-import logging
 from pathlib import Path
 import csv
 from dateutil.parser import parse
 from datetime import datetime
-import workspace_directory
 import common_helper
 
-
-################################################################################################
-#                             1. functions                                                     #
-################################################################################################
 def validate_csv_files(main_csv_arkid_filepath, resp_csv_arkid_filepath):
     validate_csv(main_csv_arkid_filepath, func_invalid_cols_from_main_row)
     validate_csv(resp_csv_arkid_filepath, func_invalid_cols_from_resp_row)
@@ -234,10 +228,7 @@ def invalid_resp_cols(row):
 
     return []
 
-
-################################################################################################
-#                                 2. variables                                                 #
-################################################################################################
+# Defined variables                                                 
 MAIN_REQUIRED_FIELDS = [
     "arkid",
     "geofile",
@@ -293,37 +284,7 @@ LS_dct_format_s = [
 
 RESP_REQUIRED_FIELDS = ["arkid", "geofile"]
 RESP_ROLE = range(1, 12)
-################################################################################################
-#                                 3. setup                                                    #
-################################################################################################
-# 1. setup log file path
-# logfile = r"C:\process_data\log\process.log"
-# logging.basicConfig(
-#     filename=logfile,
-#     level=logging.INFO,
-#     format="%(message)s - %(asctime)s",
-# )
 
-# # 2. Please provide csv files path which have been assigned with arkids
-# main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
-
-# resp_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\resp_arkid.csv"
-
-
-# # 3. please provide result directory path:
-# result_directory_path = r"C:\process_data\csv_files_arkid"
-
-################################################################################################
-#                             4. Run
-# Example:
-# input:
-#       main_csv_arkid_filepath = r"D:\results\main_sample_raster_arkids8.csv"
-#       resp_csv_arkid_filepath = r"D:\results\main_sample_raster1.csv"
-#       result_directory_path = r"D:\results"
-# any invalid field values found from above csv files will be written to:
-#      D:\results\main_sample_raster_arkids8.txt
-#      D:\results\main_sample_raster1.txt
-################################################################################################
 verification_headers = []
 def setup_main_csv_headers(main_csvfile_path):
     global verification_headers
@@ -336,7 +297,16 @@ def reset_main_csv_headers():
 def main_csv_headers():
     return verification_headers
 
-    
+################################################################################################
+# Run Example:
+# input:
+#       main_csv_arkid_filepath = r"D:\results\main_sample_raster_arkids8.csv"
+#       resp_csv_arkid_filepath = r"D:\results\main_sample_raster1.csv"
+#       result_directory_path = r"D:\results"
+# any invalid field values found from above csv files will be written to:
+#      D:\results\main_sample_raster_arkids8.txt
+#      D:\results\main_sample_raster1.txt
+################################################################################################
 def run_tool():    
     resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
     main_csv_arkid_filepath = common_helper.csv_filepath('main', True)

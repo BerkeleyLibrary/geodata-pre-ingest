@@ -1,5 +1,4 @@
 import os
-# import logging
 from pathlib import Path
 import csv
 import zipfile
@@ -8,9 +7,6 @@ import json
 import common_helper
 import workspace_directory
 
-################################################################################################
-#                             1. functions                                                     #
-################################################################################################
 def create_files(main_csv_arkid_filepath):
     ingestion_dir_path = final_directory_path("ingestion")
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
@@ -61,13 +57,11 @@ def update_json_file(json_file_path, data_file_path):
         msg =  f"Cannot update gbl_fileSizes, please check existing of files{json_file_path}; {data_file_path}; - {ex}"
         common_helper.output(msg, 1)
 
-
 def get_file_size(file_path):
     file_size_bytes = os.path.getsize(file_path)
     file_size_mb = file_size_bytes / (1024.0**2)
     size = round(file_size_mb, 2)
     return str(size)
-
 
 def save_pretty_json_file(file_path, json_data):
     with open(file_path, "w+", encoding="utf-8") as geo_json:
@@ -81,7 +75,6 @@ def save_pretty_json_file(file_path, json_data):
             )
         )
 
-
 def move_geoblacklight(dir_name, to_dir_path):
     from_dir_path = os.path.join(workspace_directory.results_directory_path, dir_name)
     if os.path.exists(from_dir_path):
@@ -94,7 +87,6 @@ def move_geoblacklight(dir_name, to_dir_path):
                         ogp_file_path = os.path.join(to_dir_path, relative_path)
                         os.makedirs(os.path.dirname(ogp_file_path), exist_ok=True)
                         copy2(file_path, ogp_file_path)
-
 
 def create_files_on_row(row, ingestion_dir_path):
     geofile_path = row.get("geofile")
@@ -243,52 +235,19 @@ def get_extensions(geofile_path):
     }
     return dic.get(ext)
 
-
-# def log_raise_error(text):
-#     logging.info(text)
-#     raise ValueError(text)
-
-
 def ensure_empty_directory(pathname):
     if Path(pathname).is_dir():
         rm_contents(pathname)
     else:
         os.makedirs(pathname)
 
-
-################################################################################################
-#                                 2. setup                                                    #
-################################################################################################
 # attention: needs to finalize extesions here
 shp_exts = [".cpg", ".dbf", ".prj", ".sbn", ".sbx", ".shp", ".shx"]
 tif_exts = [".tif", ".tfw", ".prj", ".tif.ovr"]
 # [".tif", ".aux", ".tfw", ".prj", ".tif.ovr"]
 
-# # 1. setup log file path
-# logfile = r"C:\process_data\log\process.log"
-# logging.basicConfig(
-#     filename=logfile,
-#     level=logging.INFO,
-#     format="%(message)s - %(asctime)s",
-# )
-
-# # 2. Please provide source data directory path,
-# #    make sure this is the source directory path from which main.csv file was generated.
-# source_batch_directory_path = r"C:\process_data\source_batch"
-
-# # 3. Please provide projected data directory path
-# projected_batch_directory_path = r"C:\process_data\source_batch_projected"
-
-
-# # 4. Please provide main csv file path which have been assigned with arkids
-# main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
-
-# # 5. please provide result directory path
-# result_directory_path = r"C:\process_data\results"
-
-
 ################################################################################################
-#                             3. Create ingestion files
+#  Example to create ingestion files
 #  Based on input:
 #  source_batch_directory_path = r"C:\process_data\source_batch"
 #  projected_batch_directory_path = r"C:\process_data\source_batch_projected"

@@ -1,7 +1,6 @@
 import arcpy
 from arcpy import metadata as md
 import os
-# import logging
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import csv
@@ -9,11 +8,6 @@ import re
 from datetime import date, datetime
 import common_helper
 import workspace_directory
-
-
-################################################################################################
-#                             1. class and function                                             #
-################################################################################################
 
 def export_to_csv_files():
     all_geofile_paths = geofile_paths()
@@ -80,7 +74,6 @@ class GeoFile(object):
     def __init__(self, geofile):
         self.geofile = geofile
         self.root = self._root()
-        # self.logging = logging
 
     def main_row(self):
         row = [
@@ -120,7 +113,6 @@ class GeoFile(object):
             item_md.saveAsXML(xml_filepath, "EXACT_COPY")
         except Exception as ex:
             msg = f"Could not export to xml file from {self.geofile}"
-            # self.logging.info(f"{msg} - {ex}")
             common_helper.output(msg, 1)
             raise ValueError(msg)
 
@@ -317,10 +309,7 @@ class GeoFile(object):
     def rm_dollar_sign(self, str):
         return str.replace("$", "_")
 
-
-################################################################################################
-#                             2. constant variables                                                        #
-################################################################################################
+# defined variables                                                        
 ls_gbl_resourceClass_sm = {
     "Collections",
     "Datasets",
@@ -484,11 +473,6 @@ resp_elements = {
     "instruction": {"path": "rpCntInfo/cntInstr", "type": "string"},
 }
 
-
-################################################################################################
-#                                 3. set up                                                    #
-################################################################################################
-
 # initial csv infomation to class variables
 GeoFile.resp_headers = resp_headers
 GeoFile.resp_elements = resp_elements
@@ -496,9 +480,8 @@ GeoFile.main_headers = main_headers
 GeoFile.main_elements = main_elements
 
 
-################################################################################################
-#                                4. Run                                                       #
-# Example:
+################################################################################################                                                    #
+# To run example:
 # input directory paths:
 #      source_batch_directory_path = r"C:\process_data\source_batch"
 #      csv_files_directory_path = r"C:\process_data\csv_files"
@@ -513,10 +496,4 @@ def run_tool():
   
     common_helper.verify_workspace_and_files([main_csv_arkid_filepath, resp_csv_arkid_filepath])
     export_to_csv_files()
-
-    # # common_helper.output(fr"Starting to export csv file from - {source_batch_directory_path}")
-    # # if common_helper.verify_setup([], [source_batch_directory_path, csv_files_directory_path]):
-    # all_geofile_paths = geofile_paths(source_batch_directory_path)
-    # export_main_csv(csv_files_directory_path, all_geofile_paths)
-    # export_resp_csv(csv_files_directory_path, all_geofile_paths)
         
