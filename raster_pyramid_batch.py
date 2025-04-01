@@ -3,12 +3,6 @@ import os
 import common_helper
 import workspace_directory
 
-
-################################################################################################
-#                             1. functions                                                        #
-################################################################################################
-
-
 def add_pyramid_to_geotif_files():
     geofiles = get_filepaths(".tif")
     for geofile in geofiles:
@@ -38,26 +32,8 @@ def pyramid(filepath):
             filepath, pylevel, skipfirst, resample, compress, quality, skipexist
         )
     except Exception as ex:
-        # logging.info(f"{filepath} - {ex}")
         common_helper.output(f"{filepath} - {ex}", 1)
 
-
-
-################################################################################################
-#                                2. Run options                                                #
-################################################################################################
 def run_tool():
     add_pyramid_to_geotif_files()
-        
-
-
-
-# def run_tool(projected_batch_directory_path):
-#     if common_helper.verify_setup(
-#             [],
-#             [projected_batch_directory_path],
-#         ):
-#             common_helper.output(f"Starting to add pyramids to: {projected_batch_directory_path}")
-#             add_pyramid_to_geotif_files(projected_batch_directory_path)
-#             common_helper.output(f"Completed to adding pyramids to: {projected_batch_directory_path}")
-
+       
