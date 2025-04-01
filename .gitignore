@@ -5,3 +5,4 @@ __pycache__/*
 .mypy_cache
 geodata_processing_tools.gdb
 temp
+Index/geodata_processing_tools_index/*
