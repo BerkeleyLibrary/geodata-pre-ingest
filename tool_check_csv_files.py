@@ -7,7 +7,7 @@ import constants
 
 class CheckCsvFilesTool(object):
     def __init__(self):
-        self.label = "4 - Run verification on the main and responsible CSV files that have assigned arkids"
+        self.label = "4 - Run to verify the main and responsible CSV files which have been assigned arkids"
 
     def getParameterInfo(self):
         main_csv_path_param = arcpy.Parameter(

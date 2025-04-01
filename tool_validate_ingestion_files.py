@@ -6,7 +6,7 @@ import constants
 
 class ValidateIngestionFilesTool(object):
     def __init__(self):
-        self.label = "7 - Run to validate result files"
+        self.label = "8 - Run to validate result files"
 
     def getParameterInfo(self):
         result_directory_path_param = arcpy.Parameter(
