@@ -47,8 +47,8 @@ class CreateIngestionFilesTool(object):
              
             val2 = common_helper.csv_filepath('main', True) 
             val3 = workspace_directory.results_directory_path
-        for i, val in enumerate([val0, val1, val2, val3]):
-            parameters[i].value = val
+       
+        common_helper.assign_parameters(parameters, [val0, val1, val2, val3])
         return
 
     def execute(self, parameters, messages):

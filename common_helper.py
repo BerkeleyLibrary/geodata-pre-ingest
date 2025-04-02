@@ -74,3 +74,7 @@ def call_run_tool(module_name):
     except Exception as e:
         arcpy.AddError(f"An error occurred while executing tool_{module_name}.")
         raise
+
+def assign_parameters(parameters, values):
+    for i, val in enumerate(values):
+        parameters[i].value = val

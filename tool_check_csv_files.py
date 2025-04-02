@@ -10,18 +10,6 @@ class CheckCsvFilesTool(object):
         self.label = "4 - Run to verify the main and responsible CSV files which have been assigned arkids"
 
     def getParameterInfo(self):
-        main_csv_path_param = arcpy.Parameter(
-            displayName="Main csv file",
-            name="From main csv file",
-            datatype="GPString",
-            direction="Output"
-        )    
-        responsible_csv_path_param = arcpy.Parameter(
-            displayName="Responsible csv file",
-            name="From responsible csv file",
-            datatype="GPString",
-            direction="Output"
-        )    
         csv_path_param = arcpy.Parameter(
             displayName="Check CSV files located at",
             name="To Directory",
@@ -29,19 +17,14 @@ class CheckCsvFilesTool(object):
             direction="Output"
 
         )
-        return [ main_csv_path_param, responsible_csv_path_param, csv_path_param]
+        return [csv_path_param]
 
     def updateParameters(self, parameters):
         val0 = constants.no_prcess_path_selected
-        val1 = val0
-        val2 = val0
         if (workspace_directory.source_batch_directory_path is not None):
-            csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path
-            val0 = fr"{csv_files_arkid_directory_path}\main_arkid.csv"
-            val1 = fr"{csv_files_arkid_directory_path}\resp_arkid.csv"     
-        parameters[0].value = val0
-        parameters[1].value = val1
-        parameters[2].value = csv_files_arkid_directory_path
+            val0 = workspace_directory.csv_files_arkid_directory_path
+        
+        parameters[0] = val0
         return
 
     def execute(self, parameters, messages):

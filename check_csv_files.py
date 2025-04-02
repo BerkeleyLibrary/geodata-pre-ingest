@@ -286,9 +286,9 @@ RESP_REQUIRED_FIELDS = ["arkid", "geofile"]
 RESP_ROLE = range(1, 12)
 
 verification_headers = []
-def setup_main_csv_headers(main_csvfile_path):
+def setup_main_csv_headers(main_csv_arkid_filepath):
     global verification_headers
-    verification_headers = csv_headers(main_csvfile_path)
+    verification_headers = csv_headers(main_csv_arkid_filepath)
 
 def reset_main_csv_headers():
     global verification_headers

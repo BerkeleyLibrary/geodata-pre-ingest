@@ -41,14 +41,11 @@ class BatchCreateIso19139Tool(object):
         val0 = val1 = val2 = val3 = constants.no_prcess_path_selected
         if (workspace_directory.source_batch_directory_path is not None):
             val0 = workspace_directory.source_batch_directory_path
-            val1 = workspace_directory.projected_batch_directory_path
-
-            # csv_files_arkid_directory_path = workspace_directory.csv_files_arkid_directory_path       
+            val1 = workspace_directory.projected_batch_directory_path  
             val2 = common_helper.csv_filepath('main', True)
             val3 = common_helper.csv_filepath('resp', True)
-            
-        for i, val in enumerate([val0, val1, val2, val3]):
-            parameters[i].value = val
+        
+        common_helper.assign_parameters(parameters, [val0, val1, val2, val3])
         return
 
     def execute(self, parameters, messages):

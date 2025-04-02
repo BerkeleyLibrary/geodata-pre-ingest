@@ -23,8 +23,8 @@ class CreateRasterPyramidTool(object):
         val = constants.no_prcess_path_selected
         if (workspace_directory.projected_batch_directory_path is not None):
             val = workspace_directory.projected_batch_directory_path            
-        parameters[0].value = val
         
+        parameters[0].value = val
         return
 
     def execute(self, parameters, messages):

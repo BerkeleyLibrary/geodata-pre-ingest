@@ -33,17 +33,12 @@ class AssignArkidTool(object):
         return [ from_main_csv_path_param, from_responsible_csv_path_param, to_csv_path_param]
 
     def updateParameters(self, parameters):
-        val0 = constants.no_prcess_path_selected
-        val1 = val0
-        val2 = val0
-        if (workspace_directory.source_batch_directory_path is not None):
-            csv_files_directory_path = workspace_directory.csv_files_directory_path
-            val0 = fr"{csv_files_directory_path}\main.csv"
-            val1 = fr"{csv_files_directory_path}\resp.csv"     
+        val0 = val1 = val2 = constants.no_prcess_path_selected
+        if (workspace_directory.source_batch_directory_path is not None):    
+            val0 = common_helper.csv_filepath('main')
+            val1 = common_helper.csv_filepath('resp')
             val2 = workspace_directory.csv_files_arkid_directory_path   
-        parameters[0].value = val0
-        parameters[1].value = val1
-        parameters[2].value = val2
+        common_helper.assign_parameters(parameters, [val0, val1, val2])
         return
 
     def execute(self, parameters, messages):

@@ -27,13 +27,12 @@ class PrepareBatchTool(object):
         return [ from_source_path_param, to_projected_path_param]
 
     def updateParameters(self, parameters):
-        val0= constants.no_prcess_path_selected
-        val1= val0
+        val0 = val1 = constants.no_prcess_path_selected
         if (workspace_directory.projected_batch_directory_path is not None):
             val0= workspace_directory.source_batch_directory_path
             val1= workspace_directory.projected_batch_directory_path            
-        parameters[0].value = val0
-        parameters[1].value = val1
+        
+        common_helper.assign_parameters(parameters, [val0, val1])
         return
 
     def execute(self, parameters, messages):
