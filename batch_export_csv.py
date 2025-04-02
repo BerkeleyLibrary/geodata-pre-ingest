@@ -480,9 +480,6 @@ GeoFile.main_headers = main_headers
 GeoFile.main_elements = main_elements
 
 def run_tool():
-    resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
-    main_csv_arkid_filepath = common_helper.csv_filepath('main', True)
-  
-    common_helper.verify_workspace_and_files([main_csv_arkid_filepath, resp_csv_arkid_filepath])
+    common_helper.verify_workspace_and_files([])
     export_to_csv_files()
         
