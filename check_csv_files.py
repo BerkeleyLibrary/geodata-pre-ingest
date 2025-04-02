@@ -297,16 +297,6 @@ def reset_main_csv_headers():
 def main_csv_headers():
     return verification_headers
 
-################################################################################################
-# Run Example:
-# input:
-#       main_csv_arkid_filepath = r"D:\results\main_sample_raster_arkids8.csv"
-#       resp_csv_arkid_filepath = r"D:\results\main_sample_raster1.csv"
-#       result_directory_path = r"D:\results"
-# any invalid field values found from above csv files will be written to:
-#      D:\results\main_sample_raster_arkids8.txt
-#      D:\results\main_sample_raster1.txt
-################################################################################################
 def run_tool():    
     resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
     main_csv_arkid_filepath = common_helper.csv_filepath('main', True)

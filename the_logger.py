@@ -2,7 +2,7 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
-# Called at the time when select data process path
+# Inital logger, this method is called when excuting tool "SelectWorkspaceTool"
 def setup_logger(log_dir, log_name="process.log"):        
     log_file = os.path.join(log_dir, log_name)
     logger = logging.getLogger("GeoblacklightLogger")

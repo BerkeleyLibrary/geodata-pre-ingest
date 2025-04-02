@@ -479,17 +479,6 @@ GeoFile.resp_elements = resp_elements
 GeoFile.main_headers = main_headers
 GeoFile.main_elements = main_elements
 
-
-################################################################################################                                                    #
-# To run example:
-# input directory paths:
-#      source_batch_directory_path = r"C:\process_data\source_batch"
-#      csv_files_directory_path = r"C:\process_data\csv_files"
-# output csv files:
-#     C:\process_data\csv_files\main.csv
-#     C:\process_data\csv_files\resp.csv
-################################################################################################
-
 def run_tool():
     resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
     main_csv_arkid_filepath = common_helper.csv_filepath('main', True)

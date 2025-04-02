@@ -1,8 +1,7 @@
 import os
-# from pathlib import Path
 from shutil import move
 
-# Move batch files and rename extentions with lower cases
+# Move batch files and rename extentions with lower cases (if applicable)
 def run_tool(from_directory_path, to_directory_path):
     for root, _, files in os.walk(from_directory_path):
         for file in files:
