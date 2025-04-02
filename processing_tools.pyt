@@ -14,6 +14,7 @@ from tool_batch_create_iso19139 import BatchCreateIso19139Tool
 from tool_batch_create_geoblacklight import BatchCreateGeoblacklightTool
 from tool_create_ingestion_files import CreateIngestionFilesTool
 from tool_validate_ingestion_files import ValidateIngestionFilesTool
+from tool_rename_and_move_files import RenameAndMoveFilesTool
 
 class Toolbox:
     def __init__(self):
@@ -21,7 +22,8 @@ class Toolbox:
         .pyt file)."""
         self.label = "GeoblacklightToolbox"
         self.alias = "geoblacklight_toolbox"    
-        self.tools = [CreateWorkspaceTool,
+        self.tools = [RenameAndMoveFilesTool,
+                      CreateWorkspaceTool,
                       SelectWorkspaceTool, 
                       PrepareBatchTool, 
                       CreateRasterPyramidTool, 

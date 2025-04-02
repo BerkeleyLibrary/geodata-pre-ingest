@@ -5,7 +5,7 @@ import workspace_directory
 
 class SelectWorkspaceTool(object):
     def __init__(self):
-        self.label = "0 .1 - Select a data processing directory"
+        self.label = "0 .2 - Select a data processing directory"
         self.description = "0.0 - "
 
     def getParameterInfo(self):
