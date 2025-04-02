@@ -5,7 +5,7 @@ import constants
 
 class CreateRasterPyramidTool(object):
     def __init__(self):
-        self.label = "1 .2 - Run to create raster pyramid for projected raster GeoTIFF files"
+        self.label = "1 .2 - Run to generate a raster pyramid for projected GeoTIFF files (if applicable)."
         self.title = "This is a title"
         
     def getParameterInfo(self):

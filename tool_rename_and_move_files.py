@@ -4,7 +4,7 @@ import rename_and_move_files
 
 class RenameAndMoveFilesTool(object):
     def __init__(self):
-        self.label = "0 .1 - Move files with lower case extensions"
+        self.label = "0 .1 - Move the batch and ensure filenames have lowercase extensions"
 
     def getParameterInfo(self):
         from_dir_path_param = arcpy.Parameter(
