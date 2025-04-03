@@ -89,6 +89,8 @@ def get_invalid_cols(row, hash, func):
 def get_value(row, fieldname):
     value = row.get(fieldname)
     if value:
+        if fieldname == "dct_accessRights_s":
+            return lowercase_first_letter(value)
         return value
     o_fieldname = f"{fieldname}_o"
     return row.get(o_fieldname)
@@ -179,7 +181,8 @@ def write_result_log_file(hash, csvfilepath):
             for l in ls:
                 file.write(f"{l[0]}: {l[1]} \n")
     
-   
+def lowercase_first_letter(s):
+    return s[:1].lower() + s[1:] if s else s
 
 # resp_csv -
 # 1. When role is 006 (originator), a row should have either an individual or organization value
@@ -251,7 +254,7 @@ LS_gbl_resourceClass_sm = [
     "Other",
 ]
 RG_dcat_theme_sm = range(1, 20)
-LS_dct_accessRights_s = ["Public", "Restricted"]
+LS_dct_accessRights_s = ["public", "restricted"]
 LS_dct_format_s = [
     "ArcGRID",
     "CD-ROM",

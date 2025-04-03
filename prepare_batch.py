@@ -104,9 +104,9 @@ class SourceBatch(object):
 
     def _logger(self, summary, list):
         if len(list) > 0:
-            common_helper.output(f"{summary}", 2)
+            common_helper.output(f"{summary}", 1)
             for l in list:
-                common_helper.output(f"{l}", 2)
+                common_helper.output(f"{l}", 1)
 
     def _missed_file_paths_from_geofile(self, geofile, expected_exts):
         paths = []
