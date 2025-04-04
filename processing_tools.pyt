@@ -5,7 +5,7 @@ from datetime import datetime
 from shutil import copyfile, rmtree
 from tool_create_workspace import CreateWorkspaceTool
 from tool_select_workspace import SelectWorkspaceTool
-from tool_prepare_batch import PrepareBatchTool
+from tool_source_batch_projection_transform import SourceBatchProjectionTransformTool
 from tool_raster_pyramid_batch import CreateRasterPyramidTool
 from tool_batch_export_csv import BatchExportCsvTool
 from tool_assign_arkid import AssignArkidTool
@@ -15,6 +15,7 @@ from tool_batch_create_geoblacklight import BatchCreateGeoblacklightTool
 from tool_create_ingestion_files import CreateIngestionFilesTool
 from tool_validate_ingestion_files import ValidateIngestionFilesTool
 from tool_rename_and_move_files import RenameAndMoveFilesTool
+from tool_source_batch_check import SourceBatchCheckTool
 
 class Toolbox:
     def __init__(self):
@@ -25,7 +26,7 @@ class Toolbox:
         self.tools = [RenameAndMoveFilesTool,
                       CreateWorkspaceTool,
                       SelectWorkspaceTool, 
-                      PrepareBatchTool, 
+                      SourceBatchProjectionTransformTool, 
                       CreateRasterPyramidTool, 
                       BatchExportCsvTool,
                       AssignArkidTool, 
@@ -33,4 +34,5 @@ class Toolbox:
                       BatchCreateIso19139Tool,
                       BatchCreateGeoblacklightTool,
                       CreateIngestionFilesTool,
-                      ValidateIngestionFilesTool]
+                      ValidateIngestionFilesTool,
+                      SourceBatchCheckTool]

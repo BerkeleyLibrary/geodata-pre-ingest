@@ -4,9 +4,9 @@ import common_helper
 import workspace_directory
 import constants
 
-class PrepareBatchTool(object):
+class SourceBatchProjectionTransformTool(object):
     def __init__(self):
-        self.label = "1 .1 - Run to prepare_batch"
+        self.label = "1 .1 - Run to transform the source data's projection."
         self.description = "1 .1 - prepare_batch - desc"
 
     def getParameterInfo(self):
@@ -36,7 +36,7 @@ class PrepareBatchTool(object):
         return
 
     def execute(self, parameters, messages):
-        common_helper.call_run_tool('prepare_batch')
+        common_helper.call_run_tool('source_batch_projection_transform')
         return
 
     

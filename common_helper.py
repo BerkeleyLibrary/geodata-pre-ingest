@@ -53,7 +53,7 @@ def workspace_directories_exist():
                        workspace_directory.log_directory_path]
     return paths_exist(directory_paths, False)
 
-def verify_workspace_and_files(file_paths):
+def verify_workspace_and_files(file_paths=[]):
     all_files_exist = paths_exist(file_paths)
     all_directories_exist =  workspace_directories_exist()
     if not (all_files_exist and all_directories_exist):
