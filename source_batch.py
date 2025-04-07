@@ -15,6 +15,7 @@ class SourceBatch(object):
     def check_files(self):
         self._check_missed_files()
         self._check_exceptional_files()
+        self._check_large_files()
 
     def prepare(self, referenced_filepath):
         def is_projected(file_path):
@@ -76,6 +77,20 @@ class SourceBatch(object):
         DEFAULT_RASTER_EXTS = [".tif", ".aux", ".tfw", ".tif.xml", ".tif.ovr"]
         return DEFAULT_VECTOR_EXTS if self.geo_type == "shp" else DEFAULT_RASTER_EXTS
 
+    def file_size(self, file_path):
+        size_in_bytes = os.path.getsize(file_path)
+        return size_in_bytes / (1024 ** 3)
+       
+
+    def _check_large_files(self):
+        paths = []
+     
+        for geofile_path in self.geofile_paths:
+           size = self.file_size(geofile_path)
+           if size > 2: paths.append(geofile_path)
+        self._logger("These source files are too large for publishing in Geoserver:", paths)
+
+
     def _check_missed_files(self):
         paths = []
         expected_exts = self._expected_exts()
@@ -101,6 +116,7 @@ class SourceBatch(object):
             if stem not in geo_stems:
                 paths.append(file_path)
         self._logger("Exceptional files:", paths)
+
 
     def _logger(self, summary, list):
         if len(list) > 0:
