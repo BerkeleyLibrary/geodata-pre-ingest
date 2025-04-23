@@ -1,5 +1,5 @@
 import os
-from shutil import move
+from shutil import copy2
 
 # Move batch files and rename extentions with lower cases (if applicable)
 def run_tool(from_directory_path, to_directory_path):
@@ -12,7 +12,7 @@ def run_tool(from_directory_path, to_directory_path):
                 rel_name = os.path.relpath(temp_file_path, from_directory_path)
                 dest_file_path = os.path.join(to_directory_path, rel_name)
                 os.makedirs(os.path.dirname(dest_file_path), exist_ok=True)
-                move(file_path, dest_file_path)
+                copy2(file_path, dest_file_path)
 
 
 def lowercase_extension(filename):

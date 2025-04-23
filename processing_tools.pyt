@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from pathlib import Path
-from datetime import datetime
-from shutil import copyfile, rmtree
 from tool_create_workspace import CreateWorkspaceTool
 from tool_select_workspace import SelectWorkspaceTool
 from tool_source_batch_projection_transform import SourceBatchProjectionTransformTool
@@ -14,7 +9,7 @@ from tool_batch_create_iso19139 import BatchCreateIso19139Tool
 from tool_batch_create_geoblacklight import BatchCreateGeoblacklightTool
 from tool_create_ingestion_files import CreateIngestionFilesTool
 from tool_validate_ingestion_files import ValidateIngestionFilesTool
-from tool_rename_and_move_files import RenameAndMoveFilesTool
+from tool_rename_and_copy_files import RenameAndCopyFilesTool
 from tool_source_batch_check import SourceBatchCheckTool
 
 class Toolbox:
@@ -23,7 +18,7 @@ class Toolbox:
         .pyt file)."""
         self.label = "GeoblacklightToolbox"
         self.alias = "geoblacklight_toolbox"    
-        self.tools = [RenameAndMoveFilesTool,
+        self.tools = [RenameAndCopyFilesTool,
                       CreateWorkspaceTool,
                       SelectWorkspaceTool, 
                       SourceBatchProjectionTransformTool, 

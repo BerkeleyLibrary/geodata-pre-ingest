@@ -1,10 +1,9 @@
 import arcpy
-import os
-import rename_and_move_files
+import rename_and_copy_files
 
-class RenameAndMoveFilesTool(object):
+class RenameAndCopyFilesTool(object):
     def __init__(self):
-        self.label = "0 .1 - Move the batch and ensure filenames have lowercase extensions"
+        self.label = "0 .1 - Copy the batch and ensure filenames have lowercase extensions"
 
     def getParameterInfo(self):
         from_dir_path_param = arcpy.Parameter(
@@ -31,6 +30,6 @@ class RenameAndMoveFilesTool(object):
         to_directory_path = parameters[1].valueAsText
 
         arcpy.AddMessage(f"✅ *** Starting to move batch files from {from_directory_path}")
-        rename_and_move_files.run_tool(from_directory_path, to_directory_path)
+        rename_and_copy_files.run_tool(from_directory_path, to_directory_path)
         arcpy.AddMessage(f"✅ *** Completed moving batch files from {from_directory_path} to {to_directory_path}")
         return
