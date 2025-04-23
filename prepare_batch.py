@@ -1,7 +1,6 @@
 import arcpy
 import os
 from pathlib import Path
-from shutil import copyfile, rmtree
 import common_helper
 import workspace_directory
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import arcpy
 import the_logger
 import workspace_directory
