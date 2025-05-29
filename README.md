@@ -10,5 +10,5 @@ Python scripts batch processing of shapefiles and GeoTIFF datasets, offering a r
 
 
 # How to use them
-    Running each script in ArcGIS Pro Notebook
+    Open the project "geodata_processing_tools.aprx" in ArcGIS Pro, then run the tools.
 

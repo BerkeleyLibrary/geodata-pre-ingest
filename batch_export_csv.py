@@ -1,29 +1,31 @@
 import arcpy
 from arcpy import metadata as md
 import os
-import logging
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import csv
 import re
 from datetime import date, datetime
+import common_helper
+import workspace_directory
 
+def export_to_csv_files():
+    all_geofile_paths = geofile_paths()
+    csv_files_directory_path = workspace_directory.csv_files_directory_path
+    export_main_csv(csv_files_directory_path, all_geofile_paths)
+    export_resp_csv(csv_files_directory_path, all_geofile_paths)
+        
 
-################################################################################################
-#                             1. class and function                                             #
-################################################################################################
-
-
-def export_main_csv(geofile_paths):
-    rows = [GeoFile(geofile_path, logging).main_row() for geofile_path in geofile_paths]
+def export_main_csv(csv_files_directory_path, geofile_paths):
+    rows = [GeoFile(geofile_path).main_row() for geofile_path in geofile_paths]
     file = os.path.join(csv_files_directory_path, "main.csv")
     write_csv(file, GeoFile.main_headers, rows)
 
 
-def export_resp_csv(geofile_paths):
+def export_resp_csv(csv_files_directory_path, geofile_paths):
     rows = []
     for geofile_path in geofile_paths:
-        resp_rows = GeoFile(geofile_path, logging).resp_rows()
+        resp_rows = GeoFile(geofile_path).resp_rows()
         rows.extend(resp_rows)
 
     file = os.path.join(csv_files_directory_path, "resp.csv")
@@ -31,8 +33,9 @@ def export_resp_csv(geofile_paths):
 
 
 def geofile_paths():
-    shapefile_paths = get_filepaths(".shp")
-    tiffile_paths = get_filepaths(".tif")
+    source_batch_directory_path = workspace_directory.source_batch_directory_path
+    shapefile_paths = get_filepaths(source_batch_directory_path,".shp")
+    tiffile_paths = get_filepaths(source_batch_directory_path,".tif")
     if shapefile_paths and tiffile_paths:
         raise ValueError(
             f"shapefiles and raster files found in the same sourece directory {source_batch_directory_path}"
@@ -40,7 +43,7 @@ def geofile_paths():
     return shapefile_paths if shapefile_paths else tiffile_paths
 
 
-def get_filepaths(ext):
+def get_filepaths(source_batch_directory_path,ext):
     paths = []
     for file in os.listdir(source_batch_directory_path):
         if file.endswith(ext):
@@ -68,10 +71,9 @@ class GeoFile(object):
     resp_headers = []
     resp_elements = {}
 
-    def __init__(self, geofile, logging):
+    def __init__(self, geofile):
         self.geofile = geofile
         self.root = self._root()
-        self.logging = logging
 
     def main_row(self):
         row = [
@@ -111,7 +113,7 @@ class GeoFile(object):
             item_md.saveAsXML(xml_filepath, "EXACT_COPY")
         except Exception as ex:
             msg = f"Could not export to xml file from {self.geofile}"
-            self.logging.info(f"{msg} - {ex}")
+            common_helper.output(msg, 1)
             raise ValueError(msg)
 
     def column_from_main_elements(self, header):
@@ -307,10 +309,7 @@ class GeoFile(object):
     def rm_dollar_sign(self, str):
         return str.replace("$", "_")
 
-
-################################################################################################
-#                             2. constant variables                                                        #
-################################################################################################
+# defined variables                                                        
 ls_gbl_resourceClass_sm = {
     "Collections",
     "Datasets",
@@ -474,66 +473,13 @@ resp_elements = {
     "instruction": {"path": "rpCntInfo/cntInstr", "type": "string"},
 }
 
-
-################################################################################################
-#                                 3. set up                                                    #
-################################################################################################
-
 # initial csv infomation to class variables
 GeoFile.resp_headers = resp_headers
 GeoFile.resp_elements = resp_elements
 GeoFile.main_headers = main_headers
 GeoFile.main_elements = main_elements
 
-# 1. Please provide your local log file path
-logfile = r"C:\process_data\log\process.log"
-logging.basicConfig(
-    filename=logfile,
-    level=logging.INFO,
-    format="%(message)s - %(asctime)s",
-)
-
-# 2. Please provide source data directory path
-source_batch_directory_path = r"C:\process_data\source_batch"
-
-# 3. please provide result directory path:
-csv_files_directory_path = r"C:\process_data\csv_files"
-
-
-################################################################################################
-#                                4. Run                                                       #
-# Example:
-# input directory paths:
-#      source_batch_directory_path = r"C:\process_data\source_batch"
-#      csv_files_directory_path = r"C:\process_data\csv_files"
-# output csv files:
-#     C:\process_data\csv_files\main.csv
-#     C:\process_data\csv_files\resp.csv
-################################################################################################
-def output(msg):
-    logging.info(msg)
-    print(msg)
-
-
-def verify_setup(file_paths, directory_paths):
-    verified = True
-    for file_path in file_paths:
-        if not Path(file_path).is_file():
-            print(f"{file_path} does not exit.")
-            verified = False
-
-    for directory_path in directory_paths:
-        if not Path(directory_path).is_dir():
-            print(f"{directory_path} does not exit.")
-            verified = False
-    return verified
-
-
-script_name = "2 - batch_export_csv.py"
-output(f"***starting  {script_name}")
-
-if verify_setup([], [source_batch_directory_path, csv_files_directory_path]):
-    all_geofile_paths = geofile_paths()
-    export_main_csv(all_geofile_paths)
-    export_resp_csv(all_geofile_paths)
-    output(f"***completed {script_name}")
+def run_tool():
+    common_helper.verify_workspace_and_files([])
+    export_to_csv_files()
+        

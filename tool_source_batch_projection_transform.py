@@ -1,0 +1,42 @@
+
+import arcpy
+import common_helper
+import workspace_directory
+import constants
+
+class SourceBatchProjectionTransformTool(object):
+    def __init__(self):
+        self.label = "1 .1 - Run to transform the source data's projection."
+        self.description = "1 .1 - prepare_batch - desc"
+
+    def getParameterInfo(self):
+        from_source_path_param = arcpy.Parameter(
+            displayName="Projected from below source batch directory",
+            name="From Directory",
+            datatype="GPString",
+            direction="Output"
+        )    
+        to_projected_path_param = arcpy.Parameter(
+            displayName="To this directory",
+            name="To Directory",
+            datatype="GPString",
+            direction="Output"
+
+        )
+        
+        return [ from_source_path_param, to_projected_path_param]
+
+    def updateParameters(self, parameters):
+        val0 = val1 = constants.no_prcess_path_selected
+        if (workspace_directory.projected_batch_directory_path is not None):
+            val0= workspace_directory.source_batch_directory_path
+            val1= workspace_directory.projected_batch_directory_path            
+        
+        common_helper.assign_parameters(parameters, [val0, val1])
+        return
+
+    def execute(self, parameters, messages):
+        common_helper.call_run_tool('source_batch_projection_transform')
+        return
+
+    

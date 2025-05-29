@@ -1,21 +1,17 @@
 import os
-import logging
 from pathlib import Path
 import csv
 from dateutil.parser import parse
 from datetime import datetime
+import common_helper
 
-
-################################################################################################
-#                             1. functions                                                     #
-################################################################################################
-def validate_csv_files():
+def validate_csv_files(main_csv_arkid_filepath, resp_csv_arkid_filepath):
     validate_csv(main_csv_arkid_filepath, func_invalid_cols_from_main_row)
     validate_csv(resp_csv_arkid_filepath, func_invalid_cols_from_resp_row)
 
 
 def validate_csv(csv_filepath, func):
-    row_hash = {}
+    invalid_row_hash = {}
     num = 1
     with open(csv_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
@@ -25,13 +21,12 @@ def validate_csv(csv_filepath, func):
             if len(invalid_cols):
                 arkid = row.get("arkid")
                 key = f"line->{num}, arkid->{arkid}:"
-                row_hash[key] = invalid_cols
-    if row_hash:
-        filepath = file_name(csv_filepath, result_directory_path)
-        print(f"{csv_filepath} is not valid. Please check details in {filepath}")
-        write_file(row_hash, filepath)
+                invalid_row_hash[key] = invalid_cols
+    if invalid_row_hash:
+        write_result_log_file(invalid_row_hash, csv_filepath)
     else:
-        print(f"{csv_filepath} is valid.")
+        msg = f"{csv_filepath} is valid."
+        common_helper.output(msg, 0)
 
 
 # resp csv file has no *_O column names
@@ -94,6 +89,8 @@ def get_invalid_cols(row, hash, func):
 def get_value(row, fieldname):
     value = row.get(fieldname)
     if value:
+        if fieldname == "dct_accessRights_s":
+            return lowercase_first_letter(value)
         return value
     o_fieldname = f"{fieldname}_o"
     return row.get(o_fieldname)
@@ -103,7 +100,7 @@ def f_v(fieldname, value, word="or"):
     fieldname_o = f"{fieldname}_o"
     new_name = (
         f"{fieldname} {word} {fieldname_o}"
-        if fieldname_o in main_csv_headers
+        if fieldname_o in main_csv_headers()
         else fieldname
     )
     return [new_name, value]
@@ -167,19 +164,25 @@ def csv_headers(csv_filepath):
         return csv_reader.fieldnames
 
 
-def file_name(csvfilepath, output_dir):
+def file_name(csvfilepath):
+    output_dir = Path(csvfilepath).parent
     name = Path(csvfilepath).stem
     return os.path.join(output_dir, f"{name}_log.txt")
 
+def write_result_log_file(hash, csvfilepath):
+    filepath = file_name(csvfilepath)
+    msg = f"{csvfilepath} is not valid. Please check details in {filepath}"
+    common_helper.output(msg, 1)
 
-def write_file(hash, filepath):
     with open(filepath, "w", encoding="utf-8") as file:
         file.write(f"\n Invalid fields:\n")
         for k, ls in hash.items():
             file.write(f"\n {k}:\n")
             for l in ls:
                 file.write(f"{l[0]}: {l[1]} \n")
-
+    
+def lowercase_first_letter(s):
+    return s[:1].lower() + s[1:] if s else s
 
 # resp_csv -
 # 1. When role is 006 (originator), a row should have either an individual or organization value
@@ -228,10 +231,7 @@ def invalid_resp_cols(row):
 
     return []
 
-
-################################################################################################
-#                                 2. variables                                                 #
-################################################################################################
+# Defined variables                                                 
 MAIN_REQUIRED_FIELDS = [
     "arkid",
     "geofile",
@@ -254,7 +254,7 @@ LS_gbl_resourceClass_sm = [
     "Other",
 ]
 RG_dcat_theme_sm = range(1, 20)
-LS_dct_accessRights_s = ["Public", "Restricted"]
+LS_dct_accessRights_s = ["public", "restricted"]
 LS_dct_format_s = [
     "ArcGRID",
     "CD-ROM",
@@ -287,66 +287,24 @@ LS_dct_format_s = [
 
 RESP_REQUIRED_FIELDS = ["arkid", "geofile"]
 RESP_ROLE = range(1, 12)
-################################################################################################
-#                                 3. setup                                                    #
-################################################################################################
-# 1. setup log file path
-logfile = r"C:\process_data\log\process.log"
-logging.basicConfig(
-    filename=logfile,
-    level=logging.INFO,
-    format="%(message)s - %(asctime)s",
-)
 
-# 2. Please provide csv files path which have been assigned with arkids
-main_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\main_arkid.csv"
+verification_headers = []
+def setup_main_csv_headers(main_csv_arkid_filepath):
+    global verification_headers
+    verification_headers = csv_headers(main_csv_arkid_filepath)
 
-resp_csv_arkid_filepath = r"C:\process_data\csv_files_arkid\resp_arkid.csv"
+def reset_main_csv_headers():
+    global verification_headers
+    verification_headers = []
 
+def main_csv_headers():
+    return verification_headers
 
-# 3. please provide result directory path:
-result_directory_path = r"C:\process_data\csv_files_arkid"
+def run_tool():    
+    resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
+    main_csv_arkid_filepath = common_helper.csv_filepath('main', True)
+    common_helper.verify_workspace_and_files([main_csv_arkid_filepath, resp_csv_arkid_filepath])
 
-
-################################################################################################
-#                             4. Run
-# Example:
-# input:
-#       main_csv_arkid_filepath = r"D:\results\main_sample_raster_arkids8.csv"
-#       resp_csv_arkid_filepath = r"D:\results\main_sample_raster1.csv"
-#       result_directory_path = r"D:\results"
-# any invalid field values found from above csv files will be written to:
-#      D:\results\main_sample_raster_arkids8.txt
-#      D:\results\main_sample_raster1.txt
-################################################################################################
-def output(msg):
-    logging.info(msg)
-    print(msg)
-
-
-def verify_setup(file_paths, directory_paths):
-    verified = True
-    for file_path in file_paths:
-        if not Path(file_path).is_file():
-            print(f"{file_path} does not exit.")
-            verified = False
-
-    for directory_path in directory_paths:
-        if not Path(directory_path).is_dir():
-            print(f"{directory_path} does not exit.")
-            verified = False
-    return verified
-
-
-main_csv_headers = []
-
-
-script_name = "4 - check_csv_files.py"
-output(f"***starting  {script_name}")
-
-if verify_setup(
-    [main_csv_arkid_filepath, resp_csv_arkid_filepath], [result_directory_path]
-):
-    main_csv_headers = csv_headers(main_csv_arkid_filepath)
-    validate_csv_files()
-    output(f"***completed {script_name}")
+    setup_main_csv_headers(main_csv_arkid_filepath)
+    validate_csv_files(main_csv_arkid_filepath,  resp_csv_arkid_filepath)
+    reset_main_csv_headers()

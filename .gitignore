@@ -1,1 +1,9 @@
-files/
+GpMessages
+*.pyc
+__pycache__/*
+.backups
+.mypy_cache
+geodata_processing_tools.gdb
+temp
+Index/geodata_processing_tools_index/*
+Index/geodata_processing_tools_index/geodata_processing_tools/*

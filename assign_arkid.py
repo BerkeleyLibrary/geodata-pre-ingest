@@ -1,15 +1,9 @@
 import requests
-import logging
 import csv
 import os
 from pathlib import Path
 import json
-
-
-################################################################################################
-#                             1. functions                                                      #
-################################################################################################
-
+import common_helper
 
 def mint_ark():
     config = ez_config()
@@ -23,11 +17,11 @@ def mint_ark():
             # eg. "ark:/99999/fk4m34f494"
             return response.text.split("/")[-1]
         else:
-            log_raise_error(
+            common_helper.log_raise_error(
                 f"Mint arkid request failed. Status code: {response.status_code}"
             )
     except requests.RequestException as e:
-        log_raise_error(f"Failed to make a mint arkid request: {e}")
+        common_helper.log_raise_error(f"Failed to make a mint arkid request: {e}")
 
 
 def rows_with_arkid(csv_path, hash=None):
@@ -44,17 +38,16 @@ def rows_with_arkid(csv_path, hash=None):
 
         return rows
     except FileNotFoundError as e:
-        log_raise_error(f"File not found: {csv_path} {e}")
+        common_helper.log_raise_error(f"File not found: {csv_path} {e}")
     except csv.Error as e:
-        log_raise_error(f"CSV Error while reading file: {csv_path} {e}")
+        common_helper.log_raise_error(f"CSV Error while reading file: {csv_path} {e}")
     except Exception as e:
-        log_raise_error(f"Unexpected error while reading file: {csv_path} {e}")
+        common_helper.log_raise_error(f"Unexpected error while reading file: {csv_path} {e}")
 
 
 def add_mint_arkid(row):
     arkid = mint_ark()
     row["arkid"] = arkid
-
 
 def add_hash_arkid(row, hash):
     geofile = row.get("geofile")
@@ -62,14 +55,8 @@ def add_hash_arkid(row, hash):
     if arkid:
         row["arkid"] = arkid
     else:
-        logging.info(f"No arkid in main_csv file for geofile {geofile}")
-        raise ValueError
-
-
-def log_raise_error(msg):
-    logging.exception(msg)
-    raise ValueError(msg)
-
+        msg = f"No arkid in main_csv file for geofile {geofile}"
+        common_helper.log_raise_error(msg)
 
 def is_assigned(file):
     with open(file, "r", encoding="utf-8") as csvfile:
@@ -80,22 +67,20 @@ def is_assigned(file):
                 return False
     return True
 
-
-def assign_main_csv(new_main_csv_filepath):
+def assign_main_csv(main_csv_filepath, main_csv_arkid_filepath):
     rows = rows_with_arkid(main_csv_filepath)
     write_csv(main_csv_filepath, rows)
-    write_csv(new_main_csv_filepath, rows)
-
-
-def assign_resp_csv(new_main_csv_filepath, new_resp_csv_filepath):
+    write_csv(main_csv_arkid_filepath, rows)
+    return is_assigned(main_csv_arkid_filepath)
+   
+def assign_resp_csv(resp_csv_filepath, new_main_csv_filepath, new_resp_csv_filepath):
     hash = arkid_hash(new_main_csv_filepath)
     if hash:
         rows = rows_with_arkid(resp_csv_filepath, hash)
         write_csv(resp_csv_filepath, rows)
         write_csv(new_resp_csv_filepath, rows)
     else:
-        log_raise_error(f"no arkid or geofile ?, please check {new_main_csv_filepath}")
-
+        common_helper.log_raise_error(f"no arkid or geofile ?, please check {new_main_csv_filepath}")
 
 def arkid_hash(csv_filepath):
     hash = {}
@@ -105,7 +90,6 @@ def arkid_hash(csv_filepath):
             hash[row.get("geofile")] = row.get("arkid")
     return hash
 
-
 def write_csv(filename_path, rows):
     if rows:
         with open(filename_path, "w", newline="", encoding="utf-8") as file:
@@ -114,46 +98,22 @@ def write_csv(filename_path, rows):
             writer.writeheader()
             writer.writerows(rows)
     else:
-        log_raise_error(f"no rows to add to {filename_path}")
-
+        common_helper.log_raise_error(f"no rows to add to {filename_path}")
 
 def ez_config():
     with open(config_file, "r") as f:
         return json.load(f)
 
-
-def new_filepath(filepath):
+def new_filepath(csv_files_arkid_directory_path, filepath):
     filename = Path(filepath).stem
     return os.path.join(csv_files_arkid_directory_path, f"{filename}_arkid.csv")
 
 
-################################################################################################
-#                                 2. set up                                                    #
-################################################################################################
-
-# 1. Please provide your local log file path
-logfile = r"C:\process_data\log\process.log"
-logging.basicConfig(
-    filename=logfile,
-    level=logging.INFO,
-    format="%(message)s - %(asctime)s - %(funcName)s - %(levelname)s",
-)
-
-# 2. please provide EZID config file path
+# EZID config file path
 config_file = r"C:\pre-ingestion-config/config.json"
 
-# 3. please provide main_csv file path:
-main_csv_filepath = r"C:\process_data\csv_files\main.csv"
-
-# 4. please provide resp_csv file path:
-resp_csv_filepath = r"C:\process_data\csv_files\resp.csv"
-
-# 5. Place to save the new main csv file and resp csv file with arkid assigned
-csv_files_arkid_directory_path = r"C:\process_data\csv_files_arkid"
-
 
 ################################################################################################
-#                                3. instructions
 #  a. mian_csv file:
 #                a new arkid will be minted and added to the 'arkid' column for each row,
 #                unless a row has an existing arkid.
@@ -174,48 +134,27 @@ csv_files_arkid_directory_path = r"C:\process_data\csv_files_arkid"
 #                                        "C:\process_data\csv_files_arkid\main_arkid.csv"
 #                                        "C:\process_data\csv_files_arkid\resp_arkid.csv"
 ################################################################################################
-def output(msg):
-    logging.info(msg)
-    print(msg)
 
+def run_tool():
+    main_csv_filepath = common_helper.csv_filepath('main')
+    resp_csv_filepath = common_helper.csv_filepath('resp')        
+    common_helper.verify_workspace_and_files([main_csv_filepath, resp_csv_filepath])
+     
+    resp_csv_arkid_filepath = common_helper.csv_filepath('resp', True)
+    main_csv_arkid_filepath = common_helper.csv_filepath('main', True)
 
-def verify_setup(file_paths, directory_paths):
-    verified = True
-    for file_path in file_paths:
-        if not Path(file_path).is_file():
-            print(f"{file_path} does not exit.")
-            verified = False
-
-    for directory_path in directory_paths:
-        if not Path(directory_path).is_dir():
-            print(f"{directory_path} does not exit.")
-            verified = False
-    return verified
-
-
-script_name = "3 - assign_arkid.py"
-output(f"***starting  {script_name}")
-
-if verify_setup(
-    [main_csv_filepath, resp_csv_filepath], [csv_files_arkid_directory_path]
-):
-    new_main_csv_filepath = new_filepath(main_csv_filepath)
-    new_resp_csv_filepath = new_filepath(resp_csv_filepath)
-
-    # 1. add arkids to rows without existed arkids in main.csv file
-    assign_main_csv(new_main_csv_filepath)
-
-    # 2. add arkids to resp.csv file based on arkids from new_resp_csv_filepath file
-    if is_assigned(new_main_csv_filepath):
-        assign_resp_csv(new_main_csv_filepath, new_resp_csv_filepath)
+    # step 1. Add arkids to rows in main.csv file (if missing)
+    main_csv_arkid_assigned = assign_main_csv(main_csv_filepath, main_csv_arkid_filepath)
+   
+    # step 2. Assign ARKIDs to resp CSV if main CSV assignment was successful
+    if main_csv_arkid_assigned:
+        assign_resp_csv(resp_csv_filepath, main_csv_arkid_filepath, resp_csv_arkid_filepath)
     else:
-        log_raise_error(
-            f"failed in updating arkids to {new_resp_csv_filepath}, since {new_main_csv_filepath} missing arkids"
-        )
+        msg = f"failed in updating arkids to { resp_csv_arkid_filepath}, since {main_csv_arkid_filepath} missing arkids"
+        common_helper.output(msg, 1)
+        return
 
-    # 3. give warning if new_resp_csv_filepath has no arkids
-    if not is_assigned(new_resp_csv_filepath):
-        log_raise_error(
-            f" {resp_csv_filepath} has missing arkids, please check log file for details"
-        )
-    output(f"***completed {script_name}")
+    # Step 3: Warn if new_resp_csv_filepath still has missing ARKIDs
+    if not is_assigned( resp_csv_arkid_filepath):
+        msg = f" {resp_csv_filepath} has missing arkids, please check log file for details"
+        common_helper.output(msg, 1)

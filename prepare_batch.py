@@ -1,20 +1,13 @@
 import arcpy
 import os
-import logging
 from pathlib import Path
-from datetime import datetime
-from shutil import copyfile, rmtree
-
-
-################################################################################################
-#                             1. class                                                         #
-################################################################################################
-
+import common_helper
+import workspace_directory
 
 class SourceBatch(object):
-    def __init__(self, source_dir, logging):
-        self.logging = logging
-        self.source_dir = source_dir
+    def __init__(self):
+       
+        self.source_dir = workspace_directory.source_batch_directory_path
         self.all_file_paths = self._file_paths("")
         self._geo_init()
 
@@ -22,7 +15,7 @@ class SourceBatch(object):
         self._check_missed_files()
         self._check_exceptional_files()
 
-    def prepare(self, workspace_path, referenced_filepath):
+    def prepare(self, referenced_filepath):
         def is_projected(file_path):
             if Path(file_path).is_file():
                 sr_name = arcpy.Describe(file_path).spatialReference.name
@@ -39,7 +32,7 @@ class SourceBatch(object):
 
         for geofile_path in self.geofile_paths:
             name = os.path.basename(geofile_path)
-            prj_geofile_path = os.path.join(workspace_path, name)
+            prj_geofile_path = os.path.join(workspace_directory.projected_batch_directory_path, name)
             if is_projected(prj_geofile_path):
                 continue
             projection(geofile_path, prj_geofile_path)
@@ -48,17 +41,13 @@ class SourceBatch(object):
         shapefile_paths = self._file_paths(".shp")
         tiffile_paths = self._file_paths(".tif")
         if not shapefile_paths and not tiffile_paths:
-            self.logging.info(
-                f"No shapefiles or raster files found in {self.source_dir}."
-            )
+            common_helper.output(f"No shapefiles or raster files found in {self.source_dir}.", 2)
             raise ValueError(
                 "Directory should include either shapefiles or raster files"
             )
 
         if shapefile_paths and tiffile_paths:
-            self.logging.info(
-                f"Mixing shapefiles and raster files found in {self.source_dir}."
-            )
+            common_helper.output(f"Mixing shapefiles and raster files found in {self.source_dir}.")
             raise ValueError(
                 "Both shapefiles and raster files found. Directory should include either shapefiles or raster files."
             )
@@ -73,6 +62,17 @@ class SourceBatch(object):
     def _expected_exts(self):
         if self.geo_type is None:
             raise NotImplementedError
+        DEFAULT_VECTOR_EXTS = [
+            ".cpg",
+            ".dbf",
+            ".prj",
+            ".sbn",
+            ".sbx",
+            ".shp",
+            ".shp.xml",
+            ".shx",
+        ]
+        DEFAULT_RASTER_EXTS = [".tif", ".aux", ".tfw", ".tif.xml", ".tif.ovr"]
         return DEFAULT_VECTOR_EXTS if self.geo_type == "shp" else DEFAULT_RASTER_EXTS
 
     def _check_missed_files(self):
@@ -103,9 +103,9 @@ class SourceBatch(object):
 
     def _logger(self, summary, list):
         if len(list) > 0:
-            self.logging.info(f"{summary}")
+            common_helper.output(f"{summary}", 1)
             for l in list:
-                self.logging.info(f"{l}")
+                common_helper.output(f"{l}", 1)
 
     def _missed_file_paths_from_geofile(self, geofile, expected_exts):
         paths = []
@@ -132,14 +132,14 @@ class SourceBatch(object):
             sr.loadFromString(wkt)
             arcpy.Project_management(from_filepath, to_filepath, sr)
         except Exception as ex:
-            self.logging.info(f"{from_filepath} - {ex}")
+            common_helper.output(f"{from_filepath} - {ex}")
 
     def raster_projection(self, from_filepath, to_filepath, referenced_filepath):
         try:
             sr = arcpy.Describe(referenced_filepath).spatialReference
             arcpy.ProjectRaster_management(from_filepath, to_filepath, sr)
         except Exception as ex:
-            self.logging.info(f"{from_filepath} - {ex}")
+            common_helper.output(f"{from_filepath} - {ex}")
 
 
 # Default geofile extensions
@@ -153,64 +153,16 @@ DEFAULT_VECTOR_EXTS = [
     ".sbx",
     ".shp",
     ".shp.xml",
-    ".shx",
+    ".shx"
 ]
-
-################################################################################################
-#                                 2. set up                                                    #
-################################################################################################
-
-# 1. Please provide your local log file path
-logfile = r"C:\process_data\log\process.log"
-logging.basicConfig(
-    filename=logfile,
-    level=logging.INFO,
-    format="%(message)s - %(asctime)s - %(funcName)s - %(levelname)s",
-)
-
-# 2. Please provide source data directory path
-source_batch_directory_path = r"C:\process_data\source_batch"
-
-# 3. Please provide projected data directory path
-projected_batch_directory_path = r"C:\process_data\source_batch_projected"
-
-# 4. A GeoTIFF projected file
-geotif_referenced_filepath = (
-    r"C:\pre-ingestion-config\projected_raster\5048_1_reproject4326.tif"
-)
-
-
-################################################################################################
-#                                3. Run options                                                #
-# note: No re-projection if a geofile has been projected
-################################################################################################
-def output(msg):
-    logging.info(msg)
-    print(msg)
-
-
-def verify_setup(file_paths, directory_paths):
-    verified = True
-    for file_path in file_paths:
-        if not Path(file_path).is_file():
-            print(f"{file_path} does not exit.")
-            verified = False
-
-    for directory_path in directory_paths:
-        if not Path(directory_path).is_dir():
-            print(f"{directory_path} does not exit.")
-            verified = False
-    return verified
-
-
-script_name = "1 .1 - prepare_batch.py"
-output(f"***starting  {script_name}")
-
-if verify_setup(
-    [geotif_referenced_filepath],
-    [source_batch_directory_path, projected_batch_directory_path],
-):
-    source_batch = SourceBatch(source_batch_directory_path, logging)
-    source_batch.check_files()
-    source_batch.prepare(projected_batch_directory_path, geotif_referenced_filepath)
-    output(f"***completed {script_name}")
+  
+def run_tool():
+    # A GeoTIFF projected file
+    geotif_referenced_filepath = (
+        r"C:\pre-ingestion-config\projected_raster\5048_1_reproject4326.tif"
+    )
+    common_helper.verify_workspace_and_files([geotif_referenced_filepath])
+    
+    source_batch = SourceBatch()
+    source_batch.check_files() # todo: move this to other tool
+    source_batch.prepare(geotif_referenced_filepath)
