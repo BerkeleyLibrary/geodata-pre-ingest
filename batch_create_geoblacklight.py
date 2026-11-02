@@ -222,13 +222,18 @@ def add_from_arkid(json_data, row):
 def ref_hosts(row):
     access = row.get("dct_accessRights_s").strip().lower()
     if access == "public":
-        return HOSTS
+        return {**HOSTS, **HOSTS_PUBLIC}
     elif access == "restricted":
-        return HOSTS_SECURE
+        return {**HOSTS, **HOSTS_SECURE}
     else:
         txt = f"geofile: '{row.get('geofile')}':  incorrect value in  'dct_accessRights_s', value = {access}"
         common_helper.output(txt, 1)
         raise ValueError(txt)
+
+
+# Replace the #{arkid} placeholder in the host and append the quoted filename
+def ref_url(hosts, key, arkid, filename):
+    return f"{hosts[key].replace('#{arkid}', arkid)}{filename_with_wq(filename)}"
 
 
 def filename_with_wq(filename):
@@ -240,10 +245,10 @@ def add_dataset_references(json_data, row):
     arkid = row.get("arkid")
     id = f"{PREFIX}-{arkid}"
     hosts = ref_hosts(row)
-    iso139 = f"{hosts['ISO139']}{id}/{filename_with_wq('iso19139.xml')}"
-    download = f"{hosts['download']}{id}/{filename_with_wq('data.zip')}"
+    iso139 = ref_url(hosts, "ISO139", arkid, "iso19139.xml")
+    download = ref_url(hosts, "download", arkid, "data.zip")
     content = f"{hosts['wfs']},{hosts['wms']},{iso139},{download}"
-    doc = ref_doc(row, hosts, id)
+    doc = ref_doc(row, hosts, arkid)
     if doc:
         content = f"{content},{doc}"
     ref = "{" + content + "}"
@@ -254,18 +259,17 @@ def add_non_dataset_references(json_data, row):
     arkid = row.get("arkid")
     id = f"{PREFIX}-{arkid}"
     hosts = ref_hosts(row)
-    doc = ref_doc(row, hosts, id)
+    doc = ref_doc(row, hosts, arkid)
     if doc:
         json_data["dct_references_s"] = "{" + doc + "}"
 
 
-def ref_doc(row, hosts, id):
+def ref_doc(row, hosts, arkid):
     file_path = row.get("doc_zipfile_path")
     if file_path:
         if os.path.isfile(file_path):
             basename = os.path.basename(file_path)
-            filename_doc = filename_with_wq(basename)
-            return f"{hosts['doc']}{id}/{filename_doc}"
+            return ref_url(hosts, "doc", arkid, basename)
         else:
             txt = f"arkid: '{row.get('row_id')}': cannot find the document file {file_path} in 'doc_zipfile_path' column."
             raise ValueError(txt)
@@ -371,20 +375,22 @@ PREFIX = "berkeley"
 INSTITUTION = "University of California Berkeley"
 GEOBLACKLGITH_VERSION = "Aardvark"
 
+
 HOSTS = {
-    "ISO139": '"http://www.isotc211.org/schemas/2005/gmd/":"https://spatial.lib.berkeley.edu/public/',
-    "download": '"http://schema.org/downloadUrl":"https://spatial.lib.berkeley.edu/public/',
-    "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices.lib.berkeley.edu/geoserver/wfs"',
-    "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices.lib.berkeley.edu/geoserver/wms"',
-    "doc": '"http://lccn.loc.gov/sh85035852":"https://spatial.lib.berkeley.edu/public/',
+    "ISO139": '"http://www.isotc211.org/schemas/2005/gmd/":"https://spatial.lib.berkeley.edu/maps/berkeley-ark28722-#{arkid}/metadata/',
+    "download": '"http://schema.org/downloadUrl":"https://spatial.lib.berkeley.edu/maps/berkeley-ark28722-#{arkid}/data/original/',
+    "doc": '"http://lccn.loc.gov/sh85035852":"https://spatial.lib.berkeley.edu/maps/berkeley-ark28722-#{arkid}/metadata/'
+}
+
+
+HOSTS_PUBLIC = {
+    "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices.lib.berkeley.edu/geoserver/public/wfs"',
+    "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices.lib.berkeley.edu/geoserver/public/wms"'
 }
 
 HOSTS_SECURE = {
-    "ISO139": '"http://www.isotc211.org/schemas/2005/gmd/":"https://spatial.lib.berkeley.edu/metadata/',
-    "download": '"http://schema.org/downloadUrl":"https://spatial.lib.berkeley.edu/UCB/',
-    "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices-secure.lib.berkeley.edu/geoserver/wfs"',
-    "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices-secure.lib.berkeley.edu/geoserver/wms"',
-    "doc": '"http://lccn.loc.gov/sh85035852":"https://spatial.lib.berkeley.edu/metadata/',
+    "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices.lib.berkeley.edu/geoserver/restricted/wfs"',
+    "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices.lib.berkeley.edu/geoserver/restricted/wms"'
 }
 
 CAPITALIZED_FIELDS = [
