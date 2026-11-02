@@ -7,6 +7,9 @@ import json
 import common_helper
 import workspace_directory
 
+ARK_PREFIX = "berkeley-ark28722-"
+
+
 def create_files(main_csv_arkid_filepath):
     ingestion_dir_path = final_directory_path("ingestion")
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
@@ -28,13 +31,14 @@ def add_gbl_fileSize_s():
         for file in files:
             file_path = os.path.join(root, file)
             if file == "geoblacklight.json" and os.path.isfile(file_path):
-                data_file_path = os.path.join(root, "data.zip")
+                # root is <record>/<ark dir>/metadata; data.zip is under data/original
+                data_file_path = os.path.join(os.path.dirname(root), "data", "original", "data.zip")
                 update_json_file(file_path, data_file_path)
 
 
 def get_ogp_geoblakcligh_files():
     ogp_dir_path = final_directory_path("ogp")
-    move_geoblacklight("ingestion_files", ogp_dir_path)
+    move_geoblacklight("ingestion_files", ogp_dir_path, flatten=True)
     move_geoblacklight("ingestion_collection_files", ogp_dir_path)
 
 
@@ -75,7 +79,7 @@ def save_pretty_json_file(file_path, json_data):
             )
         )
 
-def move_geoblacklight(dir_name, to_dir_path):
+def move_geoblacklight(dir_name, to_dir_path, flatten=False):
     from_dir_path = os.path.join(workspace_directory.results_directory_path, dir_name)
     if os.path.exists(from_dir_path):
         for root, _, files in os.walk(from_dir_path):
@@ -84,6 +88,9 @@ def move_geoblacklight(dir_name, to_dir_path):
                     file_path = os.path.join(root, file)
                     if os.path.isfile(file_path):
                         relative_path = os.path.relpath(file_path, from_dir_path)
+                        if flatten:
+                            # keep OGP layout <arkid>/geoblacklight.json
+                            relative_path = os.path.join(relative_path.split(os.sep)[0], file)
                         ogp_file_path = os.path.join(to_dir_path, relative_path)
                         os.makedirs(os.path.dirname(ogp_file_path), exist_ok=True)
                         copy2(file_path, ogp_file_path)
@@ -95,19 +102,24 @@ def create_files_on_row(row, ingestion_dir_path):
     arkid = row.get("arkid")
 
     def create_ingestion_file():
-        ingestion_path = arkid_directory_path(arkid, ingestion_dir_path)
-        cp_file(projected_geofile_path, ingestion_path, "iso19139.xml")
-        cp_file(
-            projected_geofile_path,
-            ingestion_path,
-            "geoblacklight.json",
-        )
-        wrap_up_zip(projected_geofile_path, arkid, ingestion_path, "map")
-        wrap_up_zip(geofile_path, arkid, ingestion_path, "data")
+        record_path = arkid_directory_path(arkid, ingestion_dir_path)
+        package_path = os.path.join(record_path, f"{ARK_PREFIX}{arkid}")
+        original_path = os.path.join(package_path, "data", "original")
+        geoserver_path = os.path.join(package_path, "data", "geoserver")
+        metadata_path = os.path.join(package_path, "metadata")
+        for path in (original_path, geoserver_path, metadata_path):
+            os.makedirs(path, exist_ok=True)
+
+        cp_file(projected_geofile_path, metadata_path, "iso19139.xml")
+        cp_file(projected_geofile_path, metadata_path, "geoblacklight.json")
+        # former map.zip contents are placed directly in data/geoserver
+        for source, name in map_sourcefiles(projected_geofile_path, arkid).items():
+            copyfile(source, os.path.join(geoserver_path, name))
+        wrap_up_zip(geofile_path, arkid, original_path, "data")
 
         doc_filepath = row.get("doc_zipfile_path")
         if doc_filepath:
-            cp_document_file(doc_filepath, ingestion_path)
+            cp_document_file(doc_filepath, metadata_path)
 
     create_ingestion_file()
 
@@ -259,11 +271,16 @@ tif_exts = [".tif", ".tfw", ".prj", ".tif.ovr"]
 #  From above directory, each Geofile(shapefile or GeoTIFF) will have a subdirectory
 #  with all related ingestion files. Below is an example of a subdirectory.
 #  The geofile was assinged an arkid "a7gt36" in the main_csv_file.
-# |---- a7gt36
-# |------ data.zip
-# |------ doc.zip
-# |------ iso19139.xml
-# |------ map.zip
+# |---- s7b70z
+# |--berkeley-ark28722-s7b70z
+# |----data/original/data.zip
+# |----data/geoserver/s7b70z.shp
+# |----data/geoserver/s7b70z.prj
+# ...
+# |----data/geoserver/s7b70z.*
+# |----metadata/iso19139.xml
+# |----metadata/doc.zip
+# |----metadata/geoblacklight.json
 # additional:
 # 1)  after creating data.zip file for each arkid related geofile, get data.zip file size, and update it to geoblacklight.json
 # 2)  moving ingenstion geoblacklight.json and collection geoblacklight.json to OGP directory
@@ -275,3 +292,4 @@ def run_tool():
     create_files(main_csv_arkid_filepath)
     add_gbl_fileSize_s()
     get_ogp_geoblakcligh_files()
+

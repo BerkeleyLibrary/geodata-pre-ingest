@@ -7,14 +7,23 @@ import workspace_directory
 import common_helper
 
 def validate_files(dir_path):
-    basenames = ["map.zip", "data.zip", "geoblacklight.json", "iso19139.xml"]
     missing_filepaths = []
-    for root, dirs, files in os.walk(dir_path):
-        for dir in dirs:
-            for name in basenames:
-                file_path = os.path.join(root, dir, name)
+    if Path(dir_path).is_dir():
+        for record in os.listdir(dir_path):
+            if not os.path.isdir(os.path.join(dir_path, record)):
+                continue
+            package_path = os.path.join(dir_path, record, f"berkeley-ark28722-{record}")
+            for relative in [
+                os.path.join("data", "original", "data.zip"),
+                os.path.join("metadata", "geoblacklight.json"),
+                os.path.join("metadata", "iso19139.xml"),
+            ]:
+                file_path = os.path.join(package_path, relative)
                 if not Path(file_path).is_file():
                     missing_filepaths.append(file_path)
+            geoserver_path = os.path.join(package_path, "data", "geoserver")
+            if not (os.path.isdir(geoserver_path) and os.listdir(geoserver_path)):
+                missing_filepaths.append(geoserver_path)
     if missing_filepaths:
         common_helper.output("Below ingestion files not found: ", 1)
         for filepath in missing_filepaths:
