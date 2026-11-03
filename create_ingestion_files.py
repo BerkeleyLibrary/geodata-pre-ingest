@@ -132,12 +132,20 @@ def arkid_directory_path(arkid, directory_path):
 
 # Check geofiles listed in main csv are from source batch dirctory
 def correlated_filepath(geofile_path):
-    if not workspace_directory.source_batch_directory_path in geofile_path:
+    source_directory = os.path.abspath(workspace_directory.source_batch_directory_path)
+    source_filepath = os.path.abspath(geofile_path)
+    try:
+        common_directory = os.path.commonpath([source_directory, source_filepath])
+    except ValueError:
+        common_directory = ""
+
+    if os.path.normcase(common_directory) != os.path.normcase(source_directory):
         text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{workspace_directory.source_batch_directory_path}'"
         common_helper.log_raise_error(text)
 
-    filepath = geofile_path.replace(
-       workspace_directory.source_batch_directory_path, workspace_directory.projected_batch_directory_path
+    relative_filepath = os.path.relpath(source_filepath, source_directory)
+    filepath = os.path.join(
+        workspace_directory.projected_batch_directory_path, relative_filepath
     )
     if Path(filepath).is_file():
         return filepath
@@ -292,4 +300,3 @@ def run_tool():
     create_files(main_csv_arkid_filepath)
     add_gbl_fileSize_s()
     get_ogp_geoblakcligh_files()
-

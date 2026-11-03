@@ -82,7 +82,7 @@ def non_dataset_geoblacklight_file_path(row):
     collection_dir_path = final_directory_path("ingestion_collection")
     arkid_directory_path = os.path.join(collection_dir_path, arkid)
     ensure_empty_directory(arkid_directory_path)
-    return f"{arkid_directory_path}/geoblacklight.json"
+    return os.path.join(arkid_directory_path, "geoblacklight.json")
 
 
 def final_directory_path(prefix):

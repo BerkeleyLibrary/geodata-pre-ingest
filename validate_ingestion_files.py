@@ -32,7 +32,7 @@ def validate_files(dir_path):
 def validate_geoblacklight_schema(dir_path, arrdvark_schema_file_path):
     if Path(dir_path).is_dir():
         schema = ""
-        with open(arrdvark_schema_file_path) as s:
+        with open(arrdvark_schema_file_path, "r", encoding="utf-8") as s:
             schema = json.load(s)
 
         json_files = get_filepaths(dir_path, ".json")
@@ -81,10 +81,14 @@ def run_tool():
     result_directory_path = workspace_directory.results_directory_path
 
     # 2. geofiles geoblackligt json file location
-    geoblacklight_directory_path = fr"{result_directory_path}\ingestion_files"
+    geoblacklight_directory_path = os.path.join(
+        result_directory_path, "ingestion_files"
+    )
 
     # 3. collection geoblackligt json file location
-    geoblacklight_collection_directory_path = fr"{result_directory_path}\ingestion_collection_files"
+    geoblacklight_collection_directory_path = os.path.join(
+        result_directory_path, "ingestion_collection_files"
+    )
     common_helper.verify_workspace_and_files([arrdvark_schema_file_path])
 
     validate_geoblacklight_schema(geoblacklight_directory_path, arrdvark_schema_file_path)
