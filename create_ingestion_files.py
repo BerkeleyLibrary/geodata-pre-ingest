@@ -102,8 +102,7 @@ def create_files_on_row(row, ingestion_dir_path):
     arkid = row.get("arkid")
 
     def create_ingestion_file():
-        record_path = arkid_directory_path(arkid, ingestion_dir_path)
-        package_path = os.path.join(record_path, f"{ARK_PREFIX}{arkid}")
+        package_path = os.path.join(ingestion_dir_path, f"{ARK_PREFIX}{arkid}")
         original_path = os.path.join(package_path, "data", "original")
         geoserver_path = os.path.join(package_path, "data", "geoserver")
         metadata_path = os.path.join(package_path, "metadata")
@@ -119,7 +118,7 @@ def create_files_on_row(row, ingestion_dir_path):
 
         doc_filepath = row.get("doc_zipfile_path")
         if doc_filepath:
-            cp_document_file(doc_filepath, metadata_path)
+            cp_document_file(doc_filepath, original_path)
 
     create_ingestion_file()
 

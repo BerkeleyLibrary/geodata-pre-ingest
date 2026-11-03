@@ -375,11 +375,14 @@ PREFIX = "berkeley"
 INSTITUTION = "University of California Berkeley"
 GEOBLACKLGITH_VERSION = "Aardvark"
 
+original_doc_base_url = (
+    "https://spatial.lib.berkeley.edu/maps/berkeley-ark28722-#{arkid}/data/original/"
+)
 
 HOSTS = {
     "ISO139": '"http://www.isotc211.org/schemas/2005/gmd/":"https://spatial.lib.berkeley.edu/maps/berkeley-ark28722-#{arkid}/metadata/',
-    "download": '"http://schema.org/downloadUrl":"https://spatial.lib.berkeley.edu/maps/berkeley-ark28722-#{arkid}/data/original/',
-    "doc": '"http://lccn.loc.gov/sh85035852":"https://spatial.lib.berkeley.edu/maps/berkeley-ark28722-#{arkid}/metadata/'
+    "download": f'"http://schema.org/downloadUrl":"{original_doc_base_url}',
+    "doc": f'"http://lccn.loc.gov/sh85035852":"{original_doc_base_url}'
 }
 
 
