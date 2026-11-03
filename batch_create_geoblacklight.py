@@ -10,6 +10,7 @@ import common_helper
 def create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath):
     all_resp_rows = csv_rows(resp_csv_arkid_filepath)
     field_names = geoblacklight_field_names(main_csv_arkid_filepath)
+    collection_dir_path = final_directory_path("ingestion_collection")
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
@@ -23,7 +24,9 @@ def create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath)
             if has_dataset(row):
                 create_geoblacklight_file_with_dataset(row, resp_rows, field_names)
             else:
-                create_geoblacklight_file_without_dataset(row, resp_rows, field_names)
+                create_geoblacklight_file_without_dataset(
+                    row, resp_rows, field_names, collection_dir_path
+                )
 
 
 def has_dataset(row):
@@ -51,12 +54,14 @@ def create_geoblacklight_file_with_dataset(row, resp_rows, field_names):
     save_pretty_json_file(file_path, json_data)
 
 
-def create_geoblacklight_file_without_dataset(row, resp_rows, field_names):
+def create_geoblacklight_file_without_dataset(
+    row, resp_rows, field_names, collection_dir_path
+):
     json_data = common_geoblacklight_fields(row, resp_rows, field_names)
 
     add_non_dataset_references(json_data, row)
 
-    file_path = non_dataset_geoblacklight_file_path(row)
+    file_path = non_dataset_geoblacklight_file_path(row, collection_dir_path)
     save_pretty_json_file(file_path, json_data)
 
 
@@ -77,12 +82,13 @@ def dataset_geoblacklight_file_path(row):
     return f"{base}_geoblacklight.json"
 
 
-def non_dataset_geoblacklight_file_path(row):
+def non_dataset_geoblacklight_file_path(row, collection_dir_path):
     arkid = row.get("arkid")
-    collection_dir_path = final_directory_path("ingestion_collection")
-    arkid_directory_path = os.path.join(collection_dir_path, arkid)
-    ensure_empty_directory(arkid_directory_path)
-    return os.path.join(arkid_directory_path, "geoblacklight.json")
+    metadata_directory_path = os.path.join(
+        collection_dir_path, f"{ARK_PREFIX}{arkid}", "metadata"
+    )
+    os.makedirs(metadata_directory_path, exist_ok=True)
+    return os.path.join(metadata_directory_path, "geoblacklight.json")
 
 
 def final_directory_path(prefix):
@@ -372,6 +378,7 @@ ISOTOPIC = {
 }
 
 PREFIX = "berkeley"
+ARK_PREFIX = "berkeley-ark28722-"
 INSTITUTION = "University of California Berkeley"
 GEOBLACKLGITH_VERSION = "Aardvark"
 

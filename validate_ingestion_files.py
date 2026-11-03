@@ -9,10 +9,10 @@ import common_helper
 def validate_files(dir_path):
     missing_filepaths = []
     if Path(dir_path).is_dir():
-        for record in os.listdir(dir_path):
-            if not os.path.isdir(os.path.join(dir_path, record)):
+        for package_name in os.listdir(dir_path):
+            package_path = os.path.join(dir_path, package_name)
+            if not os.path.isdir(package_path):
                 continue
-            package_path = os.path.join(dir_path, record, f"berkeley-ark28722-{record}")
             for relative in [
                 os.path.join("data", "original", "data.zip"),
                 os.path.join("metadata", "geoblacklight.json"),
@@ -45,11 +45,10 @@ def validate_geoblacklight_schema(dir_path, arrdvark_schema_file_path):
 
 def get_filepaths(directory, ext):
     paths = []
-    for file in os.listdir(directory):
-        if file.endswith(ext):
-            file_path = os.path.join(directory, file)
-            if os.path.isfile(file_path):
-                paths.append(file_path)
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith(ext):
+                paths.append(os.path.join(root, file))
     return paths
 
 def validate_output(data, schema, json_file):
@@ -63,8 +62,6 @@ def validate_output(data, schema, json_file):
             common_helper.output(f"Invalid fields in {json_file}:", 2)
             for message in messages:
                 common_helper.output(message, 2)
-
-        common_helper("\n")
 
     except jsonschema.ValidationError as e:
         common_helper.output(
