@@ -18,7 +18,7 @@ def create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath)
             arkid = row.get("arkid")
             if not arkid:
                 text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
-                common_helper.log_raise_error(text, 1)
+                common_helper.log_raise_error(text)
             resp_rows = [
                 resp_row for resp_row in all_resp_rows if arkid == resp_row.get("arkid")
             ]
@@ -33,7 +33,7 @@ def create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath)
                 )
             else:
                 text = f"Please check the main csv file: geofile '{geofile_path}' does not exist (arkid: {arkid})"
-                common_helper.log_raise_error(text, 1)
+                common_helper.log_raise_error(text)
 
 
 def common_geoblacklight_fields(row, resp_rows, field_names):
