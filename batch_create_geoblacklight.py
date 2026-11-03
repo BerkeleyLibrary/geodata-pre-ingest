@@ -11,6 +11,7 @@ def create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath)
     all_resp_rows = csv_rows(resp_csv_arkid_filepath)
     field_names = geoblacklight_field_names(main_csv_arkid_filepath)
     collection_dir_path = final_directory_path("ingestion_collection")
+    ingestion_dir_path = final_directory_path("ingestion")
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
@@ -22,7 +23,9 @@ def create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath)
                 resp_row for resp_row in all_resp_rows if arkid == resp_row.get("arkid")
             ]
             if has_dataset(row):
-                create_geoblacklight_file_with_dataset(row, resp_rows, field_names)
+                create_geoblacklight_file_with_dataset(
+                    row, resp_rows, field_names, ingestion_dir_path
+                )
             else:
                 create_geoblacklight_file_without_dataset(
                     row, resp_rows, field_names, collection_dir_path
@@ -44,13 +47,15 @@ def common_geoblacklight_fields(row, resp_rows, field_names):
     return json_data
 
 
-def create_geoblacklight_file_with_dataset(row, resp_rows, field_names):
+def create_geoblacklight_file_with_dataset(
+    row, resp_rows, field_names, ingestion_dir_path
+):
     json_data = common_geoblacklight_fields(row, resp_rows, field_names)
 
     add_dataset_references(json_data, row)
     add_boundary(json_data, row)
 
-    file_path = dataset_geoblacklight_file_path(row)
+    file_path = geoblacklight_file_path(row, ingestion_dir_path)
     save_pretty_json_file(file_path, json_data)
 
 
@@ -61,7 +66,7 @@ def create_geoblacklight_file_without_dataset(
 
     add_non_dataset_references(json_data, row)
 
-    file_path = non_dataset_geoblacklight_file_path(row, collection_dir_path)
+    file_path = geoblacklight_file_path(row, collection_dir_path)
     save_pretty_json_file(file_path, json_data)
 
 
@@ -76,16 +81,10 @@ def proj_geofile_path(row):
         raise ValueError(txt)
 
 
-def dataset_geoblacklight_file_path(row):
-    projected_geofile_path = proj_geofile_path(row)
-    base = os.path.splitext(projected_geofile_path)[0]
-    return f"{base}_geoblacklight.json"
-
-
-def non_dataset_geoblacklight_file_path(row, collection_dir_path):
+def geoblacklight_file_path(row, parent_dir_path):
     arkid = row.get("arkid")
     metadata_directory_path = os.path.join(
-        collection_dir_path, f"{ARK_PREFIX}{arkid}", "metadata"
+        parent_dir_path, f"{ARK_PREFIX}{arkid}", "metadata"
     )
     os.makedirs(metadata_directory_path, exist_ok=True)
     return os.path.join(metadata_directory_path, "geoblacklight.json")

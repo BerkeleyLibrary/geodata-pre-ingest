@@ -11,7 +11,11 @@ ARK_PREFIX = "berkeley-ark28722-"
 
 
 def create_files(main_csv_arkid_filepath):
-    ingestion_dir_path = final_directory_path("ingestion")
+    # ingestion_files is created and filled with geoblacklight.json by batch_create_geoblacklight
+    ingestion_dir_path = os.path.join(
+        workspace_directory.results_directory_path, "ingestion_files"
+    )
+    os.makedirs(ingestion_dir_path, exist_ok=True)
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
@@ -94,6 +98,34 @@ def move_geoblacklight(dir_name, to_dir_path):
                         os.makedirs(os.path.dirname(ogp_file_path), exist_ok=True)
                         copy2(file_path, ogp_file_path)
 
+# def create_files_on_row(row, ingestion_dir_path):
+#     geofile_path = row.get("geofile")
+#     projected_geofile_path = correlated_filepath(geofile_path)
+
+#     arkid = row.get("arkid")
+
+#     def create_ingestion_file():
+#         package_path = os.path.join(ingestion_dir_path, f"{ARK_PREFIX}{arkid}")
+#         original_path = os.path.join(package_path, "data", "original")
+#         geoserver_path = os.path.join(package_path, "data", "geoserver")
+#         metadata_path = os.path.join(package_path, "metadata")
+#         for path in (original_path, geoserver_path, metadata_path):
+#             os.makedirs(path, exist_ok=True)
+
+#         cp_file(projected_geofile_path, metadata_path, "iso19139.xml")
+#         cp_file(projected_geofile_path, metadata_path, "geoblacklight.json")
+#         # former map.zip contents are placed directly in data/geoserver
+#         for source, name in map_sourcefiles(projected_geofile_path, arkid).items():
+#             copyfile(source, os.path.join(geoserver_path, name))
+#         wrap_up_zip(geofile_path, arkid, original_path, "data")
+
+#         doc_filepath = row.get("doc_zipfile_path")
+#         if doc_filepath:
+#             cp_document_file(doc_filepath, original_path)
+
+#     create_ingestion_file()
+
+
 def create_files_on_row(row, ingestion_dir_path):
     geofile_path = row.get("geofile")
     projected_geofile_path = correlated_filepath(geofile_path)
@@ -109,7 +141,9 @@ def create_files_on_row(row, ingestion_dir_path):
             os.makedirs(path, exist_ok=True)
 
         cp_file(projected_geofile_path, metadata_path, "iso19139.xml")
-        cp_file(projected_geofile_path, metadata_path, "geoblacklight.json")
+        geoblacklight_path = os.path.join(metadata_path, "geoblacklight.json")
+        if not Path(geoblacklight_path).is_file():
+            common_helper.log_raise_error(f"missing file: {geoblacklight_path}")
         # former map.zip contents are placed directly in data/geoserver
         for source, name in map_sourcefiles(projected_geofile_path, arkid).items():
             copyfile(source, os.path.join(geoserver_path, name))
