@@ -11,16 +11,16 @@ ARK_PREFIX = "berkeley-ark28722-"
 
 
 def create_files(main_csv_arkid_filepath):
-    # ingestion_files is created and filled with geoblacklight.json by batch_create_geoblacklight
-    ingestion_dir_path = os.path.join(
-        workspace_directory.results_directory_path, "ingestion_files"
+    # both directories are created and filled with geoblacklight.json by batch_create_geoblacklight
+    results_directory_path = workspace_directory.results_directory_path
+    ingestion_dir_path = os.path.join(results_directory_path, "ingestion_files")
+    collection_dir_path = os.path.join(
+        results_directory_path, "ingestion_collection_files"
     )
-    os.makedirs(ingestion_dir_path, exist_ok=True)
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
-            if common_helper.has_dataset(row):
-                create_files_on_row(row, ingestion_dir_path)
+            create_files_on_row(row, ingestion_dir_path, collection_dir_path)
 
 
 # each subdirectory under ingestion_files has four files, which will be validated in next script
@@ -94,20 +94,22 @@ def move_geoblacklight(dir_name, to_dir_path):
                         copy2(file_path, ogp_file_path)
 
 
-# def create_files_on_row(row, ingestion_dir_path):
+def create_files_on_row(row, ingestion_dir_path, collection_dir_path):
     arkid = common_helper.require_arkid(row)
-    package_path = os.path.join(ingestion_dir_path, f"{ARK_PREFIX}{arkid}")
-    original_path = os.path.join(package_path, "data", "original")
-    geoserver_path = os.path.join(package_path, "data", "geoserver")
+    with_dataset = common_helper.has_dataset(row)
+
+    parent_dir_path = ingestion_dir_path if with_dataset else collection_dir_path
+    package_path = os.path.join(parent_dir_path, f"{ARK_PREFIX}{arkid}")
     metadata_path = os.path.join(package_path, "metadata")
+    original_path = os.path.join(package_path, "data", "original")
+    common_helper.require_geoblacklight(metadata_path)
 
-    common_helper.required_geoblacklight(metadata_path)
-
-    if common_helper.has_dataset(row):
+    if with_dataset:
+        geoserver_path = os.path.join(package_path, "data", "geoserver")
         geofile_path = row["geofile"].strip()
         projected_geofile_path = correlated_filepath(geofile_path)
 
-        for path in (original_path, geoserver_path, metadata_path):
+        for path in (original_path, geoserver_path):
             os.makedirs(path, exist_ok=True)
 
         cp_file(projected_geofile_path, metadata_path, "iso19139.xml")

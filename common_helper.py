@@ -118,7 +118,7 @@ def has_arkid_dataset(row):
     require_arkid(row)
     return has_dataset(row)
 
-def required_geoblacklight(metadata_path):
+def require_geoblacklight(metadata_path):
     geoblacklight_path = os.path.join(metadata_path, "geoblacklight.json")
     if not Path(geoblacklight_path).is_file():
         log_raise_error(f"missing file: {geoblacklight_path}")
