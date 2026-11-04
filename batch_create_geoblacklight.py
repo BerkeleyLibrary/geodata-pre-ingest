@@ -15,25 +15,18 @@ def create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath)
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
-            arkid = row.get("arkid")
-            if not arkid:
-                text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
-                common_helper.log_raise_error(text)
+            arkid = common_helper.require_arkid(row)
             resp_rows = [
                 resp_row for resp_row in all_resp_rows if arkid == resp_row.get("arkid")
             ]
-            geofile_path = (row.get("geofile") or "").strip()
-            if not geofile_path:
-                create_geoblacklight_file_without_dataset(
-                    row, resp_rows, field_names, collection_dir_path
-                )
-            elif os.path.isfile(geofile_path):
+            if common_helper.has_dataset(row):
                 create_geoblacklight_file_with_dataset(
                     row, resp_rows, field_names, ingestion_dir_path
                 )
             else:
-                text = f"Please check the main csv file: geofile '{geofile_path}' does not exist (arkid: {arkid})"
-                common_helper.log_raise_error(text)
+                create_geoblacklight_file_without_dataset(
+                    row, resp_rows, field_names, collection_dir_path
+                )
 
 
 def common_geoblacklight_fields(row, resp_rows, field_names):
