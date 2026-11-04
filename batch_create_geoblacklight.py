@@ -19,14 +19,9 @@ def create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath)
             resp_rows = [
                 resp_row for resp_row in all_resp_rows if arkid == resp_row.get("arkid")
             ]
-            if common_helper.has_dataset(row):
-                create_geoblacklight_file_with_dataset(
-                    row, resp_rows, field_names, ingestion_dir_path
-                )
-            else:
-                create_geoblacklight_file_without_dataset(
-                    row, resp_rows, field_names, collection_dir_path
-                )
+            create_geoblacklight_file(
+                row, resp_rows, field_names, ingestion_dir_path, collection_dir_path
+            )
 
 
 def common_geoblacklight_fields(row, resp_rows, field_names):
@@ -39,26 +34,18 @@ def common_geoblacklight_fields(row, resp_rows, field_names):
     return json_data
 
 
-def create_geoblacklight_file_with_dataset(
-    row, resp_rows, field_names, ingestion_dir_path
+def create_geoblacklight_file(
+    row, resp_rows, field_names, ingestion_dir_path, collection_dir_path
 ):
+    with_dataset = common_helper.has_dataset(row)
+    parent_dir_path = ingestion_dir_path if with_dataset else collection_dir_path
+
     json_data = common_geoblacklight_fields(row, resp_rows, field_names)
+    add_references(json_data, row, with_dataset)
+    if with_dataset:
+        add_boundary(json_data, row)
 
-    add_dataset_references(json_data, row)
-    add_boundary(json_data, row)
-
-    file_path = geoblacklight_file_path(row, ingestion_dir_path)
-    save_pretty_json_file(file_path, json_data)
-
-
-def create_geoblacklight_file_without_dataset(
-    row, resp_rows, field_names, collection_dir_path
-):
-    json_data = common_geoblacklight_fields(row, resp_rows, field_names)
-
-    add_non_dataset_references(json_data, row)
-
-    file_path = geoblacklight_file_path(row, collection_dir_path)
+    file_path = geoblacklight_file_path(row, parent_dir_path)
     save_pretty_json_file(file_path, json_data)
 
 
@@ -238,27 +225,24 @@ def filename_with_wq(filename):
     return f"{filename}{wq}"
 
 
-def add_dataset_references(json_data, row):
+def add_references(json_data, row, with_dataset):
     arkid = row.get("arkid")
-    id = f"{PREFIX}-{arkid}"
     hosts = ref_hosts(row)
-    iso139 = ref_url(hosts, "ISO139", arkid, "iso19139.xml")
-    download = ref_url(hosts, "download", arkid, "data.zip")
-    content = f"{hosts['wfs']},{hosts['wms']},{iso139},{download}"
+
+    refs = []
+    if with_dataset:
+        refs = [
+            hosts["wfs"],
+            hosts["wms"],
+            ref_url(hosts, "ISO139", arkid, "iso19139.xml"),
+            ref_url(hosts, "download", arkid, "data.zip"),
+        ]
     doc = ref_doc(row, hosts, arkid)
     if doc:
-        content = f"{content},{doc}"
-    ref = "{" + content + "}"
-    json_data["dct_references_s"] = ref.strip()
+        refs.append(doc)
 
-
-def add_non_dataset_references(json_data, row):
-    arkid = row.get("arkid")
-    id = f"{PREFIX}-{arkid}"
-    hosts = ref_hosts(row)
-    doc = ref_doc(row, hosts, arkid)
-    if doc:
-        json_data["dct_references_s"] = "{" + doc + "}"
+    if refs:
+        json_data["dct_references_s"] = "{" + ",".join(refs) + "}"
 
 
 def ref_doc(row, hosts, arkid):
