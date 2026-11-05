@@ -35,7 +35,7 @@ def validate_geoblacklight_schema(dir_path, arrdvark_schema_file_path):
         with open(arrdvark_schema_file_path, "r", encoding="utf-8") as s:
             schema = json.load(s)
 
-        json_files = get_filepaths(dir_path, ".json")
+        json_files = get_filepaths(dir_path, "geoblacklight.json")
 
         for json_file in json_files:
             data = ""
