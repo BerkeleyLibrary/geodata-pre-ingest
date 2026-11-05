@@ -1,1 +1,1 @@
-no_prcess_path_selected = "Please select a geodata batch from tool 0. 1 - Select a processing batch"
+no_prcess_path_selected = "No processing directory has been selected. Please use tool '0 .2 - Select a data processing directory' to choose one"
