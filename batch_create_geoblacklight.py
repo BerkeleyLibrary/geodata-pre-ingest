@@ -80,7 +80,7 @@ def ensure_empty_directory(pathname):
     directory.mkdir(parents=True, exist_ok=True)
 
     for item in directory.iterdir():
-        if item.is_dir() and not item.is_symlink():
+        if item.is_dir():
             rmtree(item)
         else:
             item.unlink()
