@@ -76,18 +76,14 @@ def final_directory_path(prefix):
 
 
 def ensure_empty_directory(pathname):
-    def rm_contents():
-        for item in os.listdir(pathname):
-            item_path = os.path.join(pathname, item)
-            if os.path.isfile(item_path):
-                os.remove(item_path)
-            elif os.path.isdir(item_path):
-                rmtree(item_path)
+    directory = Path(pathname)
+    directory.mkdir(parents=True, exist_ok=True)
 
-    if Path(pathname).is_dir():
-        rm_contents()
-    else:
-        os.makedirs(pathname)
+    for item in directory.iterdir():
+        if item.is_dir() and not item.is_symlink():
+            rmtree(item)
+        else:
+            item.unlink()
 
 
 def save_pretty_json_file(file_path, json_data):
