@@ -1,6 +1,7 @@
 import arcpy
 from pathlib import Path
 import importlib
+import os
 import workspace_directory
    
 def output(msg, level=0):
@@ -78,3 +79,46 @@ def call_run_tool(module_name):
 def assign_parameters(parameters, values):
     for i, val in enumerate(values):
         parameters[i].value = val
+
+
+GEOFILE_EMPTY = "empty"  # no geofile value: metadata-only (collection) row
+GEOFILE_EXISTS = "exists"  # geofile value is an existing file
+GEOFILE_MISSING = "missing"  # geofile value is set but file does not exist
+
+
+def geofile_status(row):
+    geofile_path = (row.get("geofile") or "").strip()
+    if not geofile_path:
+        return GEOFILE_EMPTY, geofile_path
+    if os.path.isfile(geofile_path):
+        return GEOFILE_EXISTS, geofile_path
+    return GEOFILE_MISSING, geofile_path
+
+
+def has_dataset(row):
+    status, geofile_path = geofile_status(row)
+    if status == GEOFILE_MISSING:
+        log_raise_error(
+            f"Please check the main csv file: geofile '{geofile_path}' does not exist "
+            f"(arkid: {row.get('arkid')})"
+        )
+    return status == GEOFILE_EXISTS
+
+
+def require_arkid(row):
+    arkid = (row.get("arkid") or "").strip()
+    if not arkid:
+        log_raise_error(
+            f"Please check the main csv file: missing arkid in {row.get('geofile')}"
+        )
+    return arkid
+
+
+def has_arkid_dataset(row):
+    require_arkid(row)
+    return has_dataset(row)
+
+def require_geoblacklight(metadata_path):
+    geoblacklight_path = os.path.join(metadata_path, "geoblacklight.json")
+    if not Path(geoblacklight_path).is_file():
+        log_raise_error(f"missing file: {geoblacklight_path}")

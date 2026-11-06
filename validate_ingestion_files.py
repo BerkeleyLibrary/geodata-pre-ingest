@@ -7,14 +7,23 @@ import workspace_directory
 import common_helper
 
 def validate_files(dir_path):
-    basenames = ["map.zip", "data.zip", "geoblacklight.json", "iso19139.xml"]
     missing_filepaths = []
-    for root, dirs, files in os.walk(dir_path):
-        for dir in dirs:
-            for name in basenames:
-                file_path = os.path.join(root, dir, name)
+    if Path(dir_path).is_dir():
+        for package_name in os.listdir(dir_path):
+            package_path = os.path.join(dir_path, package_name)
+            if not os.path.isdir(package_path):
+                continue
+            for relative in [
+                os.path.join("data", "original", "data.zip"),
+                os.path.join("metadata", "geoblacklight.json"),
+                os.path.join("metadata", "iso19139.xml"),
+            ]:
+                file_path = os.path.join(package_path, relative)
                 if not Path(file_path).is_file():
                     missing_filepaths.append(file_path)
+            geoserver_path = os.path.join(package_path, "data", "geoserver")
+            if not (os.path.isdir(geoserver_path) and os.listdir(geoserver_path)):
+                missing_filepaths.append(geoserver_path)
     if missing_filepaths:
         common_helper.output("Below ingestion files not found: ", 1)
         for filepath in missing_filepaths:
@@ -23,10 +32,10 @@ def validate_files(dir_path):
 def validate_geoblacklight_schema(dir_path, arrdvark_schema_file_path):
     if Path(dir_path).is_dir():
         schema = ""
-        with open(arrdvark_schema_file_path) as s:
+        with open(arrdvark_schema_file_path, "r", encoding="utf-8") as s:
             schema = json.load(s)
 
-        json_files = get_filepaths(dir_path, ".json")
+        json_files = get_filepaths(dir_path, "geoblacklight.json")
 
         for json_file in json_files:
             data = ""
@@ -36,11 +45,10 @@ def validate_geoblacklight_schema(dir_path, arrdvark_schema_file_path):
 
 def get_filepaths(directory, ext):
     paths = []
-    for file in os.listdir(directory):
-        if file.endswith(ext):
-            file_path = os.path.join(directory, file)
-            if os.path.isfile(file_path):
-                paths.append(file_path)
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith(ext):
+                paths.append(os.path.join(root, file))
     return paths
 
 def validate_output(data, schema, json_file):
@@ -54,8 +62,6 @@ def validate_output(data, schema, json_file):
             common_helper.output(f"Invalid fields in {json_file}:", 2)
             for message in messages:
                 common_helper.output(message, 2)
-
-        common_helper("\n")
 
     except jsonschema.ValidationError as e:
         common_helper.output(
@@ -72,10 +78,14 @@ def run_tool():
     result_directory_path = workspace_directory.results_directory_path
 
     # 2. geofiles geoblackligt json file location
-    geoblacklight_directory_path = fr"{result_directory_path}\ingestion_files"
+    geoblacklight_directory_path = os.path.join(
+        result_directory_path, "ingestion_files"
+    )
 
     # 3. collection geoblackligt json file location
-    geoblacklight_collection_directory_path = fr"{result_directory_path}\ingestion_collection_files"
+    geoblacklight_collection_directory_path = os.path.join(
+        result_directory_path, "ingestion_collection_files"
+    )
     common_helper.verify_workspace_and_files([arrdvark_schema_file_path])
 
     validate_geoblacklight_schema(geoblacklight_directory_path, arrdvark_schema_file_path)

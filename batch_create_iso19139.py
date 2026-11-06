@@ -14,11 +14,8 @@ def create_iso19139_files(main_csv_arkid_filepath, resp_csv_arkid_filepath):
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
-            if has_dataset(row):
-                arkid = row.get("arkid")
-                if not arkid:
-                    text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
-                    common_helper.log_raise_error(text)
+            if common_helper.has_dataset(row):
+                arkid = common_helper.require_arkid(row)
                 resp_rows = [
                     resp_row for resp_row in resp_dic if arkid == resp_row["arkid"]
                 ]
@@ -26,11 +23,6 @@ def create_iso19139_files(main_csv_arkid_filepath, resp_csv_arkid_filepath):
                 geofile_path = correlated_filepath(row.get("geofile"))
                 geofile = GeoFile(geofile_path)
                 geofile.create_iso19139_file(row, resp_rows)
-
-def has_dataset(row):
-    geofile_path = row.get("geofile")
-    return os.path.isfile(geofile_path)
-
 
 def correlated_filepath(geofile_path):
     source_batch_directory_path = workspace_directory.source_batch_directory_path

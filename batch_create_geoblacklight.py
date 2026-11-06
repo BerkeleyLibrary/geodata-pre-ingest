@@ -10,25 +10,18 @@ import common_helper
 def create_geoblacklight_files(main_csv_arkid_filepath, resp_csv_arkid_filepath):
     all_resp_rows = csv_rows(resp_csv_arkid_filepath)
     field_names = geoblacklight_field_names(main_csv_arkid_filepath)
+    collection_dir_path = final_directory_path("ingestion_collection")
+    ingestion_dir_path = final_directory_path("ingestion")
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
-            arkid = row.get("arkid")
-            if not arkid:
-                text = f"Please check the main csv file: missing arkid in {row.get('geofile')}"
-                common_helper.log_raise_error(text, 1)
+            arkid = common_helper.require_arkid(row)
             resp_rows = [
                 resp_row for resp_row in all_resp_rows if arkid == resp_row.get("arkid")
             ]
-            if has_dataset(row):
-                create_geoblacklight_file_with_dataset(row, resp_rows, field_names)
-            else:
-                create_geoblacklight_file_without_dataset(row, resp_rows, field_names)
-
-
-def has_dataset(row):
-    geofile_path = row.get("geofile")
-    return os.path.isfile(geofile_path)
+            create_geoblacklight_file(
+                row, resp_rows, field_names, ingestion_dir_path, collection_dir_path
+            )
 
 
 def common_geoblacklight_fields(row, resp_rows, field_names):
@@ -41,22 +34,18 @@ def common_geoblacklight_fields(row, resp_rows, field_names):
     return json_data
 
 
-def create_geoblacklight_file_with_dataset(row, resp_rows, field_names):
+def create_geoblacklight_file(
+    row, resp_rows, field_names, ingestion_dir_path, collection_dir_path
+):
+    with_dataset = common_helper.has_dataset(row)
+    parent_dir_path = ingestion_dir_path if with_dataset else collection_dir_path
+
     json_data = common_geoblacklight_fields(row, resp_rows, field_names)
+    add_references(json_data, row, with_dataset)
+    if with_dataset:
+        add_boundary(json_data, row)
 
-    add_dataset_references(json_data, row)
-    add_boundary(json_data, row)
-
-    file_path = dataset_geoblacklight_file_path(row)
-    save_pretty_json_file(file_path, json_data)
-
-
-def create_geoblacklight_file_without_dataset(row, resp_rows, field_names):
-    json_data = common_geoblacklight_fields(row, resp_rows, field_names)
-
-    add_non_dataset_references(json_data, row)
-
-    file_path = non_dataset_geoblacklight_file_path(row)
+    file_path = geoblacklight_file_path(row, parent_dir_path)
     save_pretty_json_file(file_path, json_data)
 
 
@@ -71,18 +60,13 @@ def proj_geofile_path(row):
         raise ValueError(txt)
 
 
-def dataset_geoblacklight_file_path(row):
-    projected_geofile_path = proj_geofile_path(row)
-    base = os.path.splitext(projected_geofile_path)[0]
-    return f"{base}_geoblacklight.json"
-
-
-def non_dataset_geoblacklight_file_path(row):
+def geoblacklight_file_path(row, parent_dir_path):
     arkid = row.get("arkid")
-    collection_dir_path = final_directory_path("ingestion_collection")
-    arkid_directory_path = os.path.join(collection_dir_path, arkid)
-    ensure_empty_directory(arkid_directory_path)
-    return f"{arkid_directory_path}/geoblacklight.json"
+    metadata_directory_path = os.path.join(
+        parent_dir_path, f"{ARK_PREFIX}{arkid}", "metadata"
+    )
+    os.makedirs(metadata_directory_path, exist_ok=True)
+    return os.path.join(metadata_directory_path, "geoblacklight.json")
 
 
 def final_directory_path(prefix):
@@ -92,18 +76,14 @@ def final_directory_path(prefix):
 
 
 def ensure_empty_directory(pathname):
-    def rm_contents():
-        for item in os.listdir(pathname):
-            item_path = os.path.join(pathname, item)
-            if os.path.isfile(item_path):
-                os.remove(item_path)
-            elif os.path.isdir(item_path):
-                rmtree(item_path)
+    directory = Path(pathname)
+    directory.mkdir(parents=True, exist_ok=True)
 
-    if Path(pathname).is_dir():
-        rm_contents()
-    else:
-        os.makedirs(pathname)
+    for item in directory.iterdir():
+        if item.is_dir():
+            rmtree(item)
+        else:
+            item.unlink()
 
 
 def save_pretty_json_file(file_path, json_data):
@@ -222,13 +202,18 @@ def add_from_arkid(json_data, row):
 def ref_hosts(row):
     access = row.get("dct_accessRights_s").strip().lower()
     if access == "public":
-        return HOSTS
+        return {**HOSTS, **HOSTS_PUBLIC}
     elif access == "restricted":
-        return HOSTS_SECURE
+        return {**HOSTS, **HOSTS_SECURE}
     else:
         txt = f"geofile: '{row.get('geofile')}':  incorrect value in  'dct_accessRights_s', value = {access}"
         common_helper.output(txt, 1)
         raise ValueError(txt)
+
+
+# Replace the #{arkid} placeholder in the host and append the quoted filename
+def ref_url(hosts, key, arkid, filename):
+    return f"{hosts[key].replace('#{arkid}', arkid)}{filename_with_wq(filename)}"
 
 
 def filename_with_wq(filename):
@@ -236,36 +221,32 @@ def filename_with_wq(filename):
     return f"{filename}{wq}"
 
 
-def add_dataset_references(json_data, row):
+def add_references(json_data, row, with_dataset):
     arkid = row.get("arkid")
-    id = f"{PREFIX}-{arkid}"
     hosts = ref_hosts(row)
-    iso139 = f"{hosts['ISO139']}{id}/{filename_with_wq('iso19139.xml')}"
-    download = f"{hosts['download']}{id}/{filename_with_wq('data.zip')}"
-    content = f"{hosts['wfs']},{hosts['wms']},{iso139},{download}"
-    doc = ref_doc(row, hosts, id)
+
+    refs = []
+    if with_dataset:
+        refs = [
+            hosts["wfs"],
+            hosts["wms"],
+            ref_url(hosts, "ISO139", arkid, "iso19139.xml"),
+            ref_url(hosts, "download", arkid, "data.zip"),
+        ]
+    doc = ref_doc(row, hosts, arkid)
     if doc:
-        content = f"{content},{doc}"
-    ref = "{" + content + "}"
-    json_data["dct_references_s"] = ref.strip()
+        refs.append(doc)
+
+    if refs:
+        json_data["dct_references_s"] = "{" + ",".join(refs) + "}"
 
 
-def add_non_dataset_references(json_data, row):
-    arkid = row.get("arkid")
-    id = f"{PREFIX}-{arkid}"
-    hosts = ref_hosts(row)
-    doc = ref_doc(row, hosts, id)
-    if doc:
-        json_data["dct_references_s"] = "{" + doc + "}"
-
-
-def ref_doc(row, hosts, id):
+def ref_doc(row, hosts, arkid):
     file_path = row.get("doc_zipfile_path")
     if file_path:
         if os.path.isfile(file_path):
             basename = os.path.basename(file_path)
-            filename_doc = filename_with_wq(basename)
-            return f"{hosts['doc']}{id}/{filename_doc}"
+            return ref_url(hosts, "doc", arkid, basename)
         else:
             txt = f"arkid: '{row.get('row_id')}': cannot find the document file {file_path} in 'doc_zipfile_path' column."
             raise ValueError(txt)
@@ -368,23 +349,29 @@ ISOTOPIC = {
 }
 
 PREFIX = "berkeley"
+ARK_PREFIX = "berkeley-ark28722-"
 INSTITUTION = "University of California Berkeley"
 GEOBLACKLGITH_VERSION = "Aardvark"
 
+original_doc_base_url = (
+    "https://spatial.lib.berkeley.edu/maps/berkeley-ark28722-#{arkid}/data/original/"
+)
+
 HOSTS = {
-    "ISO139": '"http://www.isotc211.org/schemas/2005/gmd/":"https://spatial.lib.berkeley.edu/public/',
-    "download": '"http://schema.org/downloadUrl":"https://spatial.lib.berkeley.edu/public/',
-    "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices.lib.berkeley.edu/geoserver/wfs"',
-    "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices.lib.berkeley.edu/geoserver/wms"',
-    "doc": '"http://lccn.loc.gov/sh85035852":"https://spatial.lib.berkeley.edu/public/',
+    "ISO139": '"http://www.isotc211.org/schemas/2005/gmd/":"https://spatial.lib.berkeley.edu/maps/berkeley-ark28722-#{arkid}/metadata/',
+    "download": f'"http://schema.org/downloadUrl":"{original_doc_base_url}',
+    "doc": f'"http://lccn.loc.gov/sh85035852":"{original_doc_base_url}'
+}
+
+
+HOSTS_PUBLIC = {
+    "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices.lib.berkeley.edu/geoserver/public/wfs"',
+    "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices.lib.berkeley.edu/geoserver/public/wms"'
 }
 
 HOSTS_SECURE = {
-    "ISO139": '"http://www.isotc211.org/schemas/2005/gmd/":"https://spatial.lib.berkeley.edu/metadata/',
-    "download": '"http://schema.org/downloadUrl":"https://spatial.lib.berkeley.edu/UCB/',
-    "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices-secure.lib.berkeley.edu/geoserver/wfs"',
-    "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices-secure.lib.berkeley.edu/geoserver/wms"',
-    "doc": '"http://lccn.loc.gov/sh85035852":"https://spatial.lib.berkeley.edu/metadata/',
+    "wfs": '"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geoservices.lib.berkeley.edu/geoserver/restricted/wfs"',
+    "wms": '"http://www.opengis.net/def/serviceType/ogc/wms":"https://geoservices.lib.berkeley.edu/geoserver/restricted/wms"'
 }
 
 CAPITALIZED_FIELDS = [

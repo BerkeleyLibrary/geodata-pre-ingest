@@ -7,18 +7,20 @@ import json
 import common_helper
 import workspace_directory
 
+ARK_PREFIX = "berkeley-ark28722-"
+
+
 def create_files(main_csv_arkid_filepath):
-    ingestion_dir_path = final_directory_path("ingestion")
+    # both directories are created and filled with geoblacklight.json by batch_create_geoblacklight
+    results_directory_path = workspace_directory.results_directory_path
+    ingestion_dir_path = os.path.join(results_directory_path, "ingestion_files")
+    collection_dir_path = os.path.join(
+        results_directory_path, "ingestion_collection_files"
+    )
     with open(main_csv_arkid_filepath, "r", encoding="utf-8") as csvfile:
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
-            if has_dataset(row):
-                create_files_on_row(row, ingestion_dir_path)
-
-
-def has_dataset(row):
-    geofile_path = row.get("geofile")
-    return os.path.isfile(geofile_path)
+            create_files_on_row(row, ingestion_dir_path, collection_dir_path)
 
 
 # each subdirectory under ingestion_files has four files, which will be validated in next script
@@ -28,7 +30,8 @@ def add_gbl_fileSize_s():
         for file in files:
             file_path = os.path.join(root, file)
             if file == "geoblacklight.json" and os.path.isfile(file_path):
-                data_file_path = os.path.join(root, "data.zip")
+                # root is <ark dir>/metadata; data.zip is under data/original
+                data_file_path = os.path.join(os.path.dirname(root), "data", "original", "data.zip")
                 update_json_file(file_path, data_file_path)
 
 
@@ -84,48 +87,58 @@ def move_geoblacklight(dir_name, to_dir_path):
                     file_path = os.path.join(root, file)
                     if os.path.isfile(file_path):
                         relative_path = os.path.relpath(file_path, from_dir_path)
-                        ogp_file_path = os.path.join(to_dir_path, relative_path)
+                        # keep OGP layout <arkid>/geoblacklight.json
+                        arkid = relative_path.split(os.sep)[0].removeprefix(ARK_PREFIX)
+                        ogp_file_path = os.path.join(to_dir_path, arkid, file)
                         os.makedirs(os.path.dirname(ogp_file_path), exist_ok=True)
                         copy2(file_path, ogp_file_path)
 
-def create_files_on_row(row, ingestion_dir_path):
-    geofile_path = row.get("geofile")
-    projected_geofile_path = correlated_filepath(geofile_path)
 
-    arkid = row.get("arkid")
+def create_files_on_row(row, ingestion_dir_path, collection_dir_path):
+    arkid = common_helper.require_arkid(row)
+    with_dataset = common_helper.has_dataset(row)
 
-    def create_ingestion_file():
-        ingestion_path = arkid_directory_path(arkid, ingestion_dir_path)
-        cp_file(projected_geofile_path, ingestion_path, "iso19139.xml")
-        cp_file(
-            projected_geofile_path,
-            ingestion_path,
-            "geoblacklight.json",
-        )
-        wrap_up_zip(projected_geofile_path, arkid, ingestion_path, "map")
-        wrap_up_zip(geofile_path, arkid, ingestion_path, "data")
+    parent_dir_path = ingestion_dir_path if with_dataset else collection_dir_path
+    package_path = os.path.join(parent_dir_path, f"{ARK_PREFIX}{arkid}")
+    metadata_path = os.path.join(package_path, "metadata")
+    original_path = os.path.join(package_path, "data", "original")
+    common_helper.require_geoblacklight(metadata_path)
 
-        doc_filepath = row.get("doc_zipfile_path")
-        if doc_filepath:
-            cp_document_file(doc_filepath, ingestion_path)
+    if with_dataset:
+        geoserver_path = os.path.join(package_path, "data", "geoserver")
+        geofile_path = row["geofile"].strip()
+        projected_geofile_path = correlated_filepath(geofile_path)
 
-    create_ingestion_file()
+        for path in (original_path, geoserver_path):
+            os.makedirs(path, exist_ok=True)
 
+        cp_file(projected_geofile_path, metadata_path, "iso19139.xml")
+        for source, name in map_sourcefiles(projected_geofile_path, arkid).items():
+            copyfile(source, os.path.join(geoserver_path, name))
+        wrap_up_zip(geofile_path, arkid, original_path, "data")
 
-def arkid_directory_path(arkid, directory_path):
-    arkid_directory_path = os.path.join(directory_path, arkid)
-    ensure_empty_directory(arkid_directory_path)
-    return arkid_directory_path
+    doc_filepath = (row.get("doc_zipfile_path") or "").strip()
+    if doc_filepath:
+        os.makedirs(original_path, exist_ok=True)
+        cp_document_file(doc_filepath, original_path)
 
 
 # Check geofiles listed in main csv are from source batch dirctory
 def correlated_filepath(geofile_path):
-    if not workspace_directory.source_batch_directory_path in geofile_path:
+    source_directory = os.path.abspath(workspace_directory.source_batch_directory_path)
+    source_filepath = os.path.abspath(geofile_path)
+    try:
+        common_directory = os.path.commonpath([source_directory, source_filepath])
+    except ValueError:
+        common_directory = ""
+
+    if os.path.normcase(common_directory) != os.path.normcase(source_directory):
         text = f"File '{geofile_path}' listed in main csv is not located in source batch directory: '{workspace_directory.source_batch_directory_path}'"
         common_helper.log_raise_error(text)
 
-    filepath = geofile_path.replace(
-       workspace_directory.source_batch_directory_path, workspace_directory.projected_batch_directory_path
+    relative_filepath = os.path.relpath(source_filepath, source_directory)
+    filepath = os.path.join(
+        workspace_directory.projected_batch_directory_path, relative_filepath
     )
     if Path(filepath).is_file():
         return filepath
@@ -258,12 +271,16 @@ tif_exts = [".tif", ".tfw", ".prj", ".tif.ovr"]
 #      "C:\process_data\results\ingestion_files"
 #  From above directory, each Geofile(shapefile or GeoTIFF) will have a subdirectory
 #  with all related ingestion files. Below is an example of a subdirectory.
-#  The geofile was assinged an arkid "a7gt36" in the main_csv_file.
-# |---- a7gt36
-# |------ data.zip
-# |------ doc.zip
-# |------ iso19139.xml
-# |------ map.zip
+#  The geofile was assinged an arkid "s7b70z" in the main_csv_file.
+# |--berkeley-ark28722-s7b70z
+# |----data/original/data.zip
+# |----data/original/doc.zip
+# |----data/geoserver/s7b70z.shp
+# |----data/geoserver/s7b70z.prj
+# ...
+# |----data/geoserver/s7b70z.*
+# |----metadata/iso19139.xml
+# |----metadata/geoblacklight.json
 # additional:
 # 1)  after creating data.zip file for each arkid related geofile, get data.zip file size, and update it to geoblacklight.json
 # 2)  moving ingenstion geoblacklight.json and collection geoblacklight.json to OGP directory
